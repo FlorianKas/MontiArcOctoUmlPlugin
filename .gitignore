@@ -1,5 +1,6 @@
 
-logtarget
+log
+target
 .settings
 .project
 .classpath

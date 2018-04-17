@@ -1,8 +1,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>OctoUML</groupId>
-	<artifactId>OctoUML</artifactId>
+	<groupId>octouml</groupId>
+	<artifactId>octouml-montiarc</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<properties>
 
@@ -158,17 +158,6 @@
 			</plugins>
 		</pluginManagement>
 	</build>
-	
-		<distributionManagement>
-		<repository>
-			<id>se-nexus</id>
-			<url>https://nexus.se.rwth-aachen.de/content/repositories/external-libraries/</url>
-		</repository>
-		<snapshotRepository>
-			<id>se-nexus</id>
-			<url>https://nexus.se.rwth-aachen.de/content/repositories/external-libraries/</url>
-		</snapshotRepository>
-	</distributionManagement>
 
 
 	<dependencies>

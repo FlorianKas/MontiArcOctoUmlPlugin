@@ -237,7 +237,7 @@
 		</dependency>
 
 		<dependency>
-			<groupId>local.octouml.paleo</groupId>
+			<groupId>octouml.paleo</groupId>
 			<artifactId>paleo</artifactId>
 			<version>1.0</version>
 			<scope>system</scope>
@@ -245,7 +245,7 @@
 		</dependency>
 
 		<dependency>
-			<groupId>local.octouml.ecologylabFundamental</groupId>
+			<groupId>octouml.ecologylabFundamental</groupId>
 			<artifactId>ecologylabFundamental</artifactId>
 			<version>1.0</version>
 			<scope>system</scope>
@@ -253,7 +253,7 @@
 		</dependency>
 
 		<dependency>
-			<groupId>local.octouml.weka</groupId>
+			<groupId>octouml.weka</groupId>
 			<artifactId>weka</artifactId>
 			<version>1.0</version>
 			<scope>system</scope>
@@ -261,7 +261,7 @@
 		</dependency>
 
 		<dependency>
-			<groupId>local.octouml.kryonet</groupId>
+			<groupId>octouml.kryonet</groupId>
 			<artifactId>kryonet</artifactId>
 			<version>1.0</version>
 			<scope>system</scope>
@@ -269,7 +269,7 @@
 		</dependency>
 
 		<dependency>
-			<groupId>local.octouml.sphinx4-core-5prealpha-20160628.232526-10</groupId>
+			<groupId>octouml.sphinx4-core-5prealpha-20160628.232526-10</groupId>
 			<artifactId>sphinx4-core-5prealpha-20160628.232526-10</artifactId>
 			<version>1.0</version>
 			<scope>system</scope>
@@ -277,7 +277,7 @@
 		</dependency>
 
 		<dependency>
-			<groupId>local.octouml.sphinx4-data-5prealpha-20160628.232535-10</groupId>
+			<groupId>octouml.sphinx4-data-5prealpha-20160628.232535-10</groupId>
 			<artifactId>sphinx4-data-5prealpha-20160628.232535-10</artifactId>
 			<version>1.0</version>
 			<scope>system</scope>

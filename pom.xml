@@ -285,6 +285,22 @@
 		</dependency>
 
 		<dependency>
+			<groupId>octouml.jxgrabkey</groupId>
+			<artifactId>jxgrabkey</artifactId>
+			<version>1.0</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/src/main/resources/lib/jxgrabkey-1.0.jar</systemPath>
+		</dependency>
+
+		<dependency>
+  <groupId>de.monticore.lang</groupId>
+  <artifactId>montiarc</artifactId>
+  <version>4.1.2-SNAPSHOT</version>
+</dependency>
+
+
+
+		<dependency>
 			<groupId>org.ow2.asm</groupId>
 			<artifactId>asm</artifactId>
 			<version>5.0.4</version>
@@ -398,26 +414,26 @@
 		</dependency>
 		
 		<dependency>
-    			<groupId>org.apache.maven.shared</groupId>
-    			<artifactId>maven-invoker</artifactId>
-    			<version>3.0.0</version>
+    		<groupId>org.apache.maven.shared</groupId>
+    		<artifactId>maven-invoker</artifactId>
+   			<version>3.0.0</version>
 		</dependency>
 		<dependency>
-    			<groupId>org.eclipse.core</groupId>
-    			<artifactId>org.eclipse.core.resources</artifactId>
-    			<version>3.7.100</version>
+    		<groupId>org.eclipse.core</groupId>
+    		<artifactId>org.eclipse.core.resources</artifactId>
+   			<version>3.7.100</version>
 		</dependency>
 		<dependency>
-    			<groupId>com.jcabi</groupId>
-    			<artifactId>jcabi-aether</artifactId>
-    			<version>0.10.1</version>
+    		<groupId>com.jcabi</groupId>
+    		<artifactId>jcabi-aether</artifactId>
+    		<version>0.10.1</version>
 		</dependency>
 		
 		<dependency>
-        <groupId>org.sonatype.aether</groupId>
-        <artifactId>aether-api</artifactId>
-        <version>1.13.1</version>
-    </dependency>
+        	<groupId>org.sonatype.aether</groupId>
+        	<artifactId>aether-api</artifactId>
+        	<version>1.13.1</version>
+    	</dependency>
 
 
     <dependency>
@@ -426,15 +442,18 @@
         <version>3.0.3</version>
     </dependency>
 
-		
+
+
 	</dependencies>
 
 	<repositories>
+		<!--
 		<repository>
 			<id>repository.jboss.org-public</id>
 			<name>JBoss.org Maven repository</name>
 			<url>https://repository.jboss.org/nexus/content/groups/public</url>
 		</repository>
+	-->
 		<repository>
 			<id>se-nexus-public</id>
 			<name>yf</name>
@@ -446,7 +465,7 @@
 	<reporting>
 		<plugins>
 			<plugin>
-				<groupId>de.monticore.mojo</groupId>
+			  	<groupId>de.monticore.mojo</groupId>
 				<artifactId>monticore-maven-plugin</artifactId>
 				<version>${monticore.version}</version>
 				<inherited>false</inherited>

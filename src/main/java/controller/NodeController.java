@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-// hier m�ssen weitere Anpassungen f�r MontiArc Controller vorgenommen werden
+// hier muessen weitere Anpassungen fuer MontiArc Controller vorgenommen werden
 
 /**
  * Used by MainController for handling moving and resizing Nodes, among other
@@ -401,6 +401,7 @@ public class NodeController {
       @Override
       public void handle(ActionEvent event) {
         node.setTitle(input.getText());
+        System.out.println("New title is" + node.getTitle());
         aDrawPane.getChildren().remove(group);
       }
     });
@@ -413,7 +414,7 @@ public class NodeController {
       }
     });
     
-    Label label = new Label("Choose title");
+    Label label = new Label("Choose title test");
     group.getChildren().add(label);
     group.getChildren().add(input);
     HBox buttons = new HBox();
@@ -427,7 +428,6 @@ public class NodeController {
     group.setStyle("-fx-border-color: black");
     group.setPadding(new Insets(15, 12, 15, 12));
     aDrawPane.getChildren().add(group);
-    
     return true;
   }
   

@@ -103,6 +103,7 @@ public class NodeEditDialogController {
    */
   public boolean isOkClicked() {
     return okClicked;
+    
   }
   
   /**

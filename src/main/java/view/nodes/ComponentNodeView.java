@@ -18,7 +18,7 @@ import javafx.scene.control.Separator;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.ColumnConstraints;
-// import javafx.scene.layout.StackPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -47,11 +47,14 @@ public class ComponentNodeView extends AbstractNodeView {
   // private Label attributes;
   // private Label operations;
   
+  private Label title;
+  
   private Rectangle rectangle;
   private ArrayList<Rectangle> portViewArray;
   
   // private StackPane container;
   private GridPane container;
+  private Pane titlePane;
   // private StackPane titlePane;
   private VBox vbox;
   private Pane PortLeft;
@@ -80,7 +83,8 @@ public class ComponentNodeView extends AbstractNodeView {
       initGrid(node.getHeight(), node.getWidth(), PORT_HEIGHT, PORT_WIDTH);
     }
     vbox = new VBox();
-    container.add(vbox, 3, 3);
+    initVBox(node);
+//    container.add(titlePane, 3, 3);
     // Jetzt muessen wir ueber die aeusseren beiden Grids je eine Pane legen (eine
     // klassische),
     // um die Ports an den richtigen Stellen anordnen zu koennen
@@ -144,7 +148,7 @@ public class ComponentNodeView extends AbstractNodeView {
     // createRectangles();
     // container.add(rectangle, 3, 3);
     // container.add(vbox, 3, 3);
-    container.setGridLinesVisible(false);
+    container.setGridLinesVisible(true);
     // // createRectanglesPort();
     //// changeHeight(node.getHeight());
     //// changeWidth(node.getWidth());
@@ -160,12 +164,15 @@ public class ComponentNodeView extends AbstractNodeView {
     //
     //
     //
+    container.add(vbox, 2, 1, 1, 1);
     this.getChildren().add(container);
     
     this.setTranslateX(node.getTranslateX());
     this.setTranslateY(node.getTranslateY());
     
   }
+  
+  
   
   private void initGrid(double compHeight, double compWidth, double portHeight, double portWidth) {
     ColumnConstraints column1 = new ColumnConstraints(portWidth / 2);
@@ -249,11 +256,9 @@ public class ComponentNodeView extends AbstractNodeView {
     // vbox.setMaxWidth(width);
     // vbox.setPrefWidth(width);
     //
-    /*
-     * title.setMaxWidth(width); title.setPrefWidth(width);
-     * attributes.setMaxWidth(width); attributes.setPrefWidth(width);
-     * operations.setMaxWidth(width); operations.setPrefWidth(width);
-     */
+    title.setMaxWidth(width); 
+    title.setPrefWidth(width);
+    
   }
   
   private void changeWidthPort(double width, Rectangle rec) {
@@ -273,30 +278,26 @@ public class ComponentNodeView extends AbstractNodeView {
      */
   }
   
-  private void initVBox() {
-    ComponentNode node = (ComponentNode) getRefNode();
+  private void initVBox(ComponentNode node) {
+    vbox.setPadding(new Insets(5, 0, 5, 0));
+    vbox.setSpacing(5);
     
-    // Nur f�r die Box intern
-    // vbox.setPadding(new Insets(5, 0, 5, 0));
-    // vbox.setSpacing(5);
+    titlePane = new Pane();
     
-    // titlePane = new StackPane();
+    title = new Label();
+    title.setFont(Font.font("Verdana", FontWeight.BOLD, 12));
+    System.out.println("We are going to set a title" + node.getTitle());
+    if(node.getTitle() != null) {
+      title.setText(node.getTitle());
+    }
+    title.setAlignment(Pos.CENTER);
     
-    // title = new Label();
-    // title.setFont(Font.font("Verdana", FontWeight.BOLD, 12));
-    // if(node.getTitle() != null) {
-    // title.setText(node.getTitle());
-    // }
-    // title.setAlignment(Pos.CENTER);
-    //
-    // attributes = new Label(node.getAttributes());
-    // attributes.setFont(Font.font("Verdana", 10));
-    //
-    // operations = new Label(node.getOperations());
-    // operations.setFont(Font.font("Verdana", 10));
-    //
-    // titlePane.getChildren().add(title);
-    // vbox.getChildren().addAll(titlePane, attributes, operations);
+    
+//    titlePane.getChildren().add(title);
+//    
+//    System.out.println("TitlePane looks as follows" + titlePane);
+    vbox.setAlignment(Pos.TOP_CENTER);
+    vbox.getChildren().add(title);
   }
   
   private void initLooks(Rectangle rec) {

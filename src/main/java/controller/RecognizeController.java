@@ -204,6 +204,7 @@ public class RecognizeController {
 		       		ports.add(port);
 		       		//System.out.println("Ports: " + ports);
 		       		ComponentNode node = new ComponentNode(b.getX(), b.getY(), b.getWidth(), b.getHeight(), ports);
+//		       		node.setTitle("Test");
 		       		//System.out.println("Node: " + node);
 		       		graph.addNode(node, false);
 		       		Sketch s1 = sketchMap.get(b);

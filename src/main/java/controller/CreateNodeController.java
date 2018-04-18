@@ -22,7 +22,7 @@ import java.util.Map;
  */
 // TODO should be moved to NodeController!
 
-// Hier m�ssen wir auch noch erg�nzen f�r MontiArc Nodes
+// Hier muessen wir auch noch ergaenzen fuer MontiArc Nodes
 public class CreateNodeController {
   
   // For drag-creating rectangles

@@ -13,11 +13,13 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import model.nodes.AbstractNode;
 import model.nodes.ClassNode;
+import model.nodes.ComponentNode;
 import model.nodes.PackageNode;
 import util.Constants;
 import util.commands.*;
 import view.nodes.AbstractNodeView;
 import view.nodes.ClassNodeView;
+import view.nodes.ComponentNodeView;
 import view.nodes.PackageNodeView;
 
 import java.awt.geom.Point2D;
@@ -331,13 +333,16 @@ public class NodeController {
     currentResizeNode = null; // Only needed when resizing
   }
   
-  // hier m�ssen wir auch erg�nzen f�r MontiArc Controller
   public void onDoubleClick(AbstractNodeView nodeView) {
     if (nodeView instanceof ClassNodeView) {
       showClassNodeEditDialog((ClassNode) diagramController.getNodeMap().get(nodeView));
     }
-    else { // PackageNode
+    else if (nodeView instanceof ComponentNodeView){
+      showComponentNodeEditDialog((ComponentNode) diagramController.getNodeMap().get(nodeView));
+    }
+    else {
       showNodeTitleDialog(diagramController.getNodeMap().get(nodeView));
+      // PackageNode
     }
   }
   
@@ -525,5 +530,80 @@ public class NodeController {
       e.printStackTrace();
       return false;
     }
+  }
+  
+  public boolean showComponentNodeEditDialog(ComponentNode node) {
+    if (diagramController.voiceController.voiceEnabled) {
+      // Change variable testing in VoiceController to 1(true)
+      diagramController.voiceController.testing = 1;
+      
+      String title2 = "";
+      int time = 0;
+      // Looking for a name you want to add to the package or until 5 seconds
+      // have passed
+      while ((title2.equals("") || title2 == null) && time < 500) {
+        try {
+          TimeUnit.MILLISECONDS.sleep(10);
+        }
+        catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+        // Check if a name has been recognised
+        title2 = diagramController.voiceController.titleName;
+        time++;
+      }
+      
+      // Change variable testing in VoiceController to 0(false)
+      diagramController.voiceController.testing = 0;
+      
+      // If name found in less then 5 seconds it sets the name to the package
+      if (time < 500) {
+        diagramController.voiceController.titleName = "";
+        node.setTitle(title2);
+      }
+      // Else the name is not changed to a new name
+      else {
+        diagramController.voiceController.titleName = "";
+      }
+      
+      node.setTitle(title2);
+    }
+    
+    VBox group = new VBox();
+    TextField input = new TextField();
+    input.setText(node.getTitle());
+    Button okButton = new Button("Ok");
+    okButton.setOnAction(new EventHandler<ActionEvent>() {
+      @Override
+      public void handle(ActionEvent event) {
+        node.setTitle(input.getText());
+        System.out.println("New title ist" + node.getTitle());
+        aDrawPane.getChildren().remove(group);
+      }
+    });
+    
+    Button cancelButton = new Button("Cancel");
+    cancelButton.setOnAction(new EventHandler<ActionEvent>() {
+      @Override
+      public void handle(ActionEvent event) {
+        aDrawPane.getChildren().remove(group);
+      }
+    });
+    
+    Label label = new Label("Choose title");
+    group.getChildren().add(label);
+    group.getChildren().add(input);
+    HBox buttons = new HBox();
+    buttons.getChildren().add(okButton);
+    buttons.getChildren().add(cancelButton);
+    buttons.setPadding(new Insets(15, 0, 0, 0));
+    group.getChildren().add(buttons);
+    group.setLayoutX(node.getX() + 5);
+    group.setLayoutY(node.getY() + 5);
+    group.setBackground(new Background(new BackgroundFill(Color.WHITESMOKE, new CornerRadii(1), null)));
+    group.setStyle("-fx-border-color: black");
+    group.setPadding(new Insets(15, 12, 15, 12));
+    aDrawPane.getChildren().add(group);
+    return true; 
   }
 }

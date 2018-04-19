@@ -4,7 +4,9 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import model.nodes.AbstractNode;
 import model.nodes.ClassNode;
+import model.nodes.ComponentNode;
 
 /**
  * Dialog to edit details of a node.
@@ -24,7 +26,7 @@ public class NodeEditDialogController {
   @FXML
   private Button cancelButton;
   
-  private ClassNode node;
+  private AbstractNode node;
   private boolean okClicked = false;
   
   /**
@@ -41,12 +43,19 @@ public class NodeEditDialogController {
    *
    * @param node
    */
-  public void setNode(ClassNode node) {
-    this.node = node;
+  public void setNode(AbstractNode node) {
+    if (node instanceof ClassNode) {
+      this.node = (ClassNode) node;
     
-    titleField.setText(this.node.getTitle());
-    attributesArea.setText(this.node.getAttributes());
-    operationsArea.setText(this.node.getOperations());
+      titleField.setText(this.node.getTitle());
+      attributesArea.setText(((ClassNode)this.node).getAttributes());
+      operationsArea.setText(((ClassNode)this.node).getOperations());
+    }
+    else if (node instanceof ComponentNode) {
+      this.node = (ComponentNode) node;
+      titleField.setText(((ComponentNode)this.node).getTitle());
+      
+    }
   }
   
   public Button getOkButton() {
@@ -79,20 +88,20 @@ public class NodeEditDialogController {
   }
   
   public boolean hasAttributesChanged() {
-    if (this.node.getAttributes() == null) {
+    if (((ClassNode)this.node).getAttributes() == null) {
       return attributesArea.getText() != null;
     }
     else {
-      return !this.node.getAttributes().equals(attributesArea.getText());
+      return !((ClassNode)this.node).getAttributes().equals(attributesArea.getText());
     }
   }
   
   public boolean hasOperationsChanged() {
-    if (this.node.getOperations() == null) {
+    if (((ClassNode)this.node).getOperations() == null) {
       return operationsArea.getText() != null;
     }
     else {
-      return !this.node.getOperations().equals(operationsArea.getText());
+      return !((ClassNode)this.node).getOperations().equals(operationsArea.getText());
     }
   }
   

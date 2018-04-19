@@ -7,11 +7,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 public class ComponentNode extends AbstractNode implements Serializable {
-  // Representation einer einzelnen Komponente -> interne Darstellung
   private static final String TYPE = "COMPONENT";
   private ArrayList<PortNode> Ports = new ArrayList<>();
   
-  // ueberlegen, ob wir fuer Ports nicht auch einen Node einfach erstellen und
   // hier ein Array von Ports
   private String Subcomponents; // TODO: Wieso String und nicht besser ein
                                 // Array?

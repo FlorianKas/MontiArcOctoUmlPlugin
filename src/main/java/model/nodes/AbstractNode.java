@@ -101,6 +101,7 @@ public abstract class AbstractNode implements Node, Serializable {
   
   public void setTitle(String pTitle) {
     this.aTitle = pTitle;
+    System.out.println("We are in setTitle");
     changes.firePropertyChange(Constants.changeNodeTitle, null, aTitle);
     remoteChanges.firePropertyChange(Constants.changeNodeTitle, null, aTitle);
   }

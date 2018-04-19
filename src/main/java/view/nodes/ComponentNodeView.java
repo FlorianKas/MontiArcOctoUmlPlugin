@@ -360,15 +360,16 @@ public class ComponentNodeView extends AbstractNodeView {
     }
     else if (evt.getPropertyName().equals(Constants.changeNodeHeight)) {
       changeHeight((double) evt.getNewValue());
-      // } else if (evt.getPropertyName().equals(Constants.changeNodeTitle)) {
-      // title.setText((String) evt.getNewValue());
+    }
+    else if (evt.getPropertyName().equals(Constants.changeNodeTitle)) {
+      title.setText((String) evt.getNewValue());
+    }
       // } else if
       // (evt.getPropertyName().equals(Constants.changeClassNodeAttributes)) {
       // attributes.setText((String) evt.getNewValue());
       // } else if
       // (evt.getPropertyName().equals(Constants.changeClassNodeOperations)) {
       // operations.setText((String) evt.getNewValue());
-    }
   }
  
   

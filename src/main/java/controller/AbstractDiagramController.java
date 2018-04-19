@@ -684,7 +684,7 @@ public abstract class AbstractDiagramController {
       nodeView.toBack();
       graphController.gridToBack();
     }
-    else { // ClassNode or Lifeline
+    else { // ClassNode, Lifeline or ComponentNode could be that there should be changed something
       nodeView.toFront();
     }
     return nodeView;
@@ -775,6 +775,7 @@ public abstract class AbstractDiagramController {
       for (AbstractNode node : graph.getAllNodes()) {
         if (dataArray[1].equals(node.getId())) {
           node.remoteSetTitle(dataArray[2]);
+          System.out.println("Noticed that Title has been changed");
           break;
         }
       }

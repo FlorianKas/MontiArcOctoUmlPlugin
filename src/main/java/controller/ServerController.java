@@ -10,7 +10,9 @@ import model.*;
 import model.edges.*;
 import model.nodes.AbstractNode;
 import model.nodes.ClassNode;
+import model.nodes.ComponentNode;
 import model.nodes.PackageNode;
+import model.nodes.PortNode;
 import util.Constants;
 
 import java.beans.PropertyChangeEvent;
@@ -175,6 +177,8 @@ public class ServerController implements PropertyChangeListener {
   
   private void initKryo(Kryo kryo) {
     kryo.register(ClassNode.class);
+    kryo.register(ComponentNode.class);
+    kryo.register(PortNode.class);
     kryo.register(AbstractNode.class);
     kryo.register(PackageNode.class);
     kryo.register(AbstractEdge.class);
@@ -182,6 +186,7 @@ public class ServerController implements PropertyChangeListener {
     kryo.register(CompositionEdge.class);
     kryo.register(AssociationEdge.class);
     kryo.register(AggregationEdge.class);
+    kryo.register(ConnectorEdge.class);
     kryo.register(Graph.class);
     kryo.register(ArrayList.class);
     kryo.register(AbstractEdge.Direction.class);

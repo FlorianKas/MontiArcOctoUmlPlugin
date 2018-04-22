@@ -1,5 +1,7 @@
 package model.nodes;
 
+import util.Constants;
+
 public class PortNode extends AbstractNode {
   
   private static final String TYPE = "PORT";
@@ -60,15 +62,28 @@ public class PortNode extends AbstractNode {
     super.remoteSetWidth(width);
   }
   
+  
+  public void setPortType(String pportType) {
+    portType = pportType;
+    changes.firePropertyChange(Constants.changePortNodeDataType, null, portType);
+    remoteChanges.firePropertyChange(Constants.changePortNodeDataType, null, portType);
+  }
+  
+  public void remoteSetPortType(String pportType) {
+    portType = pportType;
+    changes.firePropertyChange(Constants.changePortNodeDataType, null, portType);
+  }
+  
+  public void remoteSetPortType() {
+    
+  }
+  
   public String getType() {
     return TYPE;
   }
   
-  public void setPortType(String type) {
-	portType = type;  
-  }
   public String getPortType() {
-	return portType;  
+    return portType;  
   }
   
   public double getDefaultPortWidth() {

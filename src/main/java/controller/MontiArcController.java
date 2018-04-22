@@ -187,12 +187,13 @@ public class MontiArcController extends AbstractDiagramController {
   }
   
   boolean wasAlreadySelected = false;
-  // checken wof�r das da ist
   
   void initNodeActions(AbstractNodeView nodeView) {
     nodeView.setOnMousePressed(event -> {
       if (event.getClickCount() == 2) { // Open dialog window on double click.
-        nodeController.onDoubleClick(nodeView);
+        System.out.println("x coord " + event.getX());
+        System.out.println("y coord " + event.getY());
+        nodeController.onDoubleClick(nodeView, event.getX(), event.getY());
         tool = ToolEnum.SELECT;
         setButtonClicked(selectBtn);
       }

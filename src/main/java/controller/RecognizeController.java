@@ -200,10 +200,13 @@ public class RecognizeController {
 	        				
 	        		// bb ist Port von b
 	        	  ArrayList<PortNode> ports = new ArrayList<>();
-		        	PortNode port = new PortNode(bb.getX(), bb.getY(), bb.getWidth(), bb.getHeight());
-		       		ports.add(port);
+		        	PortNode port = new PortNode(bb.getX(), bb.getY(), bb.getHeight(), bb.getWidth());
+		        	graph.addNode(port, false);
+		       		port.setTitle("testport");
+		       		port.setPortType("Integer");
+		        	ports.add(port);
 		       		//System.out.println("Ports: " + ports);
-		       		ComponentNode node = new ComponentNode(b.getX(), b.getY(), b.getWidth(), b.getHeight(), ports);
+		       		ComponentNode node = new ComponentNode(b.getX(), b.getY(), b.getHeight(), b.getWidth(), ports);
 //		       		node.setTitle("Test");
 		       		//System.out.println("Node: " + node);
 		       		graph.addNode(node, false);

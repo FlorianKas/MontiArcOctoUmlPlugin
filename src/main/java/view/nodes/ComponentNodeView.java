@@ -9,6 +9,7 @@ import util.Constants;
 
 import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
@@ -55,7 +56,6 @@ public class ComponentNodeView extends AbstractNodeView {
   // private StackPane container;
   private GridPane container;
   private Pane titlePane;
-  // private StackPane titlePane;
   private VBox vbox;
   private Pane PortLeft;
   private Pane PortTop;
@@ -66,14 +66,18 @@ public class ComponentNodeView extends AbstractNodeView {
   
   protected static final double PORT_WIDTH = 40; 
   protected static final double PORT_HEIGHT = 40;
+  HashMap<PortNodeView, PortNode> nodeCompMap = new HashMap<>();
+  ArrayList<PortNodeView> portViews;
   
   public ComponentNodeView(ComponentNode node) {
     super(node);
     // setChangeListeners();
-    System.out.println("Wir sind in ComponentNodeViewConstructor");
-    // container = new StackPane();
     container = new GridPane();
+    vbox = new VBox();
+    
+    System.out.println("Wir sind in ComponentNodeViewConstructor");
     System.out.println("Ports " + node.getPorts());
+    
     if (!node.getPorts().isEmpty()) {
       initGrid(node.getHeight(), node.getWidth(), PORT_HEIGHT, PORT_WIDTH);
     }
@@ -82,90 +86,28 @@ public class ComponentNodeView extends AbstractNodeView {
       PortNode p = new PortNode(0,0,0,0);
       initGrid(node.getHeight(), node.getWidth(), PORT_HEIGHT, PORT_WIDTH);
     }
-    vbox = new VBox();
+    
     initVBox(node);
-//    container.add(titlePane, 3, 3);
-    // Jetzt muessen wir ueber die aeusseren beiden Grids je eine Pane legen (eine
-    // klassische),
-    // um die Ports an den richtigen Stellen anordnen zu koennen
+    
+    // For ports choose normal panes to put them at correct position
     PortLeft = new Pane();
     PortRight = new Pane();
     PortTop = new Pane();
     PortBottom = new Pane();
-    // Rectangle recPort = new
-    // Rectangle(node.getPorts().get(0).getX(),node.getPorts().get(0).getY(),
-    // node.getPorts().get(0).getWidth(),node.getPorts().get(0).getHeight());
-    // recPort.setStrokeWidth(STROKE_WIDTH);
-    // recPort.setFill(Color.LIGHTSKYBLUE);
-    // recPort.setStroke(Color.BLACK);
+    
     createRectangles(node);
     createRectanglesPort(node);
-    // Rectangle recPort = new Rectangle(0,node.getPorts().get(0).getY() -
-    // node.getY(), 40,40);
-    // recPort.setStrokeWidth(STROKE_WIDTH);
-    // recPort.setFill(Color.LIGHTSKYBLUE);
-    // recPort.setStroke(Color.BLACK);
-    //
-    // PortLeft.getChildren().add(recPort);
-    
+
+    container.add(vbox, 2, 1, 1, 1);
     container.add(PortLeft, 0, 0, 1, 1);
     container.add(PortTop, 0, 0, 4, 1);
     container.add(PortBottom, 0, 3, 4, 1);
     container.add(PortRight, 3, 0, 1, 4);
-    // Rectangle recPort = new Rectangle(40,40);
-    // recPort.setStrokeWidth(STROKE_WIDTH);
-    // recPort.setFill(Color.LIGHTSKYBLUE);
-    // recPort.setStroke(Color.BLACK);
-    // container.add(recPort, 0, 2);
     
-    // // pane = new Pane();
-    //// container.getChildren().addAll(rectangle, vbox);
-    
-    // portViewArray = new ArrayList<>();
-    // for (PortNode p : node.getPorts()) {
-    // Rectangle rec = new
-    // Rectangle(p.getX(),p.getY(),p.getWidth(),p.getHeight());
-    // System.out.println("Rec" + rec);
-    // //rec = createRectanglePort(p);
-    //// Line top = new Line();
-    //// top.startXProperty().bind(p.getWidth());
-    // portViewArray.add(rec);
-    // container.add(rec,4,4,1,0);
-    //
-    // }
-    //// container.getChildren().addAll(rectangle, vbox);
-    //// container.getChildren().add(pane);
-    //// container.getChildren().add(new Rectangle(100,100,Color.BLUE));
-    //
-    //// container.getChildren().addAll( vbox);
-    //// container.getChildren().addAll(rectangle, vbox);
-    //
-    //
-    //// container.getChildren().addAll(RecUnion, vbox);
-    //
-    //
-    // initVBox();
-    // createRectangles();
-    // container.add(rectangle, 3, 3);
-    // container.add(vbox, 3, 3);
-    container.setGridLinesVisible(true);
-    // // createRectanglesPort();
-    //// changeHeight(node.getHeight());
-    //// changeWidth(node.getWidth());
-    //// System.out.println("Rectangle: " + rectangle);
-    //// System.out.println("Rectangle2: " + rectangle2);
-    //// der Union Befehl richtet sich komisch aus
-    //// RecUnion = Shape.union((Shape)rectangle, (Shape)rectangle2);
-    //// RecUnion = Shape.intersect((Shape)rectangle, (Shape)rectangle2);
-    //
-    //// System.out.println("RecUnion: " + RecUnion);
-    //
-    // initLooks();
-    //
-    //
-    //
-    container.add(vbox, 2, 1, 1, 1);
+    container.setGridLinesVisible(false);
+    System.out.println("Container Input " + container.getChildren().toString());
     this.getChildren().add(container);
+    System.out.println("Children " + this.getChildren().toString());
     
     this.setTranslateX(node.getTranslateX());
     this.setTranslateY(node.getTranslateY());
@@ -190,16 +132,22 @@ public class ComponentNodeView extends AbstractNodeView {
   }
   
   private void createRectangles(ComponentNode node) {
-    Rectangle rec = new Rectangle(node.getWidth(), node.getHeight());
+    Rectangle rec = new Rectangle(node.getHeight(), node.getWidth());
     initLooks(rec);
     container.add(rec, 1, 1, 3, 3);
   }
   
   private void createRectanglesPort(ComponentNode node) {
+    nodeCompMap = new HashMap();
+    portViews = new ArrayList();
     ArrayList<PortNode> Ports = node.getPorts();
+    Label titlePort = new Label();
+    Label DataTypePort = new Label();
     if(!node.getPorts().isEmpty()) {
       System.out.println("Node infos: getX(), getY()"+ node.getX() + node.getY() );
+      
       for (PortNode p : Ports) {
+        PortNodeView portView = new PortNodeView(p);
         System.out.println("Port: " + p.getX() + " " + p.getY());
         System.out.println("Vergleich");
         System.out.println(p.getX() + p.getWidth());
@@ -210,32 +158,74 @@ public class ComponentNodeView extends AbstractNodeView {
         System.out.println(node.getY());
         
         if (p.getX() < node.getX()) {
-          Rectangle recPort = new Rectangle(0, p.getY() - node.getY(), PORT_HEIGHT, PORT_WIDTH);
-          initLooks(recPort);
-          PortLeft.getChildren().add(recPort);
-          System.out.println("Left:" + recPort);
+//          PortNodeView portView = new PortNodeView(p);
+          Pane portPane = portView.createPortPane(0, p.getY() - node.getY(), PORT_HEIGHT, PORT_WIDTH);
+          PortLeft.getChildren().add(portPane);
+          
+          // set PortName
+          titlePort = portView.setPortTitle(p.getTitle(), 2, p.getY() - node.getY() +10);
+          PortLeft.getChildren().add(titlePort);
+          // set PortDataType
+          DataTypePort = portView.setPortDataType(p.getPortType(), 2, p.getY() - node.getY()-12);
+          PortLeft.getChildren().add(DataTypePort);
         }
         else if (p.getY() < node.getY()) {
-          Rectangle recPort = new Rectangle(p.getX() - node.getX(), 0, PORT_HEIGHT, PORT_WIDTH);
-          initLooks(recPort);
-          PortTop.getChildren().add(recPort);
-          System.out.println("Top:" + recPort);
+//          PortNodeView portView = new PortNodeView(p);
+          Pane portPane = portView.createPortPane(p.getX() - node.getX(), 0, PORT_HEIGHT, PORT_WIDTH);
+          PortTop.getChildren().add(portPane);
+          
+          // set PortName
+          titlePort = portView.setPortTitle(p.getTitle(), p.getX() - node.getX() + 2, 10);
+          PortTop.getChildren().add(titlePort);
+          // set PortDataType
+          DataTypePort = portView.setPortDataType(p.getPortType(), p.getX() - node.getX() + 2, -12);
+          PortTop.getChildren().add(DataTypePort);
         }
         else if ((p.getX() + p.getWidth() > node.getX()) && (p.getY() + p.getHeight() < node.getY() + node.getHeight()) && (p.getY() > node.getY())) {
-          Rectangle recPort = new Rectangle(0 , p.getY() - node.getY(), PORT_HEIGHT, PORT_WIDTH);
-          initLooks(recPort);
-          PortRight.getChildren().add(recPort);
-          System.out.println("Right:" + recPort);
+//          PortNodeView portView = new PortNodeView(p);
+          Pane portPane = portView.createPortPane(0 , p.getY() - node.getY(), PORT_HEIGHT, PORT_WIDTH);
+          PortRight.getChildren().add(portPane);
+          
+          // set PortName
+          titlePort = portView.setPortTitle(p.getTitle(),2,p.getY() - node.getY() +10 );
+          PortRight.getChildren().add(titlePort);
+          // set PortDataType
+          DataTypePort = portView.setPortDataType(p.getPortType(), 2, p.getY() - node.getY()-12);
+          PortRight.getChildren().add(DataTypePort);
+          
         }
         else {
-          Rectangle recPort = new Rectangle(p.getX() - node.getX(), 0, PORT_HEIGHT, PORT_WIDTH);
-          initLooks(recPort);
-          PortBottom.getChildren().add(recPort);
-          System.out.println("Bottom:" + recPort);
+//          PortNodeView portView = new PortNodeView(p);
+          Pane portPane = portView.createPortPane(p.getX() - node.getX(), 0, PORT_HEIGHT, PORT_WIDTH);
+          PortBottom.getChildren().add(portPane);
+          
+          // set PortName
+          titlePort = portView.setPortTitle(p.getTitle(), p.getX() - node.getX() + 2, 10);
+          PortBottom.getChildren().add(titlePort);
+          // set PortDataType
+          DataTypePort = portView.setPortDataType(p.getPortType(), p.getX() - node.getX() + 2, -12);
+          PortBottom.getChildren().add(DataTypePort);
+          
         }
+        nodeCompMap.put(portView, p);
+        portViews.add(portView);
       }
     }
   }
+  
+//  private Label setPortAttr(String attr, double PositionX, double PositionY) {
+//    Label portLabel = new Label();
+//    portLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 12));
+//    System.out.println("We are going to set a title" + attr);
+//    if(attr != null) {
+//      portLabel.setText(attr);
+//    }
+//    portLabel.setAlignment(Pos.TOP_CENTER);
+//    portLabel.setTranslateX(PositionX);
+//    portLabel.setTranslateY(PositionY);
+//    portLabel.setFont(new Font("Arial", 10));
+//    return portLabel;
+//  }
   
   private void changeHeight(double height) {
     setHeight(height);
@@ -265,12 +255,6 @@ public class ComponentNodeView extends AbstractNodeView {
     // setWidth(width);
     rec.setWidth(width);
     
-    // container.setMaxWidth(width);
-    // container.setPrefWidth(width);
-    //
-    // vbox.setMaxWidth(width);
-    // vbox.setPrefWidth(width);
-    
     /*
      * title.setMaxWidth(width); title.setPrefWidth(width);
      * attributes.setMaxWidth(width); attributes.setPrefWidth(width);
@@ -279,23 +263,18 @@ public class ComponentNodeView extends AbstractNodeView {
   }
   
   private void initVBox(ComponentNode node) {
+    titlePane = new Pane();
+    title = new Label();
+        
     vbox.setPadding(new Insets(5, 0, 5, 0));
     vbox.setSpacing(5);
     
-    titlePane = new Pane();
-    
-    title = new Label();
     title.setFont(Font.font("Verdana", FontWeight.BOLD, 12));
     System.out.println("We are going to set a title" + node.getTitle());
     if(node.getTitle() != null) {
       title.setText(node.getTitle());
     }
-    title.setAlignment(Pos.CENTER);
-    
-    
-//    titlePane.getChildren().add(title);
-//    
-//    System.out.println("TitlePane looks as follows" + titlePane);
+    title.setAlignment(Pos.TOP_CENTER);
     vbox.setAlignment(Pos.TOP_CENTER);
     vbox.getChildren().add(title);
   }
@@ -304,9 +283,6 @@ public class ComponentNodeView extends AbstractNodeView {
     rec.setStrokeWidth(STROKE_WIDTH);
     rec.setFill(Color.LIGHTSKYBLUE);
     rec.setStroke(Color.BLACK);
-    // StackPane.setAlignment(title, Pos.CENTER);
-    // VBox.setMargin(attributes, new Insets(5,0,0,5));
-    // VBox.setMargin(operations, new Insets(5,0,0,5));
   }
   
   public void setSelected(boolean selected) {
@@ -343,6 +319,14 @@ public class ComponentNodeView extends AbstractNodeView {
   
   public Bounds getBounds() {
     return container.getBoundsInParent();
+  }
+  
+  public HashMap<PortNodeView, PortNode> getNodeCompMap() {
+    return nodeCompMap;
+  }
+  
+  public ArrayList<PortNodeView> getPortNodeViews() {
+    return portViews;
   }
   
   @Override

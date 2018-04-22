@@ -38,4 +38,8 @@ public class SetNodeAttributeCommand implements Command {
   public String getOldAttribute() {
     return oldAttribute;
   }
+
 }
+  
+  
+ 

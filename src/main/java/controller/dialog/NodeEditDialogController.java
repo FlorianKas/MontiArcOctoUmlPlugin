@@ -7,6 +7,7 @@ import javafx.scene.control.TextField;
 import model.nodes.AbstractNode;
 import model.nodes.ClassNode;
 import model.nodes.ComponentNode;
+import model.nodes.PortNode;
 
 /**
  * Dialog to edit details of a node.
@@ -17,6 +18,8 @@ public class NodeEditDialogController {
   
   @FXML
   private TextField titleField;
+  @FXML
+  private TextField dataTypeField;
   @FXML
   private TextArea attributesArea;
   @FXML
@@ -54,8 +57,15 @@ public class NodeEditDialogController {
     else if (node instanceof ComponentNode) {
       this.node = (ComponentNode) node;
       titleField.setText(((ComponentNode)this.node).getTitle());
-      
     }
+    else if (node instanceof PortNode) {
+      this.node = (PortNode) node;
+      titleField.setText(this.node.getTitle());
+      System.out.println("Typ of PortNode "+ ((PortNode)this.node).getPortType());
+      System.out.println("dataTypeField " + dataTypeField.getText());
+      
+      dataTypeField.setText(((PortNode)this.node).getPortType());
+      }
   }
   
   public Button getOkButton() {
@@ -78,6 +88,9 @@ public class NodeEditDialogController {
     return operationsArea.getText();
   }
   
+  public String getDataType() {
+    return dataTypeField.getText();
+  }
   public boolean hasTitledChanged() {
     if (this.node.getTitle() == null) {
       return titleField.getText() != null;
@@ -102,6 +115,15 @@ public class NodeEditDialogController {
     }
     else {
       return !((ClassNode)this.node).getOperations().equals(operationsArea.getText());
+    }
+  }
+  
+  public boolean hasDataTypeChanged() {
+    if (((PortNode)this.node).getPortType() == null) {
+      return dataTypeField.getText() != null;
+    }
+    else {
+      return !((PortNode)this.node).getPortType().equals(dataTypeField.getText());
     }
   }
   

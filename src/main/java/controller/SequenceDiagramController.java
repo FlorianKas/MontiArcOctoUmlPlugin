@@ -224,7 +224,7 @@ public class SequenceDiagramController extends AbstractDiagramController {
     
     nodeView.setOnMousePressed(event -> {
       if (event.getClickCount() == 2) { // Open dialog window on double click.
-        nodeController.onDoubleClick(nodeView);
+        nodeController.onDoubleClick(nodeView, event.getX(), event.getY());
         tool = ToolEnum.SELECT;
         setButtonClicked(selectBtn);
       }

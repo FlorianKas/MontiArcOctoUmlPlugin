@@ -15,12 +15,14 @@ import model.nodes.AbstractNode;
 import model.nodes.ClassNode;
 import model.nodes.ComponentNode;
 import model.nodes.PackageNode;
+import model.nodes.PortNode;
 import util.Constants;
 import util.commands.*;
 import view.nodes.AbstractNodeView;
 import view.nodes.ClassNodeView;
 import view.nodes.ComponentNodeView;
 import view.nodes.PackageNodeView;
+import view.nodes.PortNodeView;
 
 import java.awt.geom.Point2D;
 import java.io.IOException;
@@ -333,12 +335,37 @@ public class NodeController {
     currentResizeNode = null; // Only needed when resizing
   }
   
-  public void onDoubleClick(AbstractNodeView nodeView) {
+  public void onDoubleClick(AbstractNodeView nodeView, double posX, double posY) {
+    boolean port = false;
     if (nodeView instanceof ClassNodeView) {
       showClassNodeEditDialog((ClassNode) diagramController.getNodeMap().get(nodeView));
     }
     else if (nodeView instanceof ComponentNodeView){
-      showComponentNodeEditDialog((ComponentNode) diagramController.getNodeMap().get(nodeView));
+      System.out.println("We are in ComponentNdoeView");
+      ArrayList<PortNodeView> portViews = ((ComponentNodeView) nodeView).getPortNodeViews();
+      System.out.println("PortViews: " + portViews.get(0).getTranslateX() + portViews.get(0).getLayoutY());
+      for (PortNodeView p : portViews) {
+//        System.out.println("Scene x val" + p.computeAreaInScreen());
+//        System.out.println("Scene x val" + p.getLayoutX());
+//        System.out.println("Scene y val" + p.getLayoutY());
+//        System.out.println("Scene x val" + p.getBounds());
+//        System.out.println("Scene Y val" + p.getScene().getY());
+        System.out.println("PosX "+ posX );  
+        System.out.println("Test "+ p.getBounds().contains(posX, posY));
+        // Hier muessen wir uns noch eine neue Bounding Box bauen mit dem x und y wert vom port und den default Werten
+        // fuer Hoehe und Breite
+        if(p.getBounds().contains(posX, posY)) {
+          System.out.println("Recognized as PortNodeView");
+          System.out.println("PortView " + ((ComponentNodeView) nodeView).getNodeCompMap().get(p));
+//          ComponentNode node = ComponentNode(diagramController.getNodeMap().get(nodeView));
+          showPortNodeEditDialog(((ComponentNodeView) nodeView).getNodeCompMap().get(p));
+          port = true;
+        }
+      }
+      if(port == false) {
+        showComponentNodeEditDialog((ComponentNode) diagramController.getNodeMap().get(nodeView));  
+        System.out.println("Rec. as Comp Node");
+      }
     }
     else {
       showNodeTitleDialog(diagramController.getNodeMap().get(nodeView));
@@ -605,5 +632,109 @@ public class NodeController {
     group.setPadding(new Insets(15, 12, 15, 12));
     aDrawPane.getChildren().add(group);
     return true; 
+  }
+  
+  public boolean showPortNodeEditDialog(PortNode node) {
+    System.out.println("We are in Edit");
+    if (diagramController.voiceController.voiceEnabled) {
+      
+      // Change variable testing in MainController to 1(true)
+      diagramController.voiceController.testing = 1;
+      
+      String title = "";
+      int time = 0;
+      // Looking for a name you want to add to the class or until 5 seconds have
+      // passed
+      while ((title.equals("") || title == null) && time < 500) {
+        try {
+          TimeUnit.MILLISECONDS.sleep(10);
+        }
+        catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+        // Check if a name has been commanded
+        title = diagramController.voiceController.titleName;
+        time++;
+      }
+      
+      // Change variable testing in MainController to 0(false)
+      diagramController.voiceController.testing = 0;
+      
+      // If name found in less then 5 seconds it sets the name to the class
+      if (time < 500) {
+        diagramController.voiceController.titleName = "";
+        node.setTitle(title);
+      }
+      // Else the name is not changed to a new name
+      else {
+        diagramController.voiceController.titleName = "";
+      }
+    }
+    
+    try {
+      // Load the classDiagramView.fxml file and create a new stage for the
+      // popup
+      System.out.println("We are in try");
+      FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view/fxml/componentNodeEditDialog.fxml"));
+      
+      AnchorPane dialog = loader.load();
+      dialog.setBackground(new Background(new BackgroundFill(Color.WHITESMOKE, new CornerRadii(1), null)));
+      dialog.setStyle("-fx-border-color: black");
+      // Set location for dialog.
+      double maxX = aDrawPane.getWidth() - dialog.getPrefWidth();
+      double maxY = aDrawPane.getHeight() - dialog.getPrefHeight();
+      System.out.println("node " + node);
+      dialog.setLayoutX(Math.min(maxX, node.getTranslateX() + 5));
+      dialog.setLayoutY(Math.min(maxY, node.getTranslateY() + 5));
+      
+      NodeEditDialogController controller = loader.getController();
+      controller.setNode(node);
+      controller.getOkButton().setOnAction(new EventHandler<ActionEvent>() {
+        @Override
+        public void handle(ActionEvent event) {
+          CompoundCommand command = new CompoundCommand();
+          if (controller.hasTitledChanged()) {
+            command.add(new SetNodeTitleCommand(node, controller.getTitle(), node.getTitle()));
+            node.setTitle(controller.getTitle());
+          }
+//          if (controller.hasAttributesChanged()) {
+//            command.add(new SetNodeAttributeCommand(node, controller.getAttributes(), node.getAttributes()));
+//            node.setAttributes(controller.getAttributes());
+//          }
+//          if (controller.hasOperationsChanged()) {
+//            command.add(new SetNodeOperationsCommand(node, controller.getOperations(), node.getOperations()));
+//            node.setOperations(controller.getOperations());
+//          }
+          if (controller.hasDataTypeChanged()) {
+            command.add(new SetNodeDataTypeCommand(node, controller.getDataType(), node.getPortType()));
+            
+          }
+          if (command.size() > 0) {
+            diagramController.getUndoManager().add(command);
+            node.setPortType(controller.getDataType());
+          }
+          aDrawPane.getChildren().remove(dialog);
+          diagramController.removeDialog(dialog);
+        }
+      });
+      
+      controller.getCancelButton().setOnAction(new EventHandler<ActionEvent>() {
+        @Override
+        public void handle(ActionEvent event) {
+          aDrawPane.getChildren().remove(dialog);
+          diagramController.removeDialog(dialog);
+        }
+      });
+      aDrawPane.getChildren().add(dialog);
+      diagramController.addDialog(dialog);
+      return controller.isOkClicked();
+      
+    }
+    catch (IOException e) {
+      // Exception gets thrown if the classDiagramView.fxml file could not be
+      // loaded
+      e.printStackTrace();
+      return false;
+    }
   }
 }

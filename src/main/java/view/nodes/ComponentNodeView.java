@@ -48,7 +48,9 @@ public class ComponentNodeView extends AbstractNodeView {
   // private Label attributes;
   // private Label operations;
   
-  private Label title;
+  private Label type;
+  private Label name;
+  private Label stereotype;
   
   private Rectangle rectangle;
   private ArrayList<Rectangle> portViewArray;
@@ -246,8 +248,8 @@ public class ComponentNodeView extends AbstractNodeView {
     // vbox.setMaxWidth(width);
     // vbox.setPrefWidth(width);
     //
-    title.setMaxWidth(width); 
-    title.setPrefWidth(width);
+    type.setMaxWidth(width); 
+    type.setPrefWidth(width);
     
   }
   
@@ -263,20 +265,31 @@ public class ComponentNodeView extends AbstractNodeView {
   }
   
   private void initVBox(ComponentNode node) {
-    titlePane = new Pane();
-    title = new Label();
-        
-    vbox.setPadding(new Insets(5, 0, 5, 0));
+    type = new Label();
+    name = new Label();
+    stereotype = new Label();
+    
+    vbox.setPadding(new Insets(0, 20, 0, 0));
     vbox.setSpacing(5);
     
-    title.setFont(Font.font("Verdana", FontWeight.BOLD, 12));
-    System.out.println("We are going to set a title" + node.getTitle());
-    if(node.getTitle() != null) {
-      title.setText(node.getTitle());
+    type.setFont(Font.font("Verdana", FontWeight.LIGHT, 10));
+    name.setFont(Font.font("Verdana", FontWeight.LIGHT, 10));
+    stereotype.setFont(Font.font("Verdana", FontWeight.LIGHT, 10));
+    System.out.println("We are going to set a title" + node.getComponentType());
+    if(node.getComponentType() != null) {
+      type.setText(node.getComponentType());
     }
-    title.setAlignment(Pos.TOP_CENTER);
-    vbox.setAlignment(Pos.TOP_CENTER);
-    vbox.getChildren().add(title);
+    if(node.getTitle() != null) {
+      name.setText(node.getTitle());
+    }
+    if(node.getStereotype() != null) {
+      stereotype.setText(node.getStereotype());
+    }
+    type.setAlignment(Pos.TOP_CENTER);
+    name.setAlignment(Pos.TOP_CENTER);
+    stereotype.setAlignment(Pos.TOP_CENTER);
+    vbox.setAlignment(Pos.TOP_LEFT);
+    vbox.getChildren().addAll(stereotype, type, name);
   }
   
   private void initLooks(Rectangle rec) {
@@ -346,14 +359,14 @@ public class ComponentNodeView extends AbstractNodeView {
       changeHeight((double) evt.getNewValue());
     }
     else if (evt.getPropertyName().equals(Constants.changeNodeTitle)) {
-      title.setText((String) evt.getNewValue());
+      name.setText((String) evt.getNewValue());
     }
-      // } else if
-      // (evt.getPropertyName().equals(Constants.changeClassNodeAttributes)) {
-      // attributes.setText((String) evt.getNewValue());
-      // } else if
-      // (evt.getPropertyName().equals(Constants.changeClassNodeOperations)) {
-      // operations.setText((String) evt.getNewValue());
+    else if (evt.getPropertyName().equals(Constants.changeComponentNodeDataType)) {
+      type.setText((String) evt.getNewValue());
+    }
+    else if (evt.getPropertyName().equals(Constants.changeComponentStereotype)) {
+      stereotype.setText((String) evt.getNewValue());
+    }
   }
  
   

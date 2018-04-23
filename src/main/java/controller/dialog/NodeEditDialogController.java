@@ -19,6 +19,12 @@ public class NodeEditDialogController {
   @FXML
   private TextField titleField;
   @FXML
+  private TextField typeField;
+  @FXML
+  private TextField nameField;
+  @FXML
+  private TextField stereotypeField;
+  @FXML
   private TextField dataTypeField;
   @FXML
   private TextArea attributesArea;
@@ -56,7 +62,9 @@ public class NodeEditDialogController {
     }
     else if (node instanceof ComponentNode) {
       this.node = (ComponentNode) node;
-      titleField.setText(((ComponentNode)this.node).getTitle());
+      nameField.setText(((ComponentNode)this.node).getTitle());
+      typeField.setText(((ComponentNode)this.node).getComponentType());
+      stereotypeField.setText(((ComponentNode)this.node).getStereotype());
     }
     else if (node instanceof PortNode) {
       this.node = (PortNode) node;
@@ -78,6 +86,18 @@ public class NodeEditDialogController {
   
   public String getTitle() {
     return titleField.getText();
+  }
+  
+  public String getType() {
+    return typeField.getText();
+  }
+  
+  public String getName() {
+    return nameField.getText();
+  }
+  
+  public String getStereotype() {
+    return stereotypeField.getText();
   }
   
   public String getAttributes() {
@@ -124,6 +144,33 @@ public class NodeEditDialogController {
     }
     else {
       return !((PortNode)this.node).getPortType().equals(dataTypeField.getText());
+    }
+  }
+  
+  public boolean hasNameChanged() {
+    if (((ComponentNode)this.node).getTitle() == null) {
+      return nameField.getText() != null;
+    }
+    else {
+      return !((ComponentNode)this.node).getTitle().equals(nameField.getText());
+    }
+  }
+  
+  public boolean hasTypeChanged() {
+    if (((ComponentNode)this.node).getComponentType() == null) {
+      return typeField.getText() != null;
+    }
+    else {
+      return !((ComponentNode)this.node).getComponentType().equals(typeField.getText());
+    }
+  }
+  
+  public boolean hasStereotypeChanged() {
+    if (((ComponentNode)this.node).getStereotype() == null) {
+      return stereotypeField.getText() != null;
+    }
+    else {
+      return !((ComponentNode)this.node).getStereotype().equals(stereotypeField.getText());
     }
   }
   

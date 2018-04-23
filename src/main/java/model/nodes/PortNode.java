@@ -74,10 +74,7 @@ public class PortNode extends AbstractNode {
     changes.firePropertyChange(Constants.changePortNodeDataType, null, portType);
   }
   
-  public void remoteSetPortType() {
     
-  }
-  
   public String getType() {
     return TYPE;
   }

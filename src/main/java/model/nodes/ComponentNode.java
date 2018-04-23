@@ -8,14 +8,14 @@ import java.util.ArrayList;
 
 public class ComponentNode extends AbstractNode implements Serializable {
   private static final String TYPE = "COMPONENT";
+  // pflicht, title is optional
+  private String componentType = "";
+  private String stereotype = "";
   private ArrayList<PortNode> Ports = new ArrayList<>();
   
-  // hier ein Array von Ports
   private String Subcomponents; // TODO: Wieso String und nicht besser ein
                                 // Array?
   
-  // ueberlegen, ob hier nicht noch was rein muss. Wenn ja, brauchen wir auch
-  // setter/getter und muessen das in der Copy ber�cksichtigen
   
   public ComponentNode(double x, double y, double width, double height, ArrayList<PortNode> ports) {
     // irgendwas fuer Ports. Vielleicht auch einfach ein Array von Ports
@@ -36,6 +36,12 @@ public class ComponentNode extends AbstractNode implements Serializable {
     if (this.getTitle() != null) {
       newCopy.setTitle(this.getTitle());
       
+    }
+    if (this.getComponentType() != null) {
+      newCopy.setComponentType(this.getComponentType());
+    }
+    if (this.getStereotype() != null) {
+      newCopy.setStereotype(this.getStereotype());
     }
     newCopy.setTranslateX(this.getTranslateX());
     newCopy.setTranslateY(this.getTranslateY());
@@ -77,6 +83,36 @@ public class ComponentNode extends AbstractNode implements Serializable {
   
   public void addPort(PortNode node) {
     this.Ports.add(node);
+  }
+  
+  public void setStereotype(String pStereotype) {
+    stereotype = pStereotype;
+    changes.firePropertyChange(Constants.changeComponentStereotype, null, pStereotype);
+    remoteChanges.firePropertyChange(Constants.changeComponentStereotype, null, pStereotype);
+  }
+  
+  public void remoteSetSterotype(String pStereotype) {
+    stereotype = pStereotype;
+    changes.firePropertyChange(Constants.changeComponentStereotype, null, pStereotype);
+  }
+  
+  public String getStereotype() {
+    return stereotype;  
+  }
+  
+  public void setComponentType(String pcomponentType) {
+    componentType = pcomponentType;
+    changes.firePropertyChange(Constants.changeComponentNodeDataType, null, pcomponentType);
+    remoteChanges.firePropertyChange(Constants.changeComponentNodeDataType, null, pcomponentType);
+  }
+  
+  public void remoteSetComponentType(String pcomponentType) {
+    componentType = pcomponentType;
+    changes.firePropertyChange(Constants.changeComponentNodeDataType, null, pcomponentType);
+  }
+  
+  public String getComponentType() {
+    return componentType;  
   }
   
 }

@@ -6,8 +6,9 @@ public class PortNode extends AbstractNode {
   
   private static final String TYPE = "PORT";
   private String portType = "";
+  private ComponentNode node;
   
-  public PortNode(double x, double y, double width, double height) {
+  public PortNode(double x, double y, double height, double width) {
     super(x, y, width, height);
     // Don't accept nodes with size less than minWidth * minHeight.
 //    this.width = PORT_WIDTH;
@@ -20,9 +21,17 @@ public class PortNode extends AbstractNode {
     super();
   }
   
+  public void setComponentNode(ComponentNode pComponentNode) {
+    this.node = pComponentNode;
+  }
+  
+  public ComponentNode getComponentNode() {
+    return this.node;
+  }
+  
   @Override
   public PortNode copy() {
-    PortNode newCopy = new PortNode(this.getX(), this.getY(), this.getWidth(), this.getHeight());
+    PortNode newCopy = new PortNode(this.getX(), this.getY(), this.getHeight(), this.getWidth());
     newCopy.setTranslateX(this.getTranslateX());
     newCopy.setTranslateY(this.getTranslateY());
     newCopy.setScaleX(this.getScaleX());

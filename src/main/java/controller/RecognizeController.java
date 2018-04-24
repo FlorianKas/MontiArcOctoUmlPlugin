@@ -207,6 +207,9 @@ public class RecognizeController {
 		        	ports.add(port);
 		       		//System.out.println("Ports: " + ports);
 		       		ComponentNode node = new ComponentNode(b.getX(), b.getY(), b.getHeight(), b.getWidth(), ports);
+		       		for (PortNode p : ports) {
+		       		  p.setComponentNode(node);
+		       		}
 //		       		node.setTitle("Test");
 		       		//System.out.println("Node: " + node);
 		       		graph.addNode(node, false);
@@ -236,7 +239,7 @@ public class RecognizeController {
       } 
      	else {
         ArrayList<PortNode> ports = new ArrayList<>();
-        ComponentNode node = new ComponentNode(b.getX(), b.getY(), b.getWidth(), b.getHeight(), ports);
+        ComponentNode node = new ComponentNode(b.getX(), b.getY(), b.getHeight(), b.getWidth(), ports);
         graph.addNode(node, false);
 //      zugehörigen Sketch mittels einer HashMap
         Sketch s = sketchMap.get(b);
@@ -274,46 +277,97 @@ public class RecognizeController {
           Point2D startPoint = new Point2D(s.getStroke().getFirstPoint().getX(), s.getStroke().getFirstPoint().getY());
           Point2D endPoint = new Point2D(s.getStroke().getLastPoint().getX(), s.getStroke().getLastPoint().getY());
           System.out.println("We have found a start and end point" + startPoint + endPoint);
-          ComponentNode startNode = (ComponentNode) graph.findNode(startPoint);
-          System.out.println("Start Node" + startNode);
-          PortNode startPort = new PortNode();
-          PortNode endPort = new PortNode();
-          System.out.println("StartNode Ports " + startNode.getPorts());
-          for (PortNode p : startNode.getPorts()) {
-            System.out.println("Bounds of port " + p.getBounds());
-            if(p.getBounds().contains(startPoint)) {
-              // this is the port, the arrow starts from
+          
+          PortNode startNode = new PortNode(); 
+          Node tmpNode = graph.findNode(startPoint);
+          if (tmpNode instanceof ComponentNode) {
+//            graph.removeNode(tmpNode, false);
+            Node secTmpNode = graph.findNode(startPoint);
+            startNode = (PortNode) secTmpNode;
+//            graph.addNode((AbstractNode) tmpNode, false);
+          }
+          else {
+            startNode = (PortNode) tmpNode; 
+          }
+//          graph.removeNode(startNode, false);
+          startNode.setPortType("in");
+//          graph.addNode(startNode, false);
+          // nun muessen wir auch im zugehoerigen ComponentNode den Port setzen denke ich
+          ComponentNode nodeIn = startNode.getComponentNode();
+//          graph.removeNode(nodeIn, false);
+          for (PortNode p : nodeIn.getPorts()) {
+            if (p == startNode) {
+              p.setPortType("in");
+              break;
+            }
+          }
+//          graph.addNode(nodeIn, false);
+          
+          
+          
+          PortNode endNode = new PortNode(); 
+          Node tmpOutNode = graph.findNode(endPoint);
+          if (tmpOutNode instanceof ComponentNode) {
+//            graph.removeNode(tmpOutNode, false);
+            Node secTmpOutNode = graph.findNode(endPoint);
+            endNode = (PortNode) secTmpOutNode;
+//            graph.addNode((AbstractNode) tmpOutNode, false);
+          }
+          else {
+            endNode = (PortNode) tmpOutNode; 
+          }
+//          graph.removeNode(endNode, false);
+          endNode.setPortType("out");
+//          graph.addNode(endNode, false);
+          // nun muessen wir auch im zugehoerigen ComponentNode den Port setzen denke ich
+          ComponentNode nodeOut = endNode.getComponentNode();
+//          graph.removeNode(nodeOut, false);
+          for (PortNode p : nodeOut.getPorts()) {
+            if (p == endNode) {
               p.setPortType("out");
-              System.out.println("Port recognized as outgoing Port");
-              startPort = p;
               break;
             }
           }
-          ComponentNode endNode = (ComponentNode) graph.findNode(endPoint);
-          System.out.println("We are in Arrows");
-          //For arrows, which don't have an endpoint
-          List<Point> points = s.getStroke().getPoints();
-          for (int i = points.size()-1; i > points.size()/2; i--) {
-            Point2D point = new Point2D(points.get(i).getX(), points.get(i).getY());
-            if (graph.findNode(point) != null) {
-              for (PortNode p : ((ComponentNode)graph.findNode(point)).getPorts()) {
-                if(p.getBounds().contains(point)) {
-                  p.setPortType("in");
-                  System.out.println("Port recognized as ingoing Port");
-                  endPort = p;
-                  break;  
-                }
-              }
-              endNode = (ComponentNode) graph.findNode(point);
-              System.out.println("Found a end node " + endNode);
-              break;
-            }
-          }
+//          graph.addNode(nodeOut, false);
+          
+          
+          
+          
+//          PortNode endPort = new PortNode();
+//          PortNode endNode = (PortNode) graph.findNode(endPoint);
+//          System.out.println("We are in Arrows");
+//          //For arrows, which don't have an endpoint
+//          List<Point> points = s.getStroke().getPoints();
+//          for (int i = points.size()-1; i > points.size()/2; i--) {
+//            Point2D point = new Point2D(points.get(i).getX(), points.get(i).getY());
+//            if (graph.findNode(point) != null) {
+//              Node endTmp = graph.findNode(point);
+//              if(endTmp instanceof ComponentNode) {
+//                
+//                
+//              }
+//              else if (endTmp instanceof PortNode) {
+//                
+//              }
+//              for (PortNode p : ((ComponentNode)graph.findNode(point)).getPorts()) {
+//                if(p.getBounds().contains(point)) {
+//                  p.setPortType("in");
+//                  System.out.println("Port recognized as ingoing Port");
+//                  endPort = p;
+//                  break;  
+//                }
+//              }
+//              endNode = (ComponentNode) graph.findNode(point);
+//              System.out.println("Found a end node " + endNode);
+//              break;
+//            }
+//          }
 
           if (startNode != null && endNode != null && !startNode.equals(endNode)) {
             System.out.println("We are going to create a ConnectorEdge");
-            ConnectorEdge newEdge = new ConnectorEdge(startNode, endNode, startPort, endPort);
+            ConnectorEdge newEdge = new ConnectorEdge(nodeOut, nodeIn, startNode, endNode);
             System.out.println("Could draw an Arrow");
+            System.out.println("ConnectorEdge looks as follows " + newEdge.getStartNode() + newEdge.getStartPort() + newEdge.getEndNode() + newEdge.getEndPort());
             newEdge.setDirection(AbstractEdge.Direction.START_TO_END);
             s.setRecognizedElement(newEdge);
             sketchesToBeRemoved.add(s);

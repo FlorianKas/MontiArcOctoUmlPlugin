@@ -4,10 +4,12 @@ import model.nodes.AbstractNode;
 import model.nodes.ComponentNode;
 import model.nodes.Node;
 import model.nodes.PortNode;
+import util.Constants;
 
 public class ConnectorEdge extends AbstractEdge{
   private PortNode startPort;
   private PortNode endPort;
+  private String dataType;
   
   public ConnectorEdge(ComponentNode startNode, ComponentNode endNode, PortNode startPort, PortNode endPort) {
     super(startNode, endNode);
@@ -81,6 +83,21 @@ public class ConnectorEdge extends AbstractEdge{
   
   public PortNode getEndPort() {
     return endPort;
+  }
+  
+  public String getDataType() {
+    return dataType;
+  }
+  
+  public void setDataType(String pDataType) {
+    changes.firePropertyChange(Constants.changeConnectorDataType, dataType, pDataType);
+    remoteChanges.firePropertyChange(Constants.changeConnectorDataType, dataType, pDataType);
+    dataType = pDataType;
+  }
+  
+  public void remoteSetDataType(String pDataType) {
+    changes.firePropertyChange(Constants.changeConnectorDataType, dataType, pDataType);
+    dataType = pDataType;
   }
 
   

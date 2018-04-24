@@ -8,7 +8,7 @@ import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
-
+import javafx.scene.text.Text;
 import model.edges.AbstractEdge;
 import model.edges.ConnectorEdge;
 
@@ -23,6 +23,7 @@ public class ConnectorEdgeView extends AbstractEdgeView{
   private AbstractNodeView startNode;
   private AbstractNodeView endNode;
   private ArrayList<Line> arrowHeadLines = new ArrayList<>();
+  private Text dataType = new Text();
   
   public ConnectorEdgeView(AbstractEdge edge, AbstractNodeView startNode, AbstractNodeView endNode) {
     super(edge, startNode, endNode);
@@ -34,47 +35,66 @@ public class ConnectorEdgeView extends AbstractEdgeView{
     this.setStroke(Color.BLACK);
     setPosition();
     draw();
+    this.getChildren().add(dataType);
   }
   protected void draw() {
-    System.out.println("Now in draw");
-    AbstractEdge.Direction direction = refEdge.getDirection();
-    PortNode start = ((ConnectorEdge) this.refEdge).getStartPort();
-    PortNode ende = ((ConnectorEdge) this.refEdge).getEndPort();
+//    System.out.println("Now in draw");
+//    AbstractEdge.Direction direction = refEdge.getDirection();
+//    PortNode start = ((ConnectorEdge) this.refEdge).getStartPort();
+//    PortNode ende = ((ConnectorEdge) this.refEdge).getEndPort();
 //    if (start.getX() )
 //    getStartLine().setStartX(this.startNode.getX() + this.startNode.getWidth() + 1/2*start.getDefaultPortWidth());  
 //    getStartLine().setStartY(start.getY() + 1/2*start.getDefaultPortHeight());
 //    getEndLine().setEndX(this.endNode.getX() + 1/2*ende.getDefaultPortWidth());
 //    getEndLine().setEndY(ende.getY() + 1/2*ende.getDefaultPortHeight());
 //    getStartLine().setStartX(getStartLine().getStartX() + start.getDefaultPortWidth());
-    getStartLine().setStartX(startNode.getX() + start.getDefaultPortWidth());
+//    getStartLine().setStartX(startNode.getX() + start.getDefaultPortWidth());
 //    getStartLine().setStartY(getStartLine().getStartY() - start.getDefaultPortHeight());
-    getStartLine().setStartY(start.getY() + 1/2*start.getDefaultPortHeight());
+//    getStartLine().setStartY(start.getY() + 1/2*start.getDefaultPortHeight());
 //    getEndLine().setEndY(getEndLine().getEndY() - ende.getDefaultPortHeight());
 //    getStartLine().setEndX(getEndLine().getEndX());
-    getStartLine().setEndX(endNode.getX() - 1/2*ende.getDefaultPortWidth());
+//    getStartLine().setEndX(endNode.getX() - 1/2*ende.getDefaultPortWidth());
 //    getStartLine().setEndY(getEndLine().getEndY());
-    getStartLine().setEndY(ende.getY() + 1/2*ende.getDefaultPortHeight());
-    getChildren().clear();
-    getChildren().add(getStartLine());
+//    getStartLine().setEndY(ende.getY() + 1/2*ende.getDefaultPortHeight());
+//    getChildren().clear();
+//    getChildren().add(getStartLine());
 //    getChildren().add(getMiddleLine());
 //    getChildren().add(getEndLine());
-    super.draw();
-    this.getChildren().add(super.getEndMultiplicity());
-    this.getChildren().add(super.getStartMultiplicity());
+//    super.draw();
+//    this.getChildren().add(super.getEndMultiplicity());
+//    this.getChildren().add(super.getStartMultiplicity());
 //    System.out.println("Endline End x " + getEndLine().getEndX());
 //    System.out.println("Endline End y " + getEndLine().getEndY());
 //    System.out.println("Endline Start x " + getEndLine().getStartX());
 //    System.out.println("Endline Start y " + getEndLine().getStartY());
-    System.out.println("Startline End x " + getStartLine().getEndX());
-    System.out.println("Startline End y " + getStartLine().getEndY());
-    System.out.println("Startline Start x " + getStartLine().getStartX());
-    System.out.println("Startline Start y " + getStartLine().getStartY());
+//    System.out.println("Startline End x " + getStartLine().getEndX());
+//    System.out.println("Startline End y " + getStartLine().getEndY());
+//    System.out.println("Startline Start x " + getStartLine().getStartX());
+//    System.out.println("Startline Start y " + getStartLine().getStartY());
 //    System.out.println("MiddleLine End x " + getMiddleLine().getEndX());
 //    System.out.println("MiddleLine End y " + getMiddleLine().getEndY());
 //    System.out.println("MiddleLine Start x " + getMiddleLine().getStartX());
 //    System.out.println("MiddleLine Start y " + getMiddleLine().getStartY());
     
-    this.getChildren().add(drawArrowHead(getStartLine().getEndX(), getStartLine().getEndY(), getStartLine().getStartX(), getStartLine().getStartY()));
+//    this.getChildren().add(drawArrowHead(getStartLine().getEndX(), getStartLine().getEndY(), getStartLine().getStartX(), getStartLine().getStartY()));
+    System.out.println("Going to draw an edge");
+    
+    AbstractEdge.Direction direction = refEdge.getDirection();
+    getChildren().clear();
+    System.out.println("StartLine " + getStartLine());
+    System.out.println("MiddleLine " + getMiddleLine());
+    System.out.println("EndLine " + getEndLine());
+    getChildren().add(getStartLine());
+    getChildren().add(getMiddleLine());
+    getChildren().add(getEndLine());
+    System.out.println("Before drAaw");
+    super.draw();
+    System.out.println("After drwa");
+    this.getChildren().add(super.getEndMultiplicity());
+    this.getChildren().add(super.getStartMultiplicity());
+    this.getChildren().add(drawArrowHead(getEndLine().getEndX(), getEndLine().getEndY(), getEndLine().getStartX(), getEndLine().getStartY()));
+    
+    
   }
   
   public void setSelected(boolean selected) {

@@ -49,6 +49,7 @@ public class Constants {
   public static String changeMessageStartY = "MessageStartY";
   public static String changeMessageTitle = "MessageTitle";
   public static String changeMessageType = "MessageType";
+  public static String changeConnectorDataType = "ConnectorDataType";
   
   public static String changeSketchStart = "SketchStart";
   public static String changeSketchPoint = "SketchPoint";

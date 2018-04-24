@@ -106,7 +106,7 @@ public class ComponentNodeView extends AbstractNodeView {
     container.add(PortBottom, 0, 3, 4, 1);
     container.add(PortRight, 3, 0, 1, 4);
     
-    container.setGridLinesVisible(false);
+    container.setGridLinesVisible(true);
     System.out.println("Container Input " + container.getChildren().toString());
     this.getChildren().add(container);
     System.out.println("Children " + this.getChildren().toString());
@@ -134,7 +134,7 @@ public class ComponentNodeView extends AbstractNodeView {
   }
   
   private void createRectangles(ComponentNode node) {
-    Rectangle rec = new Rectangle(node.getHeight(), node.getWidth());
+    Rectangle rec = new Rectangle(node.getWidth(), node.getHeight());
     initLooks(rec);
     container.add(rec, 1, 1, 3, 3);
   }
@@ -186,6 +186,7 @@ public class ComponentNodeView extends AbstractNodeView {
         else if ((p.getX() + p.getWidth() > node.getX()) && (p.getY() + p.getHeight() < node.getY() + node.getHeight()) && (p.getY() > node.getY())) {
 //          PortNodeView portView = new PortNodeView(p);
           Pane portPane = portView.createPortPane(0 , p.getY() - node.getY(), PORT_HEIGHT, PORT_WIDTH);
+          System.out.println("PortPane " + portPane.getLayoutX() + portPane.toString() );
           PortRight.getChildren().add(portPane);
           
           // set PortName

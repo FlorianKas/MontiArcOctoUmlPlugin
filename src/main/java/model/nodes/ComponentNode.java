@@ -17,9 +17,9 @@ public class ComponentNode extends AbstractNode implements Serializable {
                                 // Array?
   
   
-  public ComponentNode(double x, double y, double width, double height, ArrayList<PortNode> ports) {
+  public ComponentNode(double x, double y, double height, double width, ArrayList<PortNode> ports) {
     // irgendwas fuer Ports. Vielleicht auch einfach ein Array von Ports
-    super(x, y, width, height);
+    super(x, y, height, width);
     this.width = width < COMPONENT_MIN_WIDTH ? COMPONENT_MIN_WIDTH : width;
     this.height = height < COMPONENT_MIN_HEIGHT ? COMPONENT_MIN_HEIGHT : height;
     this.Ports = ports;
@@ -27,7 +27,7 @@ public class ComponentNode extends AbstractNode implements Serializable {
   
   @Override
   public ComponentNode copy() {
-    ComponentNode newCopy = new ComponentNode(this.getX(), this.getY(), this.getWidth(), this.getHeight(), this.getPorts());
+    ComponentNode newCopy = new ComponentNode(this.getX(), this.getY(), this.getHeight(), this.getWidth(), this.getPorts());
     newCopy.setTranslateX(this.getTranslateX());
     newCopy.setTranslateY(this.getTranslateY());
     newCopy.setScaleX(this.getScaleX());
@@ -84,6 +84,7 @@ public class ComponentNode extends AbstractNode implements Serializable {
   public void addPort(PortNode node) {
     this.Ports.add(node);
   }
+  
   
   public void setStereotype(String pStereotype) {
     stereotype = pStereotype;

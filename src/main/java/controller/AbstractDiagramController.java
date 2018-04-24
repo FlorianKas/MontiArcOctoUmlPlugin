@@ -862,6 +862,9 @@ public abstract class AbstractDiagramController {
     else if (edge instanceof InheritanceEdge) {
       edgeView = new InheritanceEdgeView(edge, startNodeView, endNodeView);
     }
+    else if (edge instanceof ConnectorEdge) {
+      edgeView = new ConnectorEdgeView(edge, startNodeView, endNodeView);
+    }
     else {
       edgeView = null;
     }
@@ -894,16 +897,38 @@ public abstract class AbstractDiagramController {
     AbstractNodeView startNodeView = null;
     AbstractNodeView endNodeView = null;
     AbstractNode tempNode;
+    
     for (AbstractNodeView nodeView : allNodeViews) {
       tempNode = nodeMap.get(nodeView);
-      if (edge.getStartNode().getId().equals(tempNode.getId())) {
-        edge.setStartNode(tempNode);
-        startNodeView = nodeView;
-      }
-      else if (edge.getEndNode().getId().equals(tempNode.getId())) {
-        edge.setEndNode(tempNode);
-        endNodeView = nodeView;
-      }
+      if (edge instanceof ConnectorEdge) {
+        System.out.println("Here");
+        System.out.println("Comp Node of Port " + ((ConnectorEdge) edge).getStartPort().getComponentNode() + "id is " + ((ConnectorEdge) edge).getStartPort().getComponentNode().getId());
+        System.out.println("Tmp Node " + tempNode + " id is " + tempNode.getId());
+        if (((ConnectorEdge) edge).getStartPort().getComponentNode().getX() == tempNode.getX() && 
+            ((ConnectorEdge) edge).getStartPort().getComponentNode().getY() == tempNode.getY()) {
+          edge.setStartNode(((ConnectorEdge) edge).getStartPort());  
+          System.out.println("We are going to set the startNodeView");
+          startNodeView = nodeView;
+          System.out.println("StartNodeView is " + startNodeView);
+        }
+        else if (((ConnectorEdge) edge).getEndPort().getComponentNode().getX() == tempNode.getX() && 
+            ((ConnectorEdge) edge).getEndPort().getComponentNode().getY() == tempNode.getY()) {
+          edge.setEndNode(((ConnectorEdge) edge).getEndPort());
+          System.out.println("We are going to set the endNodeView");
+          endNodeView = nodeView;
+          System.out.println("EndNodeView is " + endNodeView);
+        }
+      } 
+      else {
+        if (edge.getStartNode().getId().equals(tempNode.getId())) {
+          edge.setStartNode(tempNode);
+          startNodeView = nodeView;
+        }
+        else if (edge.getEndNode().getId().equals(tempNode.getId())) {
+          edge.setEndNode(tempNode);
+          endNodeView = nodeView;
+        }  
+      }    
     }
     AbstractEdgeView edgeView;
     if (edge instanceof AggregationEdge) {
@@ -916,6 +941,9 @@ public abstract class AbstractDiagramController {
       edgeView = new InheritanceEdgeView(edge, startNodeView, endNodeView);
     }
     else if (edge instanceof ConnectorEdge) {
+      System.out.println("We are in ConnectorEdge case");
+      System.out.println("StartNodeView "+ startNodeView);
+      System.out.println("EndNodeView "+ endNodeView);
       edgeView = new ConnectorEdgeView(edge, startNodeView, endNodeView);
     }
     else { // Association

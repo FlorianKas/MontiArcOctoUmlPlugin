@@ -39,7 +39,9 @@ public abstract class AbstractEdgeView extends Group implements EdgeView, Proper
   
   public AbstractEdgeView(AbstractEdge edge, AbstractNodeView startNode, AbstractNodeView endNode) {
     super();
-    
+    System.out.println("We are in AbstractEdgeView");
+    System.out.println("StartNode is of type" + startNode.getX());
+    System.out.println("EndNode is of type" + endNode.getX());
     setId("VIEWASSOCIATION_" + ++objectCounter);
     
     this.refEdge = edge;

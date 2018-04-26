@@ -12,7 +12,7 @@ public class ConnectorEdge extends AbstractEdge{
   private String dataType;
   
   public ConnectorEdge(ComponentNode startNode, ComponentNode endNode, PortNode startPort, PortNode endPort) {
-    super(startNode, endNode);
+    super(startPort, endPort);
     this.startPort = startPort;
     this.endPort = endPort;
   }

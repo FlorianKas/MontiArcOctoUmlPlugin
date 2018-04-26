@@ -70,6 +70,7 @@ public class ComponentNodeView extends AbstractNodeView {
   protected static final double PORT_HEIGHT = 40;
   HashMap<PortNodeView, PortNode> nodeCompMap = new HashMap<>();
   ArrayList<PortNodeView> portViews;
+  HashMap<PortNode, PortNodeView> nodeToViewMap = new HashMap<>();
   
   public ComponentNodeView(ComponentNode node) {
     super(node);
@@ -116,6 +117,10 @@ public class ComponentNodeView extends AbstractNodeView {
     
   }
   
+  public ComponentNodeView() {
+    
+  }
+    
   
   
   private void initGrid(double compHeight, double compWidth, double portHeight, double portWidth) {
@@ -211,6 +216,7 @@ public class ComponentNodeView extends AbstractNodeView {
           
         }
         nodeCompMap.put(portView, p);
+        nodeToViewMap.put(p, portView);
         portViews.add(portView);
       }
     }
@@ -337,6 +343,10 @@ public class ComponentNodeView extends AbstractNodeView {
   
   public HashMap<PortNodeView, PortNode> getNodeCompMap() {
     return nodeCompMap;
+  }
+  
+  public HashMap<PortNode, PortNodeView> getNodeToViewMap() {
+    return nodeToViewMap;
   }
   
   public ArrayList<PortNodeView> getPortNodeViews() {

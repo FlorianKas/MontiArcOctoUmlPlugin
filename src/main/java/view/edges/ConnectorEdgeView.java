@@ -27,7 +27,12 @@ public class ConnectorEdgeView extends AbstractEdgeView{
   
   public ConnectorEdgeView(AbstractEdge edge, AbstractNodeView startNode, AbstractNodeView endNode) {
     super(edge, startNode, endNode);
+    
     System.out.println("Here we are");
+    System.out.println("StartNodeView" + startNode.getX());
+    System.out.println("StartNodeView" + startNode.getY());
+    System.out.println("EndNodeView" + endNode.getX());
+    System.out.println("StartNodeView" + startNode.getY());
     this.refEdge = edge;
     this.startNode = startNode;
     this.endNode = endNode;

@@ -33,6 +33,10 @@ public abstract class AbstractNodeView extends Group implements NodeView, Proper
     refNode.addPropertyChangeListener(this);
   }
   
+  public AbstractNodeView() {
+    
+  }
+  
   public AbstractNode getRefNode() {
     return refNode;
   }

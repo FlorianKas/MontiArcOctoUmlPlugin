@@ -656,6 +656,20 @@ public abstract class AbstractDiagramController {
     else if (node instanceof ComponentNode) {
       newView = new ComponentNodeView((ComponentNode) node);
     }
+    else if (node instanceof PortNode) {
+      ComponentNodeView compView = new ComponentNodeView();
+      System.out.println("NodeMap " + nodeMap.toString());
+      System.out.println("AllNodeViews "+ allNodeViews);
+      for (AbstractNodeView view : allNodeViews) {
+        if(nodeMap.get(view) ==  (ComponentNode)((PortNode) node).getComponentNode()) {
+          compView = (ComponentNodeView)view;
+          System.out.println("Comp View" + compView);
+          break;
+        }
+      } 
+      newView = compView.getNodeToViewMap().get(node);
+      System.out.println("newView" + newView);
+    }
     else {
       newView = new SequenceObjectView((SequenceObject) node);
       ((SequenceDiagramController) this).initLifelineHandleActions((SequenceObjectView) newView);
@@ -878,7 +892,9 @@ public abstract class AbstractDiagramController {
    * @return
    */
   public AbstractEdgeView addEdgeView(AbstractEdgeView edgeView) {
+    System.out.println("We are going to add a view");
     if (edgeView != null) {
+      System.out.println("This view is " + edgeView);
       drawPane.getChildren().add(edgeView);
       graph.addEdge(edgeView.getRefEdge(), false);
       allEdgeViews.add(edgeView);
@@ -900,36 +916,37 @@ public abstract class AbstractDiagramController {
     
     for (AbstractNodeView nodeView : allNodeViews) {
       tempNode = nodeMap.get(nodeView);
-      if (edge instanceof ConnectorEdge) {
-        System.out.println("Here");
-        System.out.println("Comp Node of Port " + ((ConnectorEdge) edge).getStartPort().getComponentNode() + "id is " + ((ConnectorEdge) edge).getStartPort().getComponentNode().getId());
-        System.out.println("Tmp Node " + tempNode + " id is " + tempNode.getId());
-        if (((ConnectorEdge) edge).getStartPort().getComponentNode().getX() == tempNode.getX() && 
-            ((ConnectorEdge) edge).getStartPort().getComponentNode().getY() == tempNode.getY()) {
-          edge.setStartNode(((ConnectorEdge) edge).getStartPort());  
-          System.out.println("We are going to set the startNodeView");
-          startNodeView = nodeView;
-          System.out.println("StartNodeView is " + startNodeView);
-        }
-        else if (((ConnectorEdge) edge).getEndPort().getComponentNode().getX() == tempNode.getX() && 
-            ((ConnectorEdge) edge).getEndPort().getComponentNode().getY() == tempNode.getY()) {
-          edge.setEndNode(((ConnectorEdge) edge).getEndPort());
-          System.out.println("We are going to set the endNodeView");
-          endNodeView = nodeView;
-          System.out.println("EndNodeView is " + endNodeView);
-        }
-      } 
-      else {
-        if (edge.getStartNode().getId().equals(tempNode.getId())) {
-          edge.setStartNode(tempNode);
-          startNodeView = nodeView;
-        }
-        else if (edge.getEndNode().getId().equals(tempNode.getId())) {
-          edge.setEndNode(tempNode);
-          endNodeView = nodeView;
-        }  
-      }    
-    }
+      System.out.println("TempNode " + tempNode);
+//      if (edge instanceof ConnectorEdge) {
+//        System.out.println("Here");
+//        System.out.println("Comp Node of Port " + ((ConnectorEdge) edge).getStartPort().getComponentNode() + "id is " + ((ConnectorEdge) edge).getStartPort().getComponentNode().getId());
+//        System.out.println("Tmp Node " + tempNode + " id is " + tempNode.getId());
+//        if (((ConnectorEdge) edge).getStartPort().getComponentNode().getX() == tempNode.getX() && 
+//            ((ConnectorEdge) edge).getStartPort().getComponentNode().getY() == tempNode.getY()) {
+//          edge.setStartNode(((ConnectorEdge) edge).getStartPort());  
+//          System.out.println("We are going to set the startNodeView");
+//          startNodeView = nodeView;
+//          System.out.println("StartNodeView is " + startNodeView);
+//        }
+//        else if (((ConnectorEdge) edge).getEndPort().getComponentNode().getX() == tempNode.getX() && 
+//            ((ConnectorEdge) edge).getEndPort().getComponentNode().getY() == tempNode.getY()) {
+//          edge.setEndNode(((ConnectorEdge) edge).getEndPort());
+//          System.out.println("We are going to set the endNodeView");
+//          endNodeView = nodeView;
+//          System.out.println("EndNodeView is " + endNodeView);
+//        }
+//      } 
+//      else {
+      if (edge.getStartNode().getId().equals(tempNode.getId())) {
+        edge.setStartNode(tempNode);
+        startNodeView = nodeView;
+      }
+      else if (edge.getEndNode().getId().equals(tempNode.getId())) {
+        edge.setEndNode(tempNode);
+        endNodeView = nodeView;
+      }  
+    }    
+//    }
     AbstractEdgeView edgeView;
     if (edge instanceof AggregationEdge) {
       edgeView = new AggregationEdgeView(edge, startNodeView, endNodeView);

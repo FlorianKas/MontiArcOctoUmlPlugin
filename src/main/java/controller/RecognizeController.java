@@ -218,7 +218,9 @@ public class RecognizeController {
 		       		sketchesToBeRemoved.add(s1);
 		       		sketchesToBeRemoved.add(s2);
 		       		s1.setRecognizedElement(node);
+		       		s2.setRecognizedElement(port);
 	        		recognizedNodes.add(node);
+              recognizedNodes.add(port);
 		       	}
 //	        				ArrayList<PortNode> ports = new ArrayList<>();
 //	        				PortNode port = new PortNode(bb.getX(), bb.getY(), bb.getWidth(), bb.getHeight());
@@ -260,12 +262,12 @@ public class RecognizeController {
 //    System.out.println("Node" + node);
         
     }
-    for (AbstractNode node : recognizedNodes) {
-    	System.out.println("Node: " + node);
-      for (PortNode p : ((ComponentNode)node).getPorts()) {
-        System.out.println("Port:" + p);
-      }
-    }
+//    for (AbstractNode node : recognizedNodes) {
+//    	System.out.println("Node: " + node);
+//      for (PortNode p : ((ComponentNode)node).getPorts()) {
+//        System.out.println("Port:" + p);
+//      }
+//    }
     
       
     for (Sketch s : sketches) {
@@ -308,10 +310,12 @@ public class RecognizeController {
           PortNode endNode = new PortNode(); 
           Node tmpOutNode = graph.findNode(endPoint);
           if (tmpOutNode instanceof ComponentNode) {
-//            graph.removeNode(tmpOutNode, false);
-            Node secTmpOutNode = graph.findNode(endPoint);
+            Graph tmp = new Graph();
+            tmp = graph;
+            tmp.removeNode(tmpOutNode, false);
+            Node secTmpOutNode = tmp.findNode(endPoint);
+//            graph.get
             endNode = (PortNode) secTmpOutNode;
-//            graph.addNode((AbstractNode) tmpOutNode, false);
           }
           else {
             endNode = (PortNode) tmpOutNode; 

@@ -99,7 +99,20 @@ public class TabController {
     else if (diagramController instanceof MontiArcController) {
       System.out.println("We are in MontiArcController");
       tab.setText("MontiArc Diagram " + tabMap.size());
-      MontiInitDialogController montiController = showMontiInitDialog();
+      String name = "";
+      MontiInitDialogController montiController= null;
+      while(name.isEmpty()) {
+        montiController = showMontiInitDialog();
+        name = montiController.nameTextField.getText();
+        System.out.println("Name " + name);
+        if (name.isEmpty()) {
+          Alert alert = new Alert(Alert.AlertType.ERROR);
+          alert.setTitle("Error");
+          alert.setHeaderText("No diagram name");
+          alert.setContentText("You have to add a diagram name.");
+          alert.showAndWait();
+        }
+      }
       ((MontiArcController)diagramController).showConfiguration(montiController);
       
     }

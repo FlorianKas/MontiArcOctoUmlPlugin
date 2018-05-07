@@ -34,6 +34,8 @@
                     <Button text="Recognize" fx:id="recognizeBtn"/>
                     <Button text="Voice" fx:id="voiceBtn"/>
                     <Button text="checkValidity" fx:id="checkValidityBtn"/>
+                    <Button text="Add Generics" fx:id="addGenericsBtn"/>
+                    <Button text="Add Types" fx:id="addTypesBtn"/> 
                 </HBox>
             </ToolBar>
         </VBox>

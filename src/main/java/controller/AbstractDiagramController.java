@@ -122,7 +122,7 @@ public abstract class AbstractDiagramController {
   CheckMenuItem mouseMenuItem;
   
   @FXML
-  protected Button createBtn, packageBtn, edgeBtn, selectBtn, drawBtn, undoBtn, redoBtn, moveBtn, deleteBtn, recognizeBtn, voiceBtn, checkValidityBtn;
+  protected Button createBtn, packageBtn, edgeBtn, selectBtn, drawBtn, undoBtn, redoBtn, moveBtn, deleteBtn, voiceBtn, recognizeBtn, checkValidityBtn;
   
   ContextMenu aContextMenu;
   private AbstractDiagramController instance = this;

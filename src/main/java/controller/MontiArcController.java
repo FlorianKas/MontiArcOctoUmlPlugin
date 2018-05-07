@@ -1,16 +1,22 @@
 package controller;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import model.Sketch;
 import model.edges.AbstractEdge;
 import model.edges.AggregationEdge;
@@ -22,6 +28,7 @@ import model.nodes.AbstractNode;
 import org.controlsfx.control.Notifications;
 import util.commands.CompoundCommand;
 import util.commands.MoveGraphElementCommand;
+
 import view.edges.AbstractEdgeView;
 import view.edges.AggregationEdgeView;
 import view.edges.AssociationEdgeView;
@@ -32,65 +39,160 @@ import view.nodes.AbstractNodeView;
 import view.nodes.PackageNodeView;
 
 import controller.dialog.MontiInitDialogController;
+import controller.dialog.addGenericsController;
+import controller.dialog.addTypesController;
+
 import java.awt.geom.Point2D;
+import java.io.IOException;
+import java.util.ArrayList;
 
 public class MontiArcController extends AbstractDiagramController {
+  ArrayList<String> genericsArray = new ArrayList<String>();
+  ArrayList<String> types = new ArrayList<String>();
+  String modelName = "";
   @FXML
   VBox config;
+  @FXML
+  protected Button createBtn, packageBtn, edgeBtn, selectBtn, drawBtn, undoBtn, redoBtn, moveBtn, deleteBtn, voiceBtn, recognizeBtn, checkValidityBtn, addGenericsBtn, addTypesBtn;
+  
   @FXML
   public void initialize() {
     super.initialize();
     initToolBarActions();
-    initDrawPaneActions();    
+    initDrawPaneActions();  
+    
   }
   
   public void showConfiguration(MontiInitDialogController controller) {
-    String modelName = "";
-    String[] genericsArray = null;
-    String[] types = null;
     if(controller.isOkClicked()) {
-      try {
-        modelName = controller.nameTextField.getText(); 
-        System.out.println("modelName is " + modelName);
-      }
-      catch (NullPointerException e) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Error");
-        alert.setHeaderText("No diagram name");
-        alert.setContentText("You have to add a diagram name.");
-        alert.showAndWait();
-      }
-      
+      modelName = controller.nameTextField.getText();          
       String genericsString = controller.genericsTextField.getText();
-      genericsArray = genericsString.split(",");
-      
+      String[] genericsTmp = genericsString.split(",");
+      for (String g: genericsTmp) {
+        genericsArray.add(g);
+      }
       String typeParam = controller.arcParameterTextField.getText();
-      types = typeParam.split(",");
+
+      String[] typesTmp = typeParam.split(",");
+      for (String t : typesTmp) {
+        types.add(t);
+      }
       
+      
+      showOutput();
       
     }
+  }
+  
+  void showOutput(){
+    config.getChildren().removeAll(config.getChildren());
+    
     Label name = new Label();
-    name.setText("Name: " + controller.nameTextField.getText());
+    name.setText("Name: " + modelName);
+    config.getChildren().add(name);
+    
     Label generics = new Label();
-    generics.setText("Generics: ");
-    config.getChildren().addAll(name, generics);
-    for( String g : genericsArray) {
-      Label tmp = new Label();
-      tmp.setText(g);
-      config.getChildren().add(tmp);
+    if (genericsArray.size() > 1) {
+      generics.setText("Generics: ");
+      config.getChildren().add(generics);
+      for( String g : genericsArray) {
+        Label tmp = new Label();
+        tmp.setText(g);
+        config.getChildren().add(tmp);
+      }
     }
-    Label typeParameters = new Label();
-    typeParameters.setText("Type Parameters: ");
-    config.getChildren().add(typeParameters);
-    for( String t : types) {
-      Label tmp = new Label();
-      tmp.setText(t);
-      config.getChildren().add(tmp);
+    if (types.size() > 1) {
+      Label typeParameters = new Label();
+      typeParameters.setText("Type Parameters: ");
+      config.getChildren().add(typeParameters);
+      for( String t : types) {
+        Label tmp = new Label();
+        tmp.setText(t);
+        config.getChildren().add(tmp);
+      }
     }
     this.config.setPadding(new Insets(0, 20, 0, 0));
     this.config.setSpacing(5);
     
   }
+  
+  void addGenerics() {
+    addGenericsController controller = showGenericsDialog();
+    String[] tmp = controller.genericsTextField.getText().split(",");
+    for (String g: tmp) {
+      genericsArray.add(g);
+    }  
+    showOutput();
+  }
+  
+  
+  public addGenericsController showGenericsDialog() {
+    addGenericsController controllerGenerics = null; 
+    
+    try {
+      FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view/fxml/addGenerics.fxml"));
+      System.out.println("Loader load " + loader.getLocation());
+      AnchorPane dialog = loader.load();
+      
+      controllerGenerics = loader.getController();
+      Stage dialogStage = new Stage();
+      dialogStage.initModality(Modality.WINDOW_MODAL);
+      dialogStage.setScene(new Scene(dialog));
+      
+      controllerGenerics = loader.getController();
+      controllerGenerics.setDialogStage(dialogStage);
+      dialogStage.showAndWait();
+    
+      
+    }
+    
+    
+    catch (IOException e) {
+      e.printStackTrace();
+      return null;
+    }
+    
+    return controllerGenerics;
+  }
+  
+  
+  void addTypes() {
+    addTypesController controller = showTypesDialog();
+    String[] tmp = controller.arcParameterTextField.getText().split(",");
+    for (String g: tmp) {
+      types.add(g);
+    }  
+    showOutput();
+
+  }
+  
+  public addTypesController showTypesDialog() {
+    addTypesController controllerTypes = null; 
+    
+    try {
+
+FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view/fxml/addTypes.fxml"));
+      System.out.println("Loader load " + loader.getLocation());
+      AnchorPane dialog = loader.load();
+      
+      controllerTypes = loader.getController();
+      Stage dialogStage = new Stage();
+      dialogStage.initModality(Modality.WINDOW_MODAL);
+      dialogStage.setScene(new Scene(dialog));
+      
+      controllerTypes = loader.getController();
+      controllerTypes.setDialogStage(dialogStage);
+      dialogStage.showAndWait();
+    }
+
+    catch (IOException e) {
+      e.printStackTrace();
+      return null;
+    }
+    
+    return controllerTypes;
+  }
+  
   
   void initDrawPaneActions() {
     drawPane.setOnMousePressed(event -> {
@@ -262,8 +364,6 @@ public class MontiArcController extends AbstractDiagramController {
   void initNodeActions(AbstractNodeView nodeView) {
     nodeView.setOnMousePressed(event -> {
       if (event.getClickCount() == 2) { // Open dialog window on double click.
-        System.out.println("x coord " + event.getX());
-        System.out.println("y coord " + event.getY());
         nodeController.onDoubleClick(nodeView, event.getX(), event.getY());
         tool = ToolEnum.SELECT;
         setButtonClicked(selectBtn);
@@ -505,6 +605,17 @@ public class MontiArcController extends AbstractDiagramController {
     checkValidityBtn.setGraphic(new ImageView(image));
     checkValidityBtn.setText("");
     
+    image = new Image("/icons/recow.png");
+    // needs to be replaced by another picture
+    addGenericsBtn.setGraphic(new ImageView(image));
+    addGenericsBtn.setText("");
+    
+    image = new Image("/icons/recow.png");
+    // needs to be replaced by another picture
+    addTypesBtn.setGraphic(new ImageView(image));
+    addTypesBtn.setText("");
+    
+    
     buttonInUse = createBtn;
     buttonInUse.getStyleClass().add("button-in-use");
     
@@ -548,6 +659,8 @@ public class MontiArcController extends AbstractDiagramController {
     deleteBtn.setOnAction(event -> deleteSelected());
     
     recognizeBtn.setOnAction(event -> recognizeController.recognizeMonti(selectedSketches));
+    addGenericsBtn.setOnAction(event -> addGenerics());
+    addTypesBtn.setOnAction(event -> addTypes());
     
     voiceBtn.setOnAction(event -> {
       if (voiceController.voiceEnabled) {

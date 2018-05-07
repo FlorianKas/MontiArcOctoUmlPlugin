@@ -39,12 +39,13 @@
         </VBox>
     </top>
     <left>
-    	<ToolBar fx:id="aToolBar" orientation="VERTICAL">
             
-   			<VBox fx:id="config" alignment="CENTER">
+   			<VBox fx:id="config" alignment="TOP_CENTER">
     			<Label fx:id="name"/>
+    			<Label fx:id="generics"/>
+    			<Label fx:id="typeParameters"/>
     		</VBox>
-    	</Toolbar>
+    	
     </left>
     <bottom>
         <StackPane fx:id="infoPane">
@@ -64,7 +65,8 @@
         <ScrollPane fx:id="scrollPane" pannable="true" BorderPane.alignment="CENTER">
             <content>
             	<Pane fx:id="drawPane" prefHeight="8000.0" prefWidth="8000.0">
-            	
+            	<Label layoutX="38.0" layoutY="56.0" fx:id="name"/>
+      
             	</Pane>
             </content>
         </ScrollPane>

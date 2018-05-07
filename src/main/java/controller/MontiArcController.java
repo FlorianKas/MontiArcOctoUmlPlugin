@@ -38,8 +38,6 @@ public class MontiArcController extends AbstractDiagramController {
   @FXML
   VBox config;
   @FXML
-  Label name;
-  @FXML
   public void initialize() {
     super.initialize();
     initToolBarActions();
@@ -48,6 +46,8 @@ public class MontiArcController extends AbstractDiagramController {
   
   public void showConfiguration(MontiInitDialogController controller) {
     String modelName = "";
+    String[] genericsArray = null;
+    String[] types = null;
     if(controller.isOkClicked()) {
       try {
         modelName = controller.nameTextField.getText(); 
@@ -62,18 +62,34 @@ public class MontiArcController extends AbstractDiagramController {
       }
       
       String genericsString = controller.genericsTextField.getText();
-      String[] generics = genericsString.split(",");
+      genericsArray = genericsString.split(",");
       
       String typeParam = controller.arcParameterTextField.getText();
-      String[] types = typeParam.split(",");
+      types = typeParam.split(",");
       
       
     }
-    this.name.setText(modelName);
+    Label name = new Label();
+    name.setText("Name: " + controller.nameTextField.getText());
+    Label generics = new Label();
+    generics.setText("Generics: ");
+    config.getChildren().addAll(name, generics);
+    for( String g : genericsArray) {
+      Label tmp = new Label();
+      tmp.setText(g);
+      config.getChildren().add(tmp);
+    }
+    Label typeParameters = new Label();
+    typeParameters.setText("Type Parameters: ");
+    config.getChildren().add(typeParameters);
+    for( String t : types) {
+      Label tmp = new Label();
+      tmp.setText(t);
+      config.getChildren().add(tmp);
+    }
     this.config.setPadding(new Insets(0, 20, 0, 0));
     this.config.setSpacing(5);
-//    this.config.getChildren().add(name);
-     System.out.println("drawPane " + drawPane.getChildren().toString());
+    
   }
   
   void initDrawPaneActions() {

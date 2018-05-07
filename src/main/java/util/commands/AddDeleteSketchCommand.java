@@ -77,6 +77,7 @@ public class AddDeleteSketchCommand implements Command {
    * Adds the edge to the graph at the point in its properties.
    */
   private void add() {
+    System.out.println("Asketch getPath" + aSketch.getPath());
     aPane.getChildren().add(aSketch.getPath());
     aSketch.getPath().toFront();
     aSketch.setColor(aSketch.getColor());

@@ -13,12 +13,10 @@ public class ComponentNode extends AbstractNode implements Serializable {
   private String stereotype = "";
   private ArrayList<PortNode> Ports = new ArrayList<>();
   
-  private String Subcomponents; // TODO: Wieso String und nicht besser ein
-                                // Array?
-  
+//  TODO: Future Work
+//  private String Subcomponents; 
   
   public ComponentNode(double x, double y, double height, double width, ArrayList<PortNode> ports) {
-    // irgendwas fuer Ports. Vielleicht auch einfach ein Array von Ports
     super(x, y, height, width);
     this.width = width < COMPONENT_MIN_WIDTH ? COMPONENT_MIN_WIDTH : width;
     this.height = height < COMPONENT_MIN_HEIGHT ? COMPONENT_MIN_HEIGHT : height;

@@ -1,25 +1,79 @@
 package controller;
 
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.shape.Rectangle;
 import model.Sketch;
+import model.edges.AbstractEdge;
+import model.edges.AggregationEdge;
+import model.edges.CompositionEdge;
+import model.edges.ConnectorEdge;
+import model.edges.InheritanceEdge;
+import model.nodes.AbstractNode;
+
 import org.controlsfx.control.Notifications;
 import util.commands.CompoundCommand;
 import util.commands.MoveGraphElementCommand;
+import view.edges.AbstractEdgeView;
+import view.edges.AggregationEdgeView;
+import view.edges.AssociationEdgeView;
+import view.edges.CompositionEdgeView;
+import view.edges.ConnectorEdgeView;
+import view.edges.InheritanceEdgeView;
 import view.nodes.AbstractNodeView;
 import view.nodes.PackageNodeView;
 
+import controller.dialog.MontiInitDialogController;
 import java.awt.geom.Point2D;
 
 public class MontiArcController extends AbstractDiagramController {
-  
+  @FXML
+  VBox config;
+  @FXML
+  Label name;
   @FXML
   public void initialize() {
     super.initialize();
     initToolBarActions();
-    initDrawPaneActions();
+    initDrawPaneActions();    
+  }
+  
+  public void showConfiguration(MontiInitDialogController controller) {
+    String modelName = "";
+    if(controller.isOkClicked()) {
+      try {
+        modelName = controller.nameTextField.getText(); 
+        System.out.println("modelName is " + modelName);
+      }
+      catch (NullPointerException e) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText("No diagram name");
+        alert.setContentText("You have to add a diagram name.");
+        alert.showAndWait();
+      }
+      
+      String genericsString = controller.genericsTextField.getText();
+      String[] generics = genericsString.split(",");
+      
+      String typeParam = controller.arcParameterTextField.getText();
+      String[] types = typeParam.split(",");
+      
+      
+    }
+    this.name.setText(modelName);
+    this.config.setPadding(new Insets(0, 20, 0, 0));
+    this.config.setSpacing(5);
+//    this.config.getChildren().add(name);
+     System.out.println("drawPane " + drawPane.getChildren().toString());
   }
   
   void initDrawPaneActions() {
@@ -52,6 +106,7 @@ public class MontiArcController extends AbstractDiagramController {
         else if (tool == ToolEnum.DRAW && mouseCreationActivated) { // Start
                                                                     // drawing.
           mode = Mode.DRAWING;
+          System.out.println("In InitDrawPaneActions event looks like " + event.toString());
           sketchController.onTouchPressed(event);
         }
         
@@ -338,6 +393,7 @@ public class MontiArcController extends AbstractDiagramController {
       }
       else if (tool == ToolEnum.DRAW) {
         mode = Mode.DRAWING;
+        System.out.println("Event looks like " + event.toString());
         sketchController.onTouchPressed(event);
       }
       event.consume();
@@ -459,8 +515,6 @@ public class MontiArcController extends AbstractDiagramController {
     
     drawBtn.setOnAction(event -> {
       tool = ToolEnum.DRAW;
-      System.out.println("hello");
-      System.out.println(drawBtn);
       setButtonClicked(drawBtn);
     });
     
@@ -469,7 +523,9 @@ public class MontiArcController extends AbstractDiagramController {
       tool = ToolEnum.MOVE_SCENE;
     });
     
-    undoBtn.setOnAction(event -> undoManager.undoCommand());
+    undoBtn.setOnAction(event -> { 
+      undoManager.undoCommand();
+      });
     
     redoBtn.setOnAction(event -> undoManager.redoCommand());
     
@@ -490,4 +546,36 @@ public class MontiArcController extends AbstractDiagramController {
     
 //    checkValidityBtn.setOnAction(event -> montiArcPlugin.checkValidity(graph));
   }
+  
+  
+  public ConnectorEdgeView addEdgeView(AbstractEdge edge, boolean remote) {
+    AbstractNodeView startNodeView = null;
+    AbstractNodeView endNodeView = null;
+    AbstractNode tempNode;
+    
+    for (AbstractNodeView nodeView : allNodeViews) {
+      tempNode = nodeMap.get(nodeView);
+      System.out.println("TempNode " + tempNode);
+      if (edge.getStartNode().getId().equals(tempNode.getId())) {
+        edge.setStartNode(tempNode);
+        startNodeView = nodeView;
+      }
+      else if (edge.getEndNode().getId().equals(tempNode.getId())) {
+        edge.setEndNode(tempNode);
+        endNodeView = nodeView;
+      }  
+    }    
+    System.out.println("We are in ConnectorEdge case");
+    System.out.println("StartNodeView "+ startNodeView);
+    System.out.println("EndNodeView "+ endNodeView);
+    ConnectorEdgeView edgeView = new ConnectorEdgeView(edge, startNodeView, endNodeView);
+    
+    allEdgeViews.add(edgeView);
+    drawPane.getChildren().add(edgeView);
+    if (!graph.getAllEdges().contains(edge)) {
+      graph.addEdge(edge, remote);
+    }
+    return edgeView;
+  }
+  
 }

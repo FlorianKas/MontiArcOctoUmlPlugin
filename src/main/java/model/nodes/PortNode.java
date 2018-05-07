@@ -6,7 +6,12 @@ public class PortNode extends AbstractNode {
   
   private static final String TYPE = "PORT";
   private String portType = "";
+  private String portDirection = "";
   private ComponentNode node;
+  private double PORT_WIDTH = 40; 
+  private double PORT_HEIGHT = 40;
+  private double xDraw;
+  private double yDraw;
   
   public PortNode(double x, double y, double height, double width) {
     super(x, y, width, height);
@@ -21,6 +26,22 @@ public class PortNode extends AbstractNode {
     super();
   }
   
+  public void setXDraw(double pXDraw) {
+    xDraw = pXDraw;
+  }
+  
+  public void setYDraw(double pYDraw) {
+    yDraw = pYDraw;
+  }
+  
+  public double getXDraw() {
+    return xDraw;
+  }
+  
+  public double getYDraw() {
+    return yDraw;
+  }
+  
   public void setComponentNode(ComponentNode pComponentNode) {
     this.node = pComponentNode;
   }
@@ -28,6 +49,15 @@ public class PortNode extends AbstractNode {
   public ComponentNode getComponentNode() {
     return this.node;
   }
+  
+  public double getPortWidth() {
+    return PORT_WIDTH;
+  }
+
+  public double getPortHeight() {
+    return PORT_HEIGHT;
+  }
+
   
   @Override
   public PortNode copy() {
@@ -56,6 +86,7 @@ public class PortNode extends AbstractNode {
   @Override
   public void setWidth(double width) {
     this.width = PORT_WIDTH;
+    // das macht Probleme, vielleicht auch auf PORT_WIDTH
     super.setWidth(width);
   }
   
@@ -88,15 +119,15 @@ public class PortNode extends AbstractNode {
     return TYPE;
   }
   
+  public String getPortDirection() {
+    return portDirection;
+  }
+  
+  public void setPortDirection(String pPortDirection) {
+    this.portDirection = pPortDirection;
+  }
+  
   public String getPortType() {
     return portType;  
-  }
-  
-  public double getDefaultPortWidth() {
-    return PORT_WIDTH;
-  }
-  
-  public double getDefaultPortHeight() {
-    return PORT_HEIGHT;
   }
 }

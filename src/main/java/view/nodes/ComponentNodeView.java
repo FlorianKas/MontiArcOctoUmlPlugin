@@ -33,21 +33,6 @@ import javafx.scene.text.FontWeight;
 public class ComponentNodeView extends AbstractNodeView {
   // Visuell Representation of a ComponentNode
   
-  // Shape C = Shape.union(A, B);
-  // Wir erzeugen ein Array von Ports, sorgen dafuer, dass die alle vernuenftig
-  // ausschauen als Rechtecke
-  // dann erzeugen wir das Rechteck fuer die Component
-  // dann rufen wir UNION darauf auf und erhalten eine hoffentlich passende
-  // Komponente
-  // Problem koennte sein, dass die Linien nicht mehr gezeigt werden
-  
-  // dann koennen wir auch eine Klasse PortNodeView erzeugen. Die kann dann fast
-  // das gleiche wie die ComponentView,
-  // nur das in der ComponentView der Union stattfindet
-  // private Label title;
-  // private Label attributes;
-  // private Label operations;
-  
   private Label type;
   private Label name;
   private Label stereotype;
@@ -55,13 +40,11 @@ public class ComponentNodeView extends AbstractNodeView {
   private Rectangle rectangle;
   private ArrayList<Rectangle> portViewArray;
   
-  // private StackPane container;
   private GridPane container;
-  private Pane titlePane;
   private VBox vbox;
   private Pane PortLeft;
-  private Pane PortTop;
-  private Pane PortBottom;
+//  private Pane PortTop;
+//  private Pane PortBottom;
   private Pane PortRight;
   
   private final int STROKE_WIDTH = 1;
@@ -81,32 +64,33 @@ public class ComponentNodeView extends AbstractNodeView {
     System.out.println("Wir sind in ComponentNodeViewConstructor");
     System.out.println("Ports " + node.getPorts());
     
-    if (!node.getPorts().isEmpty()) {
-      initGrid(node.getHeight(), node.getWidth(), PORT_HEIGHT, PORT_WIDTH);
-    }
-    else {
-      System.out.println("We have just a rectangle");
-      PortNode p = new PortNode(0,0,0,0);
-      initGrid(node.getHeight(), node.getWidth(), PORT_HEIGHT, PORT_WIDTH);
-    }
+    initGrid(node.getHeight(), node.getWidth(), PORT_HEIGHT, PORT_WIDTH);
+    createRectangles(node);
     
     initVBox(node);
     
     // For ports choose normal panes to put them at correct position
     PortLeft = new Pane();
     PortRight = new Pane();
-    PortTop = new Pane();
-    PortBottom = new Pane();
+//    PortTop = new Pane();
+//    PortBottom = new Pane();
     
-    createRectangles(node);
+//    createRectangles(node);
     createRectanglesPort(node);
 
     container.add(vbox, 2, 1, 1, 1);
-    container.add(PortLeft, 0, 0, 1, 1);
-    container.add(PortTop, 0, 0, 4, 1);
-    container.add(PortBottom, 0, 3, 4, 1);
-    container.add(PortRight, 3, 0, 1, 4);
+    container.add(PortLeft, 0, 0, 1, 2);
+    container.add(PortRight, 3, 0, 1, 2);
     
+//    container.add(vbox, 2, 1, 1, 1);
+//    container.add(PortLeft, 0, 0, 1, 1);
+//    container.add(PortTop, 0, 0, 4, 1);
+//    container.add(PortBottom, 0, 3, 4, 1);
+//    container.add(PortRight, 3, 0, 1, 4);
+    
+    
+    changeHeight(node.getHeight());
+    changeWidth(node.getWidth());
     container.setGridLinesVisible(true);
     System.out.println("Container Input " + container.getChildren().toString());
     this.getChildren().add(container);
@@ -133,15 +117,18 @@ public class ComponentNodeView extends AbstractNodeView {
     RowConstraints row2 = new RowConstraints(portHeight / 2);
     RowConstraints row3 = new RowConstraints(compHeight - portWidth);
     RowConstraints row4 = new RowConstraints(portHeight / 2);
-    RowConstraints row5 = new RowConstraints(portHeight / 2);
+//    RowConstraints row5 = new RowConstraints(portHeight / 2);
     container.getColumnConstraints().addAll(column1, column2, column3, column4, column5);
-    container.getRowConstraints().addAll(row1, row2, row3, row4, row5);
+//    container.getRowConstraints().addAll(row1, row2, row3, row4, row5);
+    container.getRowConstraints().addAll(row2, row3, row4);
+     
   }
   
   private void createRectangles(ComponentNode node) {
-    Rectangle rec = new Rectangle(node.getWidth(), node.getHeight());
-    initLooks(rec);
-    container.add(rec, 1, 1, 3, 3);
+    rectangle = new Rectangle(node.getX(), node.getY(), node.getWidth(), node.getHeight());
+    initLooks();
+//    container.add(rec, 1, 1, 3, 3);
+    container.add(rectangle, 1, 1, 3, 1);
   }
   
   private void createRectanglesPort(ComponentNode node) {
@@ -155,66 +142,71 @@ public class ComponentNodeView extends AbstractNodeView {
       
       for (PortNode p : Ports) {
         PortNodeView portView = new PortNodeView(p);
-        System.out.println("Port: " + p.getX() + " " + p.getY());
+        System.out.println("Port: " + p.getXDraw() + " " + p.getYDraw());
         System.out.println("Vergleich");
-        System.out.println(p.getX() + p.getWidth());
-        System.out.println(p.getY() + p.getHeight());
+        System.out.println(p.getXDraw() + p.getWidth());
+        System.out.println(p.getYDraw() + p.getHeight());
         System.out.println(node.getX() + 3 / 5 * node.getWidth());
         System.out.println(node.getY() + 3 / 5 * node.getHeight());
-        System.out.println(p.getY());
+        System.out.println(p.getYDraw());
         System.out.println(node.getY());
         
-        if (p.getX() < node.getX()) {
+        if (p.getX() + p.getWidth() < node.getX() + node.getWidth()) {
 //          PortNodeView portView = new PortNodeView(p);
-          Pane portPane = portView.createPortPane(0, p.getY() - node.getY(), PORT_HEIGHT, PORT_WIDTH);
+          System.out.println("LeftPane");
+          System.out.println("yDraw" + p.getYDraw());
+          Pane portPane = portView.createPortPane(0, p.getYDraw() - node.getY(), PORT_HEIGHT, PORT_WIDTH);
           PortLeft.getChildren().add(portPane);
           
           // set PortName
-          titlePort = portView.setPortTitle(p.getTitle(), 2, p.getY() - node.getY() +10);
+          titlePort = portView.setPortTitle(p.getTitle(), 2, p.getYDraw() - node.getY() +10);
           PortLeft.getChildren().add(titlePort);
           // set PortDataType
-          DataTypePort = portView.setPortDataType(p.getPortType(), 2, p.getY() - node.getY()-12);
+          DataTypePort = portView.setPortDataType(p.getPortType(), 2, p.getYDraw() - node.getY()-12);
           PortLeft.getChildren().add(DataTypePort);
         }
-        else if (p.getY() < node.getY()) {
+        /*else if (p.getY() < node.getY()) {
 //          PortNodeView portView = new PortNodeView(p);
-          Pane portPane = portView.createPortPane(p.getX() - node.getX(), 0, PORT_HEIGHT, PORT_WIDTH);
+          System.out.println("We are in ComponentNodeView Top");
+          Pane portPane = portView.createPortPane(p.getXDraw() - node.getX(), 0, PORT_HEIGHT, PORT_WIDTH);
           PortTop.getChildren().add(portPane);
           
           // set PortName
-          titlePort = portView.setPortTitle(p.getTitle(), p.getX() - node.getX() + 2, 10);
+          titlePort = portView.setPortTitle(p.getTitle(), p.getXDraw() - node.getX() + 2, 10);
           PortTop.getChildren().add(titlePort);
           // set PortDataType
-          DataTypePort = portView.setPortDataType(p.getPortType(), p.getX() - node.getX() + 2, -12);
+          DataTypePort = portView.setPortDataType(p.getPortType(), p.getXDraw() - node.getX() + 2, -12);
           PortTop.getChildren().add(DataTypePort);
-        }
-        else if ((p.getX() + p.getWidth() > node.getX()) && (p.getY() + p.getHeight() < node.getY() + node.getHeight()) && (p.getY() > node.getY())) {
+        }*/
+//        else if ((p.getX() + p.getWidth() > node.getX()) && (p.getY() + p.getHeight() < node.getY() + node.getHeight()) && (p.getYDraw() > node.getY())) {
 //          PortNodeView portView = new PortNodeView(p);
-          Pane portPane = portView.createPortPane(0 , p.getY() - node.getY(), PORT_HEIGHT, PORT_WIDTH);
-          System.out.println("PortPane " + portPane.getLayoutX() + portPane.toString() );
+        else {  
+          portView.setX(portView.getX());
+          Pane portPane = portView.createPortPane(0 , p.getYDraw() - node.getY(), PORT_HEIGHT, PORT_WIDTH);
+          System.out.println("PortPane " + portPane.getBoundsInParent());
           PortRight.getChildren().add(portPane);
-          
           // set PortName
-          titlePort = portView.setPortTitle(p.getTitle(),2,p.getY() - node.getY() +10 );
+          titlePort = portView.setPortTitle(p.getTitle(),2,p.getYDraw() - node.getY() +10 );
           PortRight.getChildren().add(titlePort);
           // set PortDataType
-          DataTypePort = portView.setPortDataType(p.getPortType(), 2, p.getY() - node.getY()-12);
+          DataTypePort = portView.setPortDataType(p.getPortType(), 2, p.getYDraw() - node.getY()-12);
           PortRight.getChildren().add(DataTypePort);
           
         }
-        else {
+        /*else {
 //          PortNodeView portView = new PortNodeView(p);
-          Pane portPane = portView.createPortPane(p.getX() - node.getX(), 0, PORT_HEIGHT, PORT_WIDTH);
+          System.out.println("ComponentNodeView Bottom");
+          Pane portPane = portView.createPortPane(p.getXDraw() - node.getX(), 0, PORT_HEIGHT, PORT_WIDTH);
           PortBottom.getChildren().add(portPane);
           
           // set PortName
-          titlePort = portView.setPortTitle(p.getTitle(), p.getX() - node.getX() + 2, 10);
+          titlePort = portView.setPortTitle(p.getTitle(), p.getXDraw() - node.getX() + 2, 10);
           PortBottom.getChildren().add(titlePort);
           // set PortDataType
-          DataTypePort = portView.setPortDataType(p.getPortType(), p.getX() - node.getX() + 2, -12);
+          DataTypePort = portView.setPortDataType(p.getPortType(), p.getXDraw() - node.getX() + 2, -12);
           PortBottom.getChildren().add(DataTypePort);
           
-        }
+        }*/
         nodeCompMap.put(portView, p);
         nodeToViewMap.put(p, portView);
         portViews.add(portView);
@@ -247,14 +239,22 @@ public class ComponentNodeView extends AbstractNodeView {
   }
   
   private void changeWidth(double width) {
-    // setWidth(width);
+    setWidth(width);
     rectangle.setWidth(width);
-    // container.setMaxWidth(width);
-    // container.setPrefWidth(width);
+    container.setMaxWidth(width);
+    container.setPrefWidth(width);
     
-    // vbox.setMaxWidth(width);
-    // vbox.setPrefWidth(width);
-    //
+    vbox.setMaxWidth(width);
+    vbox.setPrefWidth(width);
+    System.out.println("Width is " + width);
+    System.out.println("type" + type);
+    
+    name.setMaxWidth(width); 
+    name.setPrefWidth(width);
+    
+    stereotype.setMaxWidth(width); 
+    stereotype.setPrefWidth(width);
+    
     type.setMaxWidth(width); 
     type.setPrefWidth(width);
     
@@ -295,14 +295,14 @@ public class ComponentNodeView extends AbstractNodeView {
     type.setAlignment(Pos.TOP_CENTER);
     name.setAlignment(Pos.TOP_CENTER);
     stereotype.setAlignment(Pos.TOP_CENTER);
-    vbox.setAlignment(Pos.TOP_LEFT);
+    vbox.setAlignment(Pos.TOP_CENTER);
     vbox.getChildren().addAll(stereotype, type, name);
   }
   
-  private void initLooks(Rectangle rec) {
-    rec.setStrokeWidth(STROKE_WIDTH);
-    rec.setFill(Color.LIGHTSKYBLUE);
-    rec.setStroke(Color.BLACK);
+  private void initLooks() {
+    rectangle.setStrokeWidth(STROKE_WIDTH);
+    rectangle.setFill(Color.LIGHTSKYBLUE);
+    rectangle.setStroke(Color.BLACK);
   }
   
   public void setSelected(boolean selected) {
@@ -318,22 +318,28 @@ public class ComponentNodeView extends AbstractNodeView {
   
   public void setStrokeWidth(double scale) {
     rectangle.setStrokeWidth(scale);
-    for (Rectangle rec : portViewArray) {
-      rec.setStrokeWidth(scale);
+    if (portViewArray != null) {
+      for (Rectangle rec : portViewArray) {
+        rec.setStrokeWidth(scale);
+      }
     }
   }
   
   public void setFill(Paint p) {
     rectangle.setFill(p);
-    for (Rectangle rec : portViewArray) {
-      rec.setFill(p);
+    if(!portViewArray.isEmpty()) {
+      for (Rectangle rec : portViewArray) {
+        rec.setFill(p);
+      }
     }
   }
   
   public void setStroke(Paint p) {
     rectangle.setStroke(p);
-    for (Rectangle rec : portViewArray) {
-      rec.setStroke(p);
+    if(portViewArray != null) {
+      for (Rectangle rec : portViewArray) {
+        rec.setStroke(p);
+      }
     }
   }
   

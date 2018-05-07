@@ -19,6 +19,7 @@ import model.nodes.PortNode;
 import model.nodes.Node;
 import util.commands.AddDeleteEdgeCommand;
 import util.commands.AddDeleteNodeCommand;
+import util.commands.Command;
 import util.commands.CompoundCommand;
 import view.edges.AbstractEdgeView;
 import view.nodes.AbstractNodeView;
@@ -135,7 +136,26 @@ public class RecognizeController {
     }
 
   }
-
+  
+  public List<Sketch> removeDuplicates(List<Sketch> sketches) {
+    ArrayList<Sketch> toBeRemovedSketches = new ArrayList();
+    for(Sketch s1: sketches) {
+      for(Sketch s2: sketches) {
+        System.out.println("transX S1 " + s1.getTranslateX());
+        System.out.println("transX S2 " + s2.getTranslateX());
+        System.out.println("transX S2 " + s2.getId());
+        if((s1.getTranslateX() == s2.getTranslateX()) && (s1.getTranslateY() == s2.getTranslateY()) && (s1.getId() != s2.getId()) ) {
+          toBeRemovedSketches.add(s2);
+        }
+      }
+    }
+    if(toBeRemovedSketches != null) {
+      for(Sketch s: toBeRemovedSketches) {
+        sketches.remove(s);
+      }
+    }
+    return (List)sketches;
+  }
 
   public synchronized void recognizeMonti(List<Sketch> sketches) {	
     ArrayList<AbstractNode> recognizedNodes = new ArrayList();
@@ -143,7 +163,11 @@ public class RecognizeController {
     ArrayList<AbstractEdge> recognizedEdges = new ArrayList<>();
     ArrayList<BoundingBox> boxes = new ArrayList();
     CompoundCommand recognizeCompoundCommand = new CompoundCommand();
-        
+    System.out.println("Sketches" + sketches);
+    
+//    sketches = removeDuplicates(sketches);
+    
+    
     System.out.println("Sketches" + sketches);
     for (Sketch s : sketches) {
       if (s.getStroke() != null && s.getStroke().getPoints() != null && !s.getStroke().getPoints().isEmpty()) {
@@ -170,106 +194,132 @@ public class RecognizeController {
       }
     }    
     System.out.println("Boex: "+ boxes);
-    
-// What is missing? We are currently not able to add some components to existing ones
-// In order to do that, we need to check the graph
-// This could help, BUT we are looking for nodes in the model and not for BoundingBoxes
- // checken ob b schon existiert
-//    Point2D point = new Point2D(b.getX(), b.getY());
-//    if(graph.findNode(point) != null){
-//      // entferne den zuvor erkannten Knotn
-//      ComponentNode node = (ComponentNode)graph.findNode(point);
-//      recognizedNodes.remove(node);
-//      // erweitere ihn um den gefundenen Port
-//      ((ComponentNode)graph.findNode(point)).addPort(new PortNode(bb.getX(), bb.getY(), bb.getWidth(), bb.getHeight()));
-//        
-//      // Markiere Sketch des gefundenen Ports als bearbeitet
-//      Sketch s = sketchMap.get(bb); 
-//      sketchesToBeRemoved.add(s);
-//               
-//      //füge Knoten mit neuem Port wieder als erkannt ein
-//      recognizedNodes.add((ComponentNode)graph.findNode(point));
-//      System.out.println("Graph looks like:" + graph.getAllNodes());
-        
+            
  // Now, we recognized the sketches and want to create/modify the model
     for (BoundingBox b: boxes) {
      	if(boxes.size() > 1) {
 	      for (BoundingBox bb: boxes) {
-	        if (!b.equals(bb) && b.intersects(bb)){
+	        if (!b.equals(bb) && b.intersects(bb)) {
 	        	if(b.getWidth()*b.getHeight() > 2*bb.getWidth()*bb.getHeight()) {
 	        				
 	        		// bb ist Port von b
-	        	  ArrayList<PortNode> ports = new ArrayList<>();
-		        	PortNode port = new PortNode(bb.getX(), bb.getY(), bb.getHeight(), bb.getWidth());
-		        	graph.addNode(port, false);
-		       		port.setTitle("testport");
-		       		port.setPortType("Integer");
-		        	ports.add(port);
-		       		//System.out.println("Ports: " + ports);
-		       		ComponentNode node = new ComponentNode(b.getX(), b.getY(), b.getHeight(), b.getWidth(), ports);
-		       		for (PortNode p : ports) {
-		       		  p.setComponentNode(node);
-		       		}
-//		       		node.setTitle("Test");
-		       		//System.out.println("Node: " + node);
-		       		graph.addNode(node, false);
-		       		Sketch s1 = sketchMap.get(b);
-		       		Sketch s2 = sketchMap.get(bb);
-		       		sketchesToBeRemoved.add(s1);
-		       		sketchesToBeRemoved.add(s2);
-		       		s1.setRecognizedElement(node);
-		       		s2.setRecognizedElement(port);
-	        		recognizedNodes.add(node);
-              recognizedNodes.add(port);
+	        	  String direction = "";
+	        	  PortNode tmpPort = new PortNode();
+	        	  double x,y,xDraw,yDraw,height,width;
+//	        	  PortNode port = new PortNode(bb.getX(), bb.getY(), bb.getHeight(), bb.getWidth());
+              
+	        	  if (bb.getX() + bb.getWidth() < b.getX() + b.getWidth() ) {
+	        	    // left Port
+	        	    System.out.println("LEFTTTTTTT");
+	        	    xDraw = b.getX() - 0.5*tmpPort.getPortWidth();
+	        	    x = bb.getX();
+//	        	    System.out.println("Port_Width" + port.getPortWidth());
+//	        	    System.out.println("x Val of node"+ b.getX());
+//	        	    System.out.println("x Val of port" + port.getX());
+	        	    yDraw = bb.getY();
+	        	    y = bb.getY();
+	        	    direction = "in";
+	        	  }
+//	        	  else if (bb.getY() < b.getY()) {
+//	        	    // top
+//	        	    System.out.println("We are in top");
+//	        	    xDraw = bb.getX();
+//	        	    x = (bb.getX());
+//	        	    yDraw = (b.getY() - 0.5*tmpPort.getHeight());
+//	        	    y = (bb.getY());
+//	        	  }
+	        	  else if ((bb.getX() + bb.getWidth() > b.getX()) && (bb.getY() + bb.getHeight() < b.getY() + b.getHeight()) && (bb.getY() > b.getY())) {
+//	            right
+	        	    System.out.println("righttttttttt");
+	        	    xDraw = (b.getX() + b.getWidth() - 0.5*tmpPort.getPortWidth());
+                x = (bb.getX());
+                yDraw = (bb.getY());
+                y = (bb.getY());
+                direction = "out";
+  	          }
+  	          else {
+  //	          bottom
+//  	            System.out.println("We are in bottom");
+//  	            xDraw = (bb.getX());
+//                x = (bb.getX());
+//                yDraw = (b.getY() + b.getHeight() - 0.5*tmpPort.getHeight());
+//                y = (bb.getY());
+  	            System.out.println("Some Ports are not at the right or left");
+  	            // Hier Ausgabe auf dem Screen
+  	            break;
+  	          }
+	        	  PortNode port = new PortNode(x,y,bb.getHeight(), bb.getWidth());
+	        	  port.setXDraw(xDraw);
+	        	  port.setYDraw(yDraw);
+	        	  if (!graph.getAllNodes().contains(port)) {
+	              graph.addNode(port, false);
+	        	  }  
+//		       		port.setTitle("testport");
+//		       		port.setPortType("Integer");
+		        	//System.out.println("Ports: " + ports);
+		        	Point2D tmpPoint = new Point2D(b.getX(),b.getY());
+		        	if(graph.findNode(tmpPoint) == null) {
+		        	  ArrayList<PortNode> ports = new ArrayList<>();
+		        	  ports.add(port);
+		        	  ComponentNode node = new ComponentNode(b.getX(), b.getY(), b.getHeight(), b.getWidth(), ports);
+		        	  for (PortNode p : ports) {
+	                p.setComponentNode(node);
+	                p.setPortDirection(direction);
+	              }
+		        	  graph.addNode(node, false); 
+		        	  Sketch s1 = sketchMap.get(b);
+		        	  Sketch s2 = sketchMap.get(bb);
+		        	  s1.setRecognizedElement(node);
+		        	  s2.setRecognizedElement(port);
+		        	  sketchesToBeRemoved.add(s1);
+                sketchesToBeRemoved.add(s2);
+		        	  
+	              if (!recognizedNodes.contains(node)) {
+	                recognizedNodes.add(node);  
+	              }
+	              if(!recognizedNodes.contains(port)) {
+	                recognizedNodes.add(port);
+	              }
+	              
+		        	}
+		        	else {
+		        	  ((ComponentNode)graph.findNode(tmpPoint)).addPort(port);
+		        	  port.setComponentNode((ComponentNode)graph.findNode(tmpPoint));
+		        	  if(!recognizedNodes.contains(port)) {
+	                recognizedNodes.add(port);
+	              }
+//		        	  Sketch s1 = sketchMap.get(b);
+	              Sketch s2 = sketchMap.get(bb);
+	              
+//	              s1.setRecognizedElement((ComponentNode)graph.findNode(tmpPoint));
+	              s2.setRecognizedElement(port);
+	              
+//	              sketchesToBeRemoved.add(s1);
+	              sketchesToBeRemoved.add(s2);
+		        	}
+		        	
 		       	}
-//	        				ArrayList<PortNode> ports = new ArrayList<>();
-//	        				PortNode port = new PortNode(bb.getX(), bb.getY(), bb.getWidth(), bb.getHeight());
-//	        				ports.add(port);
-//	        				//System.out.println("Ports: " + ports);
-//	        				ComponentNode node = new ComponentNode(b.getX(), b.getY(), b.getWidth(), b.getHeight(), ports);
-//	        				//System.out.println("Node: " + node);
-//	        				graph.addNode(node, false);
-//	        	    		// zugehörigen Sketch mittels einer HashMap
-//	        	    		Sketch s = sketchMap.get(b);
-//	        	    		s.setRecognizedElement(node);
-//	        	            recognizedNodes.add(node);
-//	        	            sketchesToBeRemoved.add(s);
-	        	        	//System.out.println("Node" + node);
-	        	        
 	        }  	
 	      }
       } 
      	else {
         ArrayList<PortNode> ports = new ArrayList<>();
         ComponentNode node = new ComponentNode(b.getX(), b.getY(), b.getHeight(), b.getWidth(), ports);
-        graph.addNode(node, false);
-//      zugehörigen Sketch mittels einer HashMap
+        if (!graph.getAllNodes().contains(node)) {
+          graph.addNode(node, false);
+        }
         Sketch s = sketchMap.get(b);
         s.setRecognizedElement(node);
-        recognizedNodes.add(node);
+        if (!recognizedNodes.contains(node)) {
+          recognizedNodes.add(node);  
+        }
         sketchesToBeRemoved.add(s);
         //System.out.println("Node" + node);
 
-      }
-//    ArrayList<PortNode> ports = new ArrayList<>();
-//    ComponentNode node = new ComponentNode(b.getX(), b.getY(), b.getWidth(), b.getHeight(), ports);
-//    graph.addNode(node, false);
-    	// zugehörigen Sketch mittels einer HashMap
-//    Sketch s = sketchMap.get(b);
-//    s.setRecognizedElement(node);
-//    recognizedNodes.add(node);
-//    sketchesToBeRemoved.add(s);
-//    System.out.println("Node" + node);
-        
-    }
-//    for (AbstractNode node : recognizedNodes) {
-//    	System.out.println("Node: " + node);
-//      for (PortNode p : ((ComponentNode)node).getPorts()) {
-//        System.out.println("Port:" + p);
-//      }
-//    }
-    
+      }        
+    }    
       
+    System.out.println("Graph " + graph.getAllNodes().toString());
     for (Sketch s : sketches) {
       if (s.getStroke() != null) {
         recognizer.setStroke(s.getStroke());
@@ -280,58 +330,78 @@ public class RecognizeController {
           Point2D endPoint = new Point2D(s.getStroke().getLastPoint().getX(), s.getStroke().getLastPoint().getY());
           System.out.println("We have found a start and end point" + startPoint + endPoint);
           
+          
+          
           PortNode startNode = new PortNode(); 
           Node tmpNode = graph.findNode(startPoint);
           if (tmpNode instanceof ComponentNode) {
 //            graph.removeNode(tmpNode, false);
-            Node secTmpNode = graph.findNode(startPoint);
+            Graph tmpStart = new Graph();
+            tmpStart = graph;
+            tmpStart.removeNode(tmpNode, false);
+            Node secTmpNode = tmpStart.findNode(startPoint);
             startNode = (PortNode) secTmpNode;
 //            graph.addNode((AbstractNode) tmpNode, false);
           }
           else {
             startNode = (PortNode) tmpNode; 
           }
+          if(startNode.getPortDirection() != "out") {
+            System.out.println("You tried to start an edge from an ingoing Port");
+            // hier muss dann auch eine Fehlerausgabe hin
+            break;  
+          }
+          
+          System.out.println("startNode" + startNode);
 //          graph.removeNode(startNode, false);
-          startNode.setPortType("in");
+//          startNode.setPortDirection("in");
 //          graph.addNode(startNode, false);
           // nun muessen wir auch im zugehoerigen ComponentNode den Port setzen denke ich
           ComponentNode nodeIn = startNode.getComponentNode();
 //          graph.removeNode(nodeIn, false);
-          for (PortNode p : nodeIn.getPorts()) {
-            if (p == startNode) {
-              p.setPortType("in");
-              break;
-            }
-          }
 //          graph.addNode(nodeIn, false);
           
           
           
           PortNode endNode = new PortNode(); 
           Node tmpOutNode = graph.findNode(endPoint);
+          System.out.println("Graph" + graph.getAllNodes());
           if (tmpOutNode instanceof ComponentNode) {
             Graph tmp = new Graph();
             tmp = graph;
             tmp.removeNode(tmpOutNode, false);
             Node secTmpOutNode = tmp.findNode(endPoint);
+//            while (secTmpOutNode instanceof ComponentNode) {
+//              tmp.removeNode(secTmpOutNode, false);
+//              secTmpOutNode = tmp.findNode(endPoint);
+//            }
+            System.out.println("Hab EndNode gefunden" + secTmpOutNode);
 //            graph.get
             endNode = (PortNode) secTmpOutNode;
           }
           else {
             endNode = (PortNode) tmpOutNode; 
           }
-//          graph.removeNode(endNode, false);
-          endNode.setPortType("out");
-//          graph.addNode(endNode, false);
-          // nun muessen wir auch im zugehoerigen ComponentNode den Port setzen denke ich
-          ComponentNode nodeOut = endNode.getComponentNode();
-//          graph.removeNode(nodeOut, false);
-          for (PortNode p : nodeOut.getPorts()) {
-            if (p == endNode) {
-              p.setPortType("out");
+          
+        //For arrows, which don't have an endpoint
+          List<Point> points = s.getStroke().getPoints();
+          for (int i = points.size()-1; i > points.size()/2; i--) {
+            Point2D point = new Point2D(points.get(i).getX(), points.get(i).getY());
+            if (graph.findNode(point) != null) {
+              endNode = (PortNode) graph.findNode(point);
               break;
             }
           }
+//          graph.removeNode(endNode, false);
+          if(endNode.getPortDirection() != "in") {
+            System.out.println("You tried to end an edge from an outgoing Port");
+            // hier muss dann auch eine Fehlerausgabe hin
+            break;  
+          }
+          //          graph.addNode(endNode, false);
+          // nun muessen wir auch im zugehoerigen ComponentNode den Port setzen denke ich
+          ComponentNode nodeOut = endNode.getComponentNode();
+//          graph.removeNode(nodeOut, false);
 //          graph.addNode(nodeOut, false);
           
           
@@ -380,25 +450,17 @@ public class RecognizeController {
         }
       }
     }
-
-        
-        	
-//    	ArrayList<PortNode> ports = new ArrayList<>();
-//    	ComponentNode node = new ComponentNode(b.getX(), b.getY(), b.getWidth(), b.getHeight(), ports);
-//		graph.addNode(node, false);
-//		// zugehörigen Sketch mittels einer HashMap
-//		Sketch s = sketchMap.get(b);
-//		s.setRecognizedElement(node);
-//        recognizedNodes.add(node);
-//        sketchesToBeRemoved.add(s);
-//    	System.out.println("Node" + node);
-//    
+    System.out.println("RecognizedNodes " + recognizedNodes.toString());
     for(AbstractNode node : recognizedNodes){
-     	//System.out.println(node);
+     	System.out.println("Node for creating a view is " + node.toString());
       AbstractNodeView nodeView = diagramController.createNodeView(node, false);
-      //System.out.println(nodeView);
+      System.out.println("NodeView is" + nodeView);
       recognizeCompoundCommand.add(new AddDeleteNodeCommand(diagramController, graph, nodeView, node, true));
+      System.out.println("In Loop End");
+      
     }
+    System.out.println("recognizeCOMPONUNDCOMMAND" +recognizeCompoundCommand.getCommands().toString()); 
+    System.out.println("After loop");
     for(AbstractEdge edge : recognizedEdges){
       System.out.println("Create the View");
       AbstractEdgeView edgeView = diagramController.addEdgeView(edge, false);
@@ -410,75 +472,9 @@ public class RecognizeController {
       diagramController.deleteSketch(sketch, recognizeCompoundCommand, false);
     }
     if(recognizeCompoundCommand.size() > 0){
+      System.out.println("This should be added: " + recognizeCompoundCommand.getCommands());
       diagramController.getUndoManager().add(recognizeCompoundCommand);
-    }
-        
-//        for (BoundingBox b : boxes) {
-//        	for (BoundingBox bb: boxes) {
-//        		if(b.intersects(bb.getX(), bb.getY(), bb.getWidth(), bb.getHeight())) {
-////        			// dann schneiden sich die beiden Boxen
-////        			// d.h. eine Box ist vermutlich eine Component und eine ist ein Port
-//        			if(b.getWidth()*b.getHeight() > bb.getWidth()*bb.getHeight()) {
-//        				// dann wissen wir, dass das Volumen von b größer als von bb ist
-//        				// und leiten ab, dass b Component und bb Port
-//        				
-//        				// Jetzt muss erst noch gecheckt werden, ob es bereits einen Node für die jeweilige Box gibt
-//        				// Wenn das der Fall ist, müssen wir den ComponentNode nicht mehr erzeugen und nur noch den PortNode zum ComponentNode hinzufügen
-//        				// Ansonsten müssen beide erzeugt werden
-//        				// Die Nodes sind im Graphen drin
-//        				Point2D point = new Point2D(b.getX(), b.getY());
-//        				if(graph.findNode(point) != null) {
-//        					// Fall 1: ComponentNode existiert bereits
-//        					PortNode port = new PortNode(bb.getX(), bb.getY(), bb.getWidth(), bb.getHeight());
-//        					((ComponentNode) graph.findNode(point)).addPort(port);
-//        				}else {
-//        				// Fall 2: Beide müssen erzeugt werden
-//        					ArrayList<PortNode> ports = new ArrayList<>();
-//        					PortNode port = new PortNode(bb.getX(), bb.getY(), bb.getWidth(), bb.getHeight());
-//        					ports.add(port);
-//        					ComponentNode node = new ComponentNode(b.getX(), b.getY(), b.getWidth(), b.getHeight(), ports);
-//        					graph.addNode(node, false);
-//        					// zugehörigen Sketch mittels einer HashMap
-//        					Sketch s = sketchMap.get(bb);
-//            				s.setRecognizedElement(node);
-//            	            recognizedNodes.add(node);
-//            	            sketchesToBeRemoved.add(s);
-//            			}
-//        			}else {
-//        				// also ist bb das größere Rechteck
-//        				Point2D point = new Point2D(bb.getX(), bb.getY());
-//        				if(graph.findNode(point) != null) {
-//        					// Fall 1: ComponentNode existiert bereits
-//        					PortNode port = new PortNode(b.getX(), b.getY(), b.getWidth(), b.getHeight());
-//           					((ComponentNode) graph.findNode(point)).addPort(port);
-//        				}else {
-//        				// Fall 2: Beide müssen erzeugt werden
-//        					ArrayList<PortNode> ports = new ArrayList<>();
-//        					PortNode port = new PortNode(b.getX(), b.getY(), b.getWidth(), b.getHeight());
-//        					ports.add(port);
-//        					ComponentNode node = new ComponentNode(bb.getX(), bb.getY(), bb.getWidth(), bb.getHeight(), ports);
-//        					graph.addNode(node, false);
-//        					// zugehörigen Sketch mittels einer HashMap
-//            				Sketch s = sketchMap.get(b);
-//            				s.setRecognizedElement(node);
-//            	            recognizedNodes.add(node);
-//            	            sketchesToBeRemoved.add(s);
-//        				}
-//        			}	
-//        		} else {
-//        			// hier kommen verschiedene Optionen jetzt in Frage. Dazu gehört dann auch die hierarchische Komponente
-//        			// dann kann man vielleicht mit contains() überprüfen
-//        			// drei weitere Optionen: Beide sind Ports der gleichen Component, beide sind Ports verschiedener Components, beide sind Components
-//        			
-//        		}
-//        	}
-//        	
-//        
-////        	// hier muss jetzt entschieden werden, ob ComponentNode oder PortNode
-////        	// brauchen sowas wie: für componentNode c: c.addPort(new PortNode(...)) um Port zu einer Component hinzuzufügen
-////        	// Frage, ob die Ports auch in recogniedNodes müssen
-////        	
-//        }
+    }        
   }
 }
     

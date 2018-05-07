@@ -57,6 +57,8 @@ public class CompoundCommand implements Command {
     Stack<Command> temp = new Stack<>();
     while (!aCommands.empty()) {
       Command c = aCommands.pop();
+      System.out.println("Acommands" + aCommands.toString());
+      System.out.println("TeSt");
       c.undo();
       temp.push(c);
     }

@@ -2,17 +2,32 @@ package controller;
 
 import controller.dialog.GithubLoginDialogController;
 import controller.dialog.GithubRepoDialogController;
+import controller.dialog.MontiInitDialogController;
+import controller.dialog.NodeEditDialogController;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import util.commands.CompoundCommand;
+import util.commands.SetNodeComponentTypeCommand;
+import util.commands.SetNodeNameCommand;
+import util.commands.SetNodeStereotypeCommand;
+
 import org.controlsfx.control.Notifications;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PushCommand;
@@ -23,8 +38,10 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The class controlling the top menu and the tabs.
@@ -63,6 +80,7 @@ public class TabController {
     FXMLLoader loader;
     try {
       loader = new FXMLLoader(getClass().getClassLoader().getResource(pathToDiagram));
+      System.out.println("Loader" + loader);
       canvasView = loader.load();
       diagramController = loader.getController();
     }
@@ -74,14 +92,21 @@ public class TabController {
     
     tab.setContent(canvasView);
     tabMap.put(tab, diagramController);
+    System.out.println("DiagramControlleer " + diagramController);
     if (diagramController instanceof ClassDiagramController) {
       tab.setText("Class Diagram " + tabMap.size());
     }
     else if (diagramController instanceof MontiArcController) {
+      System.out.println("We are in MontiArcController");
       tab.setText("MontiArc Diagram " + tabMap.size());
+      MontiInitDialogController montiController = showMontiInitDialog();
+      ((MontiArcController)diagramController).showConfiguration(montiController);
+      
     }
     else {
       tab.setText("Sequence Diagram " + tabMap.size());
+      System.out.println("We are in SequenceController");
+      
     }
     tabPane.getTabs().add(tab);
     diagramController.setStage(stage);
@@ -121,6 +146,11 @@ public class TabController {
   
   public void handleMenuActionNewClassDiagram() {
     Tab tab = addTab(CLASS_DIAGRAM_VIEW_PATH);
+    tabPane.getSelectionModel().select(tab);
+  }
+  
+  public void handleMenuActionNewMontiArcDiagram() {
+    Tab tab = addTab(MONTIARC_DIAGRAM_VIEW_PATH);
     tabPane.getSelectionModel().select(tab);
   }
   
@@ -257,6 +287,42 @@ public class TabController {
     return controller;
     
   }
+  
+  
+  
+  public MontiInitDialogController showMontiInitDialog() {
+    MontiInitDialogController controller = null; 
+    
+    try {
+      // Load the montiInitDialog.fxml file and create a new stage for the
+      // popup
+      FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view/fxml/montiInitDialog.fxml"));
+      System.out.println("Loader load " + loader.getLocation());
+      AnchorPane dialog = loader.load();
+      Stage dialogStage = new Stage();
+      dialogStage.initModality(Modality.WINDOW_MODAL);
+      dialogStage.initOwner(this.stage);
+      dialogStage.setScene(new Scene(dialog));
+      
+      controller = loader.getController();
+      controller.setDialogStage(dialogStage);
+      dialogStage.showAndWait();
+    }
+    
+    
+    catch (IOException e) {
+      // Exception gets thrown if the classDiagramView.fxml file could not be
+      // loaded
+      e.printStackTrace();
+      return null;
+    }
+    
+    return controller;
+  }
+  
+  
+  
+  
   
   public GithubLoginDialogController showGithubLoginDialog() {
     GithubLoginDialogController controller = null;

@@ -23,15 +23,26 @@ public class PortNodeView extends AbstractNodeView {
   private Rectangle rectangle;
   private Pane portPane;
   private final int STROKE_WIDTH = 1;
-
+  private double portX;
+  double portY;
+  double portHeight;
+  double portWidth;
 
   public PortNodeView(PortNode node) {
     super(node);
+    
+    this.portX = node.getXDraw();
+    this.portY = node.getYDraw();
+    this.portHeight = node.getPortHeight();
+    this.portWidth = node.getPortWidth();
     this.setTranslateX(node.getTranslateX());
     this.setTranslateY(node.getTranslateY());
-  
   }
   
+  
+  public PortNodeView() {
+    
+  }
   public Pane createPortPane(double portX, double portY, double portHeight, double portWidth) {
     rectangle = new Rectangle(portX, portY, portHeight, portWidth);
     initLooks();
@@ -45,6 +56,21 @@ public class PortNodeView extends AbstractNodeView {
     return portPane;
   }
   
+  public double getPortX() {
+    return this.portX;
+  }
+  
+  public double getPortY() {
+    return this.portY;
+  }
+  
+  public double getPortWidth() {
+    return this.portWidth;
+  }
+  
+  public double getPortHeight() {
+    return this.portHeight;
+  }
   
   public Label setPortTitle(String attr, double PositionX, double PositionY) {
 //    title.setFont(Font.font("Verdana", FontWeight.BOLD, 12));
@@ -95,6 +121,12 @@ public class PortNodeView extends AbstractNodeView {
   private void changeWidth(double width) {
     setWidth(width);
     rectangle.setWidth(width); 
+    
+    title.setMaxWidth(width);
+    title.setPrefWidth(width);
+    
+    dataType.setMaxWidth(width);
+    dataType.setMaxHeight(width);
   }
   
   private void initLooks() {
@@ -127,7 +159,6 @@ public class PortNodeView extends AbstractNodeView {
   }
   
   public Bounds getBounds() {
-    // noch keine Ahnung, ob das hier richtig ist.
     return rectangle.getBoundsInParent();
   }
   @Override

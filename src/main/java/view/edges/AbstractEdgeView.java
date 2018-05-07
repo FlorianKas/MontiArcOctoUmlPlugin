@@ -39,9 +39,6 @@ public abstract class AbstractEdgeView extends Group implements EdgeView, Proper
   
   public AbstractEdgeView(AbstractEdge edge, AbstractNodeView startNode, AbstractNodeView endNode) {
     super();
-    System.out.println("We are in AbstractEdgeView");
-    System.out.println("StartNode is of type" + startNode.getX());
-    System.out.println("EndNode is of type" + endNode.getX());
     setId("VIEWASSOCIATION_" + ++objectCounter);
     
     this.refEdge = edge;
@@ -188,6 +185,8 @@ public abstract class AbstractEdgeView extends Group implements EdgeView, Proper
   }
   
   protected void setPosition() {
+    System.out.println("StrartNode X " + startNode.getTranslateX());
+    System.out.println("StrartNode Width " + startNode.getWidth());
     // If end node is to the right of startNode:
     if (startNode.getTranslateX() + startNode.getWidth() <= endNode.getTranslateX()) { // Straight
                                                                                        // line

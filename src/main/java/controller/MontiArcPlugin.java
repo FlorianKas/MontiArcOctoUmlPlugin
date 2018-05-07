@@ -20,7 +20,7 @@ import model.GraphElement;
 import model.nodes.ComponentNode;
 import model.nodes.PortNode;
 //implements MontiCorePlugIn 
-public class MontiArcPlugin {
+//public class MontiArcPlugin {
 //	
 //  void checkValidity(Graph g) {
 //	  ASTNode node = shapeToAST(g);
@@ -56,36 +56,36 @@ public class MontiArcPlugin {
 //  
 //  }
 //  
-  ASTMACompilationUnit shapeToAST(Graph g) {
-    ASTMACompilationUnit ast = new ASTMACompilationUnit();
-	  List<GraphElement> elements	= g.getAllGraphElements();
-    for(GraphElement e : elements) {
-      if(e instanceof ComponentNode) {
-    	List<PortNode> ports = ((ComponentNode) e).getPorts();
-    	ArrayList<String> astPorts = new ArrayList<>(); 
-    	String astPortList = "";
-    	if(ports.size() == 0) {	
-    	    // error message. Is not allowed
-    	  } 
-    	  else if(ports.size() == 1) {
-    		astPorts.add( " default " + ports.get(0).toString());
-    		astPortList = " port " + astPorts;
-    	  }
-    	  else {
-    		for (PortNode p : ports) {
-    		  astPorts.add( " default " + p.toString());
-        	}
-    		astPortList = " ports " + astPorts;
-    	  }
-    	
-        ASTComponent aComponent = new ASTComponent(  );
-//        new ASTStereotype(), e.getId().toString(), 
-//        " Buffer1 " ," Component ", " Buffer2 ", astPortList
-      }
-    }
-    return ;
-  }
-  
+//  ASTMACompilationUnit shapeToAST(Graph g) {
+//    ASTMACompilationUnit ast = new ASTMACompilationUnit();
+//	  List<GraphElement> elements	= g.getAllGraphElements();
+//    for(GraphElement e : elements) {
+//      if(e instanceof ComponentNode) {
+//    	List<PortNode> ports = ((ComponentNode) e).getPorts();
+//    	ArrayList<String> astPorts = new ArrayList<>(); 
+//    	String astPortList = "";
+//    	if(ports.size() == 0) {	
+//    	    // error message. Is not allowed
+//    	  } 
+//    	  else if(ports.size() == 1) {
+//    		astPorts.add( " default " + ports.get(0).toString());
+//    		astPortList = " port " + astPorts;
+//    	  }
+//    	  else {
+//    		for (PortNode p : ports) {
+//    		  astPorts.add( " default " + p.toString());
+//        	}
+//    		astPortList = " ports " + astPorts;
+//    	  }
+//    	
+//        ASTComponent aComponent = new ASTComponent(  );
+////        new ASTStereotype(), e.getId().toString(), 
+////        " Buffer1 " ," Component ", " Buffer2 ", astPortList
+//      }
+//    }
+//    return ;
+//  }
+//  
 //  List<String> check(ASTMontiArcNode node){
 //	  
 //  
@@ -99,4 +99,4 @@ public class MontiArcPlugin {
 //	  return "MAAGenerator";  
 //  }
 //  
-}
+//}

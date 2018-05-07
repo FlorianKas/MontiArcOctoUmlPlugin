@@ -638,6 +638,8 @@ public abstract class AbstractDiagramController {
     aContextMenu.getItems().addAll(cmItemCopy, cmItemPaste, cmItemDelete, cmItemInsertImg);
   }
   
+  
+  
   /**
    * Creates a new NodeView from the given node and adds them to the graph.
    *
@@ -645,8 +647,10 @@ public abstract class AbstractDiagramController {
    * @return the created AbstractNodeView
    */
   // hier brauchen wir auch noch ggf. einen PortNode
+  // das müssen wir auslagern in den MontiArcController
+  
   public AbstractNodeView createNodeView(AbstractNode node, boolean remote) {
-    AbstractNodeView newView;
+    AbstractNodeView newView = null;
     if (node instanceof ClassNode) {
       newView = new ClassNodeView((ClassNode) node);
     }
@@ -657,18 +661,15 @@ public abstract class AbstractDiagramController {
       newView = new ComponentNodeView((ComponentNode) node);
     }
     else if (node instanceof PortNode) {
-      ComponentNodeView compView = new ComponentNodeView();
+//      ComponentNodeView compView = new ComponentNodeView();
       System.out.println("NodeMap " + nodeMap.toString());
       System.out.println("AllNodeViews "+ allNodeViews);
       for (AbstractNodeView view : allNodeViews) {
         if(nodeMap.get(view) ==  (ComponentNode)((PortNode) node).getComponentNode()) {
-          compView = (ComponentNodeView)view;
-          System.out.println("Comp View" + compView);
+          newView = ((ComponentNodeView)view).getNodeToViewMap().get(node);
           break;
         }
       } 
-      newView = compView.getNodeToViewMap().get(node);
-      System.out.println("newView" + newView);
     }
     else {
       newView = new SequenceObjectView((SequenceObject) node);
@@ -676,6 +677,7 @@ public abstract class AbstractDiagramController {
     }
     
     if (!graph.getAllNodes().contains(node)) {
+      
       graph.addNode(node, remote);
       undoManager.add(new AddDeleteNodeCommand(AbstractDiagramController.this, graph, newView, node, true));
     }
@@ -690,6 +692,7 @@ public abstract class AbstractDiagramController {
    * @return
    */
   public AbstractNodeView addNodeView(AbstractNodeView nodeView, AbstractNode node) {
+    System.out.println("NodeView" + nodeView.toString());
     drawPane.getChildren().add(nodeView);
     initNodeActions(nodeView);
     nodeMap.put(nodeView, node);
@@ -854,6 +857,8 @@ public abstract class AbstractDiagramController {
     }
   }
   
+  
+  // muss auch ausgelagert werden in MontiArcController
   /**
    * Creates and adds a new EdgeView
    *
@@ -903,6 +908,8 @@ public abstract class AbstractDiagramController {
     return edgeView;
   }
   
+  
+  // Muss auch ausgelagert werden in MontiArcController
   /**
    * @param edge
    * @param remote, true if change comes from a remote server
@@ -961,7 +968,30 @@ public abstract class AbstractDiagramController {
       System.out.println("We are in ConnectorEdge case");
       System.out.println("StartNodeView "+ startNodeView);
       System.out.println("EndNodeView "+ endNodeView);
+//      double startNodeHeight = ((PortNode)edge.getStartNode()).getHeight();
+//      double startNodeWidth = ((PortNode)edge.getStartNode()).getWidth();
+//      double endNodeHeight = ((PortNode)edge.getEndNode()).getHeight();
+//      double endNodeWidth = ((PortNode)edge.getEndNode()).getWidth();
+//      ((PortNode)edge.getStartNode()).setHeight(((PortNode)edge.getStartNode()).getPortHeight());
+//      ((PortNode)edge.getStartNode()).setWidth(((PortNode)edge.getStartNode()).getPortWidth());
+//      ((PortNode)edge.getEndNode()).setHeight(((PortNode)edge.getEndNode()).getPortHeight());
+//      ((PortNode)edge.getEndNode()).setWidth(((PortNode)edge.getEndNode()).getPortWidth());
+      startNodeView.setHeight(((PortNode)edge.getStartNode()).getPortHeight());
+      System.out.println("PortNode Heogjt " + ((PortNode)edge.getStartNode()).getPortHeight());
+      System.out.println("StartNodeView has a width of " + startNodeView.getHeight());
+      startNodeView.setWidth(((PortNode)edge.getStartNode()).getPortWidth());
+      startNodeView.setX(((PortNode)edge.getStartNode()).getXDraw());
+      startNodeView.setY(((PortNode)edge.getStartNode()).getYDraw());
+      endNodeView.setX(((PortNode)edge.getEndNode()).getXDraw());
+      endNodeView.setX(((PortNode)edge.getEndNode()).getXDraw());
+      
+      
+      
       edgeView = new ConnectorEdgeView(edge, startNodeView, endNodeView);
+//      ((PortNode)edge.getStartNode()).setHeight(startNodeHeight);
+//      ((PortNode)edge.getStartNode()).setWidth(startNodeWidth);
+//      ((PortNode)edge.getEndNode()).setHeight(endNodeHeight);
+//      ((PortNode)edge.getEndNode()).setWidth(endNodeWidth);
     }
     else { // Association
       edgeView = new AssociationEdgeView(edge, startNodeView, endNodeView);

@@ -130,6 +130,7 @@ public abstract class AbstractEdge implements Edge, Serializable {
     return label;
   }
   
+  // die sind nich von mir 
   public Node getStartNode() {
     return startNode;
   }

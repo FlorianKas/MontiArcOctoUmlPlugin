@@ -13,14 +13,13 @@ import java.io.Serializable;
 public abstract class AbstractNode implements Node, Serializable {
   protected static final double CLASS_MIN_WIDTH = 120;
   protected static final double CLASS_MIN_HEIGHT = 100;
+  
+  // Die dinger muss ich dann in ComponentNode bzw PortNode packen
   protected static final double COMPONENT_MIN_WIDTH = 120; // Werte einfach
                                                            // erstmal von
                                                            // ClassDiagram
   protected static final double COMPONENT_MIN_HEIGHT = 100;
-  protected static final double PORT_WIDTH = 40; // hier muessen noch die
-                                                     // richtigen Werte gesetzt
-                                                     // werden
-  protected static final double PORT_HEIGHT = 40;
+  
   protected static final double LIFELINE_MIN_WIDTH = 120;
   protected static final double LIFELINE_MIN_HEIGHT = 40;
   protected static final double PACKAGE_MIN_WIDTH = 240;

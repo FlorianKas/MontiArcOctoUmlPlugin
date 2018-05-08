@@ -8,12 +8,12 @@
 <?import javafx.scene.layout.VBox?>
 <?import java.net.URL?>
 
-<VBox fx:controller="controller.TabController" xmlns:fx="http://javafx.com/fxml">
+<VBox fx:controller="controller.TabControllerMonti" xmlns:fx="http://javafx.com/fxml">
     <MenuBar fx:id="menuBar">
         <menus>
             <Menu text="File">
                 <items>
-                    <MenuItem text="New Class Diagram" onAction="#handleMenuActionNewClassDiagram"/>
+                    <MenuItem text="New Class Diagram" onAction="#handleMenuActionNewMontiArcDiagram"/>
                     <MenuItem text="New Sequence Diagram" onAction="#handleMenuActionNewSequenceDiagram"/>
                     <MenuItem text="Open" onAction="#handleMenuActionLoad"/>
                     <MenuItem text="Save as XMI" onAction="#handleMenuActionSave"/>

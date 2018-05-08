@@ -47,6 +47,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class MontiArcController extends AbstractDiagramController {
+  
+  NodeControllerMonti nodeController;
+  MontiRecognizeController recognizeController;
+  TabControllerMonti tabController;
+  EdgeControllerMonti edgeController;
+  
   ArrayList<String> genericsArray = new ArrayList<String>();
   ArrayList<String> types = new ArrayList<String>();
   String modelName = "";
@@ -60,6 +66,11 @@ public class MontiArcController extends AbstractDiagramController {
     super.initialize();
     initToolBarActions();
     initDrawPaneActions();  
+    
+    nodeController = new NodeControllerMonti(drawPane, this);
+    recognizeController = new MontiRecognizeController(drawPane, this);
+    edgeController = new EdgeControllerMonti(drawPane,this);
+    
     
   }
   
@@ -364,6 +375,7 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
   void initNodeActions(AbstractNodeView nodeView) {
     nodeView.setOnMousePressed(event -> {
       if (event.getClickCount() == 2) { // Open dialog window on double click.
+        System.out.println("We are before calling the NodeControllerMonti");
         nodeController.onDoubleClick(nodeView, event.getX(), event.getY());
         tool = ToolEnum.SELECT;
         setButtonClicked(selectBtn);
@@ -658,7 +670,7 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
     
     deleteBtn.setOnAction(event -> deleteSelected());
     
-    recognizeBtn.setOnAction(event -> recognizeController.recognizeMonti(selectedSketches));
+    recognizeBtn.setOnAction(event -> recognizeController.recognize(selectedSketches));
     addGenericsBtn.setOnAction(event -> addGenerics());
     addTypesBtn.setOnAction(event -> addTypes());
     

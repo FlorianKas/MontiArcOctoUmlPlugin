@@ -205,11 +205,13 @@ public class RecognizeController {
 	        		// bb ist Port von b
 	        	  String direction = "";
 	        	  PortNode tmpPort = new PortNode();
-	        	  double x,y,xDraw,yDraw,height,width;
+	        	  double x,y,xDraw,yDraw = 0;
 //	        	  PortNode port = new PortNode(bb.getX(), bb.getY(), bb.getHeight(), bb.getWidth());
-              
-	        	  if (bb.getX() + bb.getWidth() < b.getX() + b.getWidth() ) {
-	        	    // left Port
+              System.out.println("Bounding Box of Node has position x " + bb.getX() + " " + bb.getY() + " " + bb.getHeight() + " " + bb.getWidth());
+              System.out.println("Bounding Box of Port has position x " + b.getX() + " " + b.getY() + " " + b.getHeight() + " " + b.getWidth());
+//	        	  if (bb.getX() + bb.getWidth() < b.getX() + b.getWidth() && bb.getX() < b.getX()) {
+	        	  if(Math.abs(b.getX() - bb.getX()) < Math.abs(b.getX() + b.getWidth() - bb.getX()) && (bb.getY() + bb.getHeight() < b.getY() + b.getHeight())) {
+              // left Port
 	        	    System.out.println("LEFTTTTTTT");
 	        	    xDraw = b.getX() - 0.5*tmpPort.getPortWidth();
 	        	    x = bb.getX();
@@ -228,7 +230,7 @@ public class RecognizeController {
 //	        	    yDraw = (b.getY() - 0.5*tmpPort.getHeight());
 //	        	    y = (bb.getY());
 //	        	  }
-	        	  else if ((bb.getX() + bb.getWidth() > b.getX()) && (bb.getY() + bb.getHeight() < b.getY() + b.getHeight()) && (bb.getY() > b.getY())) {
+	        	  else if (Math.abs(b.getX() - bb.getX()) > Math.abs(b.getX() + b.getWidth() - bb.getX()) && (bb.getY() + bb.getHeight() < b.getY() + b.getHeight()) ) {
 //	            right
 	        	    System.out.println("righttttttttt");
 	        	    xDraw = (b.getX() + b.getWidth() - 0.5*tmpPort.getPortWidth());

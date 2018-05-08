@@ -343,73 +343,48 @@ public class NodeController {
       showClassNodeEditDialog((ClassNode) diagramController.getNodeMap().get(nodeView));
     }
     else if (nodeView instanceof ComponentNodeView){
-      System.out.println("We are in ComponentNdoeView");
-      System.out.println("Comp Bpunds "+ ((ComponentNodeView) nodeView).getBounds());
-      Point doubleClick = new Point(posX,posY);
+      
       ArrayList<PortNodeView> portViews = ((ComponentNodeView) nodeView).getPortNodeViews();
+      ArrayList<PortNodeView> portViewsLeft = new ArrayList<>();
+      ArrayList<PortNodeView> portViewsRight = new ArrayList<>();
+      
       for (PortNodeView p : portViews) {
-        System.out.println("Scene x val" + p.getBounds());
-        System.out.println("PosX "+ posX );  
-        System.out.println("Test "+ p.getBounds().contains(posX, posY));
-        // Hier muessen wir uns noch eine neue Bounding Box bauen mit dem x und y wert vom port und den default Werten
-        // fuer Hoehe und Breite
-//        BoundingBox portBox = new BoundingBox();
-//        portBox.setRect(p.getPortX(), p.getPortY(), p.getPortWidth(), p.getPortHeight());
-        System.out.println("NodeView x " + nodeView.getBounds().getMinX());
-//        System.out.println("BoundingBox contians doubleClick" +portBox.contains(doubleClick));
-        if((posX < nodeView.getBounds().getMinX() + p.getBounds().getWidth()) &&
-            (posX > nodeView.getBounds().getMinX()) && 
-            (posY < p.getBounds().getMinY() + p.getBounds().getHeight()) &&
-            (posY > p.getBounds().getMinY()) ) { 
-//          && portBox.contains(doubleClick)
-          // left side 
-//        if(p.getBounds().contains(posX, posY)) {
-          System.out.println("Recognized as PortNodeView left");
-          System.out.println("PortView " + ((ComponentNodeView) nodeView).getNodeCompMap().get(p));
-//          ComponentNode node = ComponentNode(diagramController.getNodeMap().get(nodeView));
-          showPortNodeEditDialog(((ComponentNodeView) nodeView).getNodeCompMap().get(p));
-          port = true;
-          break;
+        if(p.getPortX() < nodeView.getX()) {
+          portViewsLeft.add(p);
         }
-        else if((posX > nodeView.getBounds().getMinX() + nodeView.getBounds().getWidth() - p.getBounds().getWidth()) &&
-            (posX < nodeView.getBounds().getMinX() + nodeView.getBounds().getWidth()) && 
-            (posY < p.getBounds().getMinY() + p.getBounds().getHeight()) &&
-            (posY > p.getBounds().getMinY())) {
-//           && portBox.contains(doubleClick)
-          // right side 
-//        if(p.getBounds().contains(posX, posY)) {
-          System.out.println("Recognized as PortNodeView Right");
-          System.out.println("PortView " + ((ComponentNodeView) nodeView).getNodeCompMap().get(p));
-//          ComponentNode node = ComponentNode(diagramController.getNodeMap().get(nodeView));
-          showPortNodeEditDialog(((ComponentNodeView) nodeView).getNodeCompMap().get(p));
-          port = true;
-          break;
+        else {
+          portViewsRight.add(p);
         }
-        
-//        else if(posY > nodeView.getBounds().getMinY() + p.getBounds().getHeight() &&
-//            posX < p.getBounds().getMinX() + p.getBounds().getWidth() &&
-//            posX > p.getBounds().getMinX()) { 
-//          // down side 
-////        if(p.getBounds().contains(posX, posY)) {
-//          System.out.println("Recognized as PortNodeView");
-//          System.out.println("PortView " + ((ComponentNodeView) nodeView).getNodeCompMap().get(p));
-////          ComponentNode node = ComponentNode(diagramController.getNodeMap().get(nodeView));
-//          showPortNodeEditDialog(((ComponentNodeView) nodeView).getNodeCompMap().get(p));
-//          port = true;
-//          break;
-//        }
-//        if(posY < nodeView.getBounds().getMinY() + p.getBounds().getHeight() &&
-//            posX < p.getBounds().getMinX() + p.getBounds().getWidth() &&
-//            posX > p.getBounds().getMinX()) { 
-//          // top side 
-////        if(p.getBounds().contains(posX, posY)) {
-//          System.out.println("Recognized as PortNodeView");
-//          System.out.println("PortView " + ((ComponentNodeView) nodeView).getNodeCompMap().get(p));
-////          ComponentNode node = ComponentNode(diagramController.getNodeMap().get(nodeView));
-//          showPortNodeEditDialog(((ComponentNodeView) nodeView).getNodeCompMap().get(p));
-//          port = true;
-//          break;
-//        }
+      }
+      
+      String dir = "";
+      if (posX > 0 && posX < 40) {
+        dir = "left";
+      }
+      else if ((posX < nodeView.getBounds().getMinX() + nodeView.getBounds().getWidth()) 
+          && (posX > nodeView.getBounds().getMinX() + nodeView.getBounds().getWidth()-40)) {
+        dir = "right";
+      }
+      
+      if (dir == "left") {
+        for (PortNodeView p : portViewsLeft) {
+          if((posY < p.getBounds().getMinY() + p.getBounds().getHeight()) &&
+              (posY > p.getBounds().getMinY()) ) {
+            showPortNodeEditDialog(((ComponentNodeView) nodeView).getNodeCompMap().get(p));
+            port = true;
+            break;
+          }
+        }
+      } 
+      else if (dir == "right") {
+        for (PortNodeView p : portViewsRight) {
+          if((posY < p.getBounds().getMinY() + p.getBounds().getHeight()) &&
+              (posY > p.getBounds().getMinY()) ) {
+            showPortNodeEditDialog(((ComponentNodeView) nodeView).getNodeCompMap().get(p));
+            port = true;
+          break;
+          }
+        }
       }
       if(port == false) {
         showComponentNodeEditDialog((ComponentNode) diagramController.getNodeMap().get(nodeView));  

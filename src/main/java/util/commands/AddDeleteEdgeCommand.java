@@ -47,6 +47,7 @@ public class AddDeleteEdgeCommand implements Command {
     aEdgeView = pEdgeView;
     aEdge = pEdge;
     aAdding = pAdding;
+    System.out.println("End of AddDeleteEdgeCommand");
   }
   
   /**

@@ -23,6 +23,10 @@ public class ComponentNode extends AbstractNode implements Serializable {
     this.Ports = ports;
   }
   
+  public ComponentNode() {
+    
+  }
+  
   @Override
   public ComponentNode copy() {
     ComponentNode newCopy = new ComponentNode(this.getX(), this.getY(), this.getHeight(), this.getWidth(), this.getPorts());

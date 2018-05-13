@@ -870,23 +870,29 @@ public abstract class AbstractDiagramController {
   public AbstractEdgeView createEdgeView(AbstractEdge edge, AbstractNodeView startNodeView, AbstractNodeView endNodeView) {
     AbstractEdgeView edgeView;
     if (edge instanceof AssociationEdge) {
+      System.out.println("Detected a AssociationEdge");
       edgeView = new AssociationEdgeView(edge, startNodeView, endNodeView);
     }
     else if (edge instanceof AggregationEdge) {
+      System.out.println("Detected a AggregationEdge");
       edgeView = new AggregationEdgeView(edge, startNodeView, endNodeView);
     }
     else if (edge instanceof CompositionEdge) {
+      System.out.println("Detected a CompositionEdge");
       edgeView = new CompositionEdgeView(edge, startNodeView, endNodeView);
     }
     else if (edge instanceof InheritanceEdge) {
+      System.out.println("Detected a InheritanceEdge");
       edgeView = new InheritanceEdgeView(edge, startNodeView, endNodeView);
     }
     else if (edge instanceof ConnectorEdge) {
+      System.out.println("Detected a ConnectorEdge");
       edgeView = new ConnectorEdgeView(edge, startNodeView, endNodeView);
     }
     else {
       edgeView = null;
     }
+    System.out.println("EdgeView" + edgeView.getStartX() + edgeView.getStartY() + edgeView.getEndX() + edgeView.getEndY());
     return addEdgeView(edgeView);
   }
   
@@ -904,6 +910,11 @@ public abstract class AbstractDiagramController {
       graph.addEdge(edgeView.getRefEdge(), false);
       allEdgeViews.add(edgeView);
     }
+    System.out.println("edgeView StartX" + edgeView.getStartX() 
+        + "edgeView StartY" + edgeView.getStartY() + 
+        "edgeView EndX" + edgeView.getEndX() + "edgeView EndY" + edgeView.getEndY());
+    System.out.println("edgeView getRefEdge" + edgeView.getRefEdge().getStartNode() + edgeView.getRefEdge().getEndNode());
+    System.out.println("LAS>T" + AbstractDiagramController.this);
     undoManager.add(new AddDeleteEdgeCommand(AbstractDiagramController.this, edgeView, edgeView.getRefEdge(), true));
     return edgeView;
   }

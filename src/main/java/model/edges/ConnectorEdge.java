@@ -7,24 +7,18 @@ import model.nodes.PortNode;
 import util.Constants;
 
 public class ConnectorEdge extends AbstractEdge{
-  private PortNode startPort;
-  private PortNode endPort;
+//  private PortNode startPort;
+//  private PortNode endPort;
   private String dataType;
   
-  public ConnectorEdge(ComponentNode startNode, ComponentNode endNode, PortNode startPort, PortNode endPort) {
+  public ConnectorEdge(PortNode startPort, PortNode endPort) {
     super(startPort, endPort);
-    this.startPort = startPort;
-    this.endPort = endPort;
+//    this.startPort = startPort;
+//    this.endPort = endPort;
   }
 
   @Override
   public Edge copy(AbstractNode startNodeCopy, AbstractNode endNodeCopy) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public String getType() {
     // TODO Auto-generated method stub
     return null;
   }
@@ -78,11 +72,11 @@ public class ConnectorEdge extends AbstractEdge{
   }
   
   public PortNode getStartPort() {
-    return startPort;
+    return (PortNode) this.getStartNode();
   }
   
   public PortNode getEndPort() {
-    return endPort;
+    return (PortNode) this.getEndNode();
   }
   
   public String getDataType() {
@@ -100,5 +94,8 @@ public class ConnectorEdge extends AbstractEdge{
     dataType = pDataType;
   }
 
+  public String getType() {
+    return "Connector";
+  }
   
 }

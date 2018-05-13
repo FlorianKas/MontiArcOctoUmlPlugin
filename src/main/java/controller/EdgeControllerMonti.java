@@ -13,12 +13,16 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import model.edges.*;
+import model.nodes.ComponentNode;
+import model.nodes.PortNode;
 import util.commands.DirectionChangeEdgeCommand;
 import util.commands.MoveMessageCommand;
 import util.commands.ReplaceEdgeCommand;
 import view.edges.AbstractEdgeView;
 import view.edges.MessageEdgeView;
 import view.nodes.AbstractNodeView;
+import view.nodes.ComponentNodeView;
+import view.nodes.PortNodeView;
 import view.nodes.SequenceObjectView;
 
 import java.io.IOException;
@@ -44,26 +48,41 @@ public class EdgeControllerMonti extends EdgeController {
   }
   
   public void onMousePressedOnNode(MouseEvent event) {
-    dragStartX = event.getX() + ((AbstractNodeView) event.getSource()).getTranslateX();
-    dragStartY = event.getY() + ((AbstractNodeView) event.getSource()).getTranslateY();
-    startNodeView = (AbstractNodeView) event.getSource();
-    aDrawPane.getChildren().add(dragLine);
-  }
-  
-  public void onMousePressedOnCanvas(MouseEvent event) {
-    dragStartX = event.getX();
-    dragStartY = event.getY();
-    if (diagramController instanceof SequenceDiagramController) {
-      for (AbstractNodeView node : diagramController.getAllNodeViews()) {
-        double middleOfNode = (node.getX() + (node.getX() + node.getWidth())) / 2;
-        if (event.getX() > middleOfNode - 20 && event.getX() < middleOfNode + 20 && event.getY() > node.getY()) {
-          startNodeView = node;
-        }
+    double tmp = event.getX() + ((AbstractNodeView) event.getSource()).getTranslateX() + 1.5*((ComponentNodeView) event.getSource()).getPortNodeViews().get(0).getPortWidth();
+    
+    ComponentNodeView tmpView = (ComponentNodeView) event.getSource();
+    System.out.println("Start at position x" + tmpView.getTranslateX());
+    System.out.println("event get x" + event.getX());
+    
+    for (PortNodeView pView : tmpView.getPortNodeViews()) {
+      System.out.println("port getX" + pView.getPortX());
+      if (event.getX() + tmpView.getTranslateX() > pView.getPortX() + 0.5*pView.getPortWidth() 
+          && event.getX() + tmpView.getTranslateX()  < pView.getPortX() + 1.5*pView.getPortWidth()) {
+        System.out.println("Test");
+        dragStartX = pView.getX() + 1.5*pView.getPortWidth();
+        dragStartY = pView.getY() + 0.5*pView.getPortHeight(); 
+        startNodeView = pView;
       }
     }
     aDrawPane.getChildren().add(dragLine);
   }
   
+//  public void onMousePressedOnCanvas(MouseEvent event) {
+//    dragStartX = event.getX();
+//    dragStartY = event.getY();
+//    if (diagramController instanceof SequenceDiagramController) {
+//      for (AbstractNodeView node : diagramController.getAllNodeViews()) {
+//        if (node instanceof PortNodeView) {
+//          double middleOfNode = (node.getX() + (node.getX() + node.getWidth())) / 2;
+//          if (event.getX() > middleOfNode - 20 && event.getX() < middleOfNode + 20 && event.getY() > node.getY()) {
+//            startNodeView = node;
+//          }
+//        }
+//      }
+//    }
+//    aDrawPane.getChildren().add(dragLine);
+//  }
+    
   public void onMouseDragged(MouseEvent event) {
     dragLine.setStartX(dragStartX);
     dragLine.setStartY(dragStartY);
@@ -71,6 +90,8 @@ public class EdgeControllerMonti extends EdgeController {
     if (event.getSource() instanceof AbstractNodeView) {
       dragLine.setEndX(event.getX() + ((AbstractNodeView) event.getSource()).getTranslateX());
       dragLine.setEndY(event.getY() + ((AbstractNodeView) event.getSource()).getTranslateY());
+      System.out.println("dargLine X " + dragLine.getEndX());
+      System.out.println("dargLine Y " + dragLine.getEndY());
     }
     else {
       dragLine.setEndX(event.getX());
@@ -78,42 +99,50 @@ public class EdgeControllerMonti extends EdgeController {
     }
   }
   
-  /*
-   * Used for sequence diagrams
-   */
-  public void onMouseReleasedSequence() {
-    for (AbstractNodeView nodeView : diagramController.getAllNodeViews()) { // TODO
-                                                                            // implement
-                                                                            // getAllLifelines
-      if (nodeView instanceof SequenceObjectView && ((SequenceObjectView) nodeView).isOnLifeline(getEndPoint())) {
-        endNodeView = nodeView;
-      }
-    }
-    if (endNodeView != null) {
-      if (startNodeView != null) {
-        MessageEdge edge = new MessageEdge(dragStartX, dragStartY, diagramController.getNodeMap().get(startNodeView), diagramController.getNodeMap().get(endNodeView));
-        ((SequenceDiagramController) diagramController).createEdgeView(edge, startNodeView, endNodeView);
-      }
-      else {
-        MessageEdge edge = new MessageEdge(dragStartX, dragStartY, diagramController.getNodeMap().get(endNodeView));
-        ((SequenceDiagramController) diagramController).createEdgeView(edge, null, endNodeView);
-      }
-    }
-    finishCreateEdge();
-  }
   
   /*
-   * Used for class diagrams
+   * Used for MA diagrams
    */
   public void onMouseReleasedRelation() {
     for (AbstractNodeView nodeView : diagramController.getAllNodeViews()) {
-      if (nodeView.contains(getEndPoint())) {
+      System.out.println("Endpoint " + getEndPoint());
+      System.out.println("nodeView " + nodeView.getTranslateX() + nodeView.getTranslateY());
+      if(nodeView.contains(getEndPoint())){
         endNodeView = nodeView;
+        System.out.println("Found a nodeView");
       }
     }
-    if (endNodeView != null) {
-      AssociationEdge edge = new AssociationEdge(diagramController.getNodeMap().get(startNodeView), diagramController.getNodeMap().get(endNodeView));
+    System.out.println("endNodeView " + endNodeView.getTranslateX() + endNodeView.getTranslateY());
+    PortNode endNode = new PortNode();
+    PortNode startNode = new PortNode();
+    ComponentNode endCompNode = new ComponentNode();
+    ComponentNode startCompNode = new ComponentNode();
+    if (endNodeView != null && endNodeView instanceof PortNodeView) {
+      endNode = (PortNode) diagramController.getNodeMap().get(endNodeView);
+      endCompNode = endNode.getComponentNode();
+      startNode = (PortNode) diagramController.getNodeMap().get(startNodeView);
+      startCompNode = startNode.getComponentNode();
+      ConnectorEdge edge = new ConnectorEdge(startNode, endNode);
+      System.out.println("Edge " + edge.toString());
       diagramController.createEdgeView(edge, startNodeView, endNodeView);
+    } 
+    else {
+      System.out.println("We have a ComponentNodeView as recognized");
+      System.out.println("endNodeView " + endNodeView.getX() + endNodeView.getY() + endNodeView.getWidth() + endNodeView.getHeight());
+      for (PortNodeView pView: ((ComponentNodeView) endNodeView).getPortNodeViews()) {
+        System.out.println("pView " + pView.getX() + pView.getY() + pView.getWidth() + pView.getHeight());
+        
+        if(pView.getPortX() <= getEndPoint().getX() && pView.getPortX() + pView.getPortWidth() >= getEndPoint().getX()
+            && pView.getPortY() <= getEndPoint().getY() && pView.getPortY() + pView.getPortHeight() >= getEndPoint().getY()) {
+          endNode = (PortNode)diagramController.getNodeMap().get(pView);
+          endCompNode = endNode.getComponentNode();
+          startNode = (PortNode) diagramController.getNodeMap().get(startNodeView);
+          startCompNode = startNode.getComponentNode();
+          ConnectorEdge edge = new ConnectorEdge(startNode, endNode);
+          diagramController.createEdgeView(edge, startNodeView, endNodeView);
+          System.out.println("Found a endNode");
+        }
+      }
     }
     finishCreateEdge();
   }

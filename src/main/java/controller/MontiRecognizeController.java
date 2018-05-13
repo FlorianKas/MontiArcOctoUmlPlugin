@@ -355,7 +355,7 @@ public class MontiRecognizeController extends RecognizeController{
   
             if (startNode != null && endNode != null && !startNode.equals(endNode)) {
               System.out.println("We are going to create a ConnectorEdge");
-              ConnectorEdge newEdge = new ConnectorEdge(nodeOut, nodeIn, startNode, endNode);
+              ConnectorEdge newEdge = new ConnectorEdge(startNode, endNode);
               System.out.println("Could draw an Arrow");
               System.out.println("ConnectorEdge looks as follows " + newEdge.getStartNode() + newEdge.getStartPort() + newEdge.getEndNode() + newEdge.getEndPort());
               newEdge.setDirection(AbstractEdge.Direction.START_TO_END);

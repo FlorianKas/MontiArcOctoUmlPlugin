@@ -74,6 +74,14 @@ public class MontiArcController extends AbstractDiagramController {
     
   }
   
+  public ArrayList<String> getGenerics() {
+    return genericsArray;  
+  }
+  
+  public ArrayList<String> getTypes() {
+    return types;  
+  }
+  
   public void showConfiguration(MontiInitDialogController controller) {
     if(controller.isOkClicked()) {
       modelName = controller.nameTextField.getText();          
@@ -718,5 +726,7 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
     }
     return edgeView;
   }
+  
+  
   
 }

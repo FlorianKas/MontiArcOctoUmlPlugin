@@ -52,9 +52,10 @@ public class MontiArcController extends AbstractDiagramController {
   MontiRecognizeController recognizeController;
   TabControllerMonti tabController;
   EdgeControllerMonti edgeController;
+  MontiArcPlugin plugin;
   
-  ArrayList<String> genericsArray = new ArrayList<String>();
-  ArrayList<String> types = new ArrayList<String>();
+  public static ArrayList<String> genericsArray = new ArrayList<String>();
+  public static ArrayList<String> types = new ArrayList<String>();
   String modelName = "";
   @FXML
   VBox config;
@@ -70,6 +71,7 @@ public class MontiArcController extends AbstractDiagramController {
     nodeController = new NodeControllerMonti(drawPane, this);
     recognizeController = new MontiRecognizeController(drawPane, this);
     edgeController = new EdgeControllerMonti(drawPane,this);
+    plugin = new MontiArcPlugin();
     
     
   }
@@ -623,7 +625,7 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
     image = new Image("/icons/recow.png");
     // needs to be replaced by another picture
     checkValidityBtn.setGraphic(new ImageView(image));
-    checkValidityBtn.setText("");
+    checkValidityBtn.setText("Check");
     
     image = new Image("/icons/recow.png");
     // needs to be replaced by another picture
@@ -693,7 +695,15 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
       
     });
     
-//    checkValidityBtn.setOnAction(event -> montiArcPlugin.checkValidity(graph));
+   
+    checkValidityBtn.setOnAction(event -> {
+    
+    System.out.println("graph looks as follows " + graph.getAllNodes().toString() + graph.getAllEdges().toString());
+    System.out.println("modelName " + modelName);
+      
+    plugin.shapeToAST(graph, modelName);
+    
+    });
   }
   
   

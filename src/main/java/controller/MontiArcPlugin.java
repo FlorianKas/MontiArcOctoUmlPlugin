@@ -11,10 +11,13 @@ import de.monticore.common.common._ast.ASTStereoValue;
 import de.monticore.common.common._ast.ASTStereotype;
 import de.monticore.common.common._ast.ASTStereotype.Builder;
 import de.monticore.common.common._ast.CommonNodeFactory;
-import de.monticore.types.types._ast.ASTType;
+import de.monticore.types.types._ast.ASTComplexArrayType;
+import de.monticore.types.types._ast.ASTTypeParameters;
 import de.monticore.types.types._ast.ASTTypeVariableDeclaration;
+import de.monticore.types.types._ast.ASTComplexReferenceType;
 import de.monticore.types.types._ast.ASTQualifiedName;
 import de.monticore.types.types._ast.ASTQualifiedName.*;
+import de.monticore.types.types._ast.ASTSimpleReferenceType;
 import de.monticore.lang.montiarc.common._ast.ASTParameter;
 import de.monticore.lang.montiarc.montiarc._ast.*;
 import de.monticore.types.types._ast.TypesNodeFactory;
@@ -23,7 +26,7 @@ import de.monticore.prettyprint.IndentPrinter;
 import de.monticore.types.prettyprint.TypesPrettyPrinterConcreteVisitor;
 import javafx.stage.Stage;
 import controller.AbstractDiagramController;
-
+import de.monticore.lang.montiarc.helper.SymbolPrinter;
 import model.Graph;
 import model.GraphElement;
 import model.edges.ConnectorEdge;
@@ -33,7 +36,7 @@ import model.nodes.ComponentNode;
 import model.nodes.PortNode;
 
 public class MontiArcPlugin implements MontiCorePlugIn {
-	
+  
   public AbstractDiagramController getController() {
     return null;
   }
@@ -95,6 +98,7 @@ public class MontiArcPlugin implements MontiCorePlugIn {
 
   @Override
   public TypesPrettyPrinterConcreteVisitor getPrettyPrinter() {
+    
     // TODO Auto-generated method stub
     return null;
   }
@@ -108,9 +112,8 @@ public class MontiArcPlugin implements MontiCorePlugIn {
   @Override
   public ASTNode shapeToAST(Graph graph, String modelName) {
     
-    MontiArcController controller = new MontiArcController();
-    ArrayList<String> generics = controller.getGenerics();
-    ArrayList<String> types = controller.getTypes();
+    ArrayList<String> generics = MontiArcController.genericsArray;
+    ArrayList<String> types = MontiArcController.types;
     
     // create AST
     de.monticore.lang.montiarc.montiarc._ast.ASTMACompilationUnit ast = 
@@ -118,6 +121,7 @@ public class MontiArcPlugin implements MontiCorePlugIn {
         
     // create generic type params
     ArrayList<de.monticore.types.types._ast.ASTTypeVariableDeclaration> genericsTypes = new ArrayList<ASTTypeVariableDeclaration>();
+    System.out.println("Generics looks as follows" + generics);
     for (String g : generics) {
       String name = "";
       ArrayList<String> upperBounds = new ArrayList<String>();
@@ -126,14 +130,20 @@ public class MontiArcPlugin implements MontiCorePlugIn {
         for(String u : g.split("extends")[1].split(",")) {
           upperBounds.add(u.replaceAll("\\s+", ""));
         }
-        List<de.monticore.types.types._ast.ASTSimpleReferenceType> simpleReferenceTypes = 
-            (List<de.monticore.types.types._ast.ASTSimpleReferenceType>) TypesNodeFactory.createASTSimpleReferenceType(upperBounds, null);
-        de.monticore.types.types._ast.ASTComplexReferenceType complexReferenceTypes = 
+        ArrayList<de.monticore.types.types._ast.ASTSimpleReferenceType> simpleReferenceTypes = new ArrayList<de.monticore.types.types._ast.ASTSimpleReferenceType>();
+        de.monticore.types.types._ast.ASTSimpleReferenceType simpleReferenceType =    
+            TypesNodeFactory.createASTSimpleReferenceType(upperBounds, null);
+        simpleReferenceTypes.add(simpleReferenceType);
+        ArrayList<de.monticore.types.types._ast.ASTComplexReferenceType> complexReferenceTypes = 
+            new ArrayList<de.monticore.types.types._ast.ASTComplexReferenceType>();
+        de.monticore.types.types._ast.ASTComplexReferenceType complexReferenceType = 
             TypesNodeFactory.createASTComplexReferenceType(simpleReferenceTypes);
+        complexReferenceTypes.add(complexReferenceType);
         de.monticore.types.types._ast.ASTTypeVariableDeclaration typeVariableDec = 
             TypesNodeFactory.createASTTypeVariableDeclaration(name, 
                 (List<de.monticore.types.types._ast.ASTComplexReferenceType>) complexReferenceTypes);
         genericsTypes.add(typeVariableDec);
+        System.out.println("typeVariableDec" + typeVariableDec.toString());
       }
       else {
         name = g.replaceAll("\\s+", "");
@@ -144,14 +154,16 @@ public class MontiArcPlugin implements MontiCorePlugIn {
     
     //create types param
     ArrayList<de.monticore.lang.montiarc.common._ast.ASTParameter> parameters = new ArrayList<ASTParameter>();
+    System.out.println("Types looks as follows" + types);
     for (String t : types) {
-      de.monticore.types.types._ast.ASTTypeVariableDeclaration varDec = 
-          TypesNodeFactory.createASTTypeVariableDeclaration(t.split("\\s+")[0], null);
-      de.monticore.types.types._ast.ASTType type = 
-          (ASTType) TypesNodeFactory.createASTTypeParameters((List<ASTTypeVariableDeclaration>) varDec);
+      ArrayList<String> names = new ArrayList<String>();
+      names.add(t.split("\\s+")[1]);
+      de.monticore.types.types._ast.ASTSimpleReferenceType varDec = 
+          TypesNodeFactory.createASTSimpleReferenceType(names, null);
       String typeName = t.split("\\s+")[1];
+      System.out.println("typeName " + typeName);
       de.monticore.lang.montiarc.common._ast.ASTParameter parameter = 
-          MontiArcNodeFactory.createASTParameter(type, typeName, null);
+          MontiArcNodeFactory.createASTParameter(varDec, typeName, null);
       parameters.add(parameter);    
     }
     ArrayList<de.monticore.lang.montiarc.montiarc._ast.ASTElement> elements = new ArrayList<ASTElement>();
@@ -166,7 +178,9 @@ public class MontiArcPlugin implements MontiCorePlugIn {
       if (g instanceof ComponentNode) {
         de.monticore.common.common._ast.ASTStereotype.Builder builder = new Builder();
         ASTStereoValue value = CommonNodeFactory.createASTStereoValue(((ComponentNode) g).getStereotype(), null);
-        builder.values((List<de.monticore.common.common._ast.ASTStereoValue>) value);
+        ArrayList<ASTStereoValue> valueList = new ArrayList<ASTStereoValue>();
+        valueList.add(value);
+        builder.values(valueList);
         de.monticore.common.common._ast.ASTStereotype stereotype = builder.build();
         de.monticore.lang.montiarc.montiarc._ast.ASTComponentHead head = MontiArcNodeFactory.createASTComponentHead();
         ArrayList<de.monticore.lang.montiarc.montiarc._ast.ASTElement> bodyElements = new ArrayList<ASTElement>();
@@ -185,12 +199,26 @@ public class MontiArcPlugin implements MontiCorePlugIn {
             outgoing = true;
           }
           
-          de.monticore.types.types._ast.ASTTypeVariableDeclaration varDecPort = TypesNodeFactory.createASTTypeVariableDeclaration(p.getPortType(), null);
-          de.monticore.types.types._ast.ASTType typePort = (ASTType) TypesNodeFactory.createASTTypeParameters((List<ASTTypeVariableDeclaration>) varDecPort);
+          
+          ArrayList<String> namesPort = new ArrayList<String>();
+          namesPort.add(p.getPortType());
+          de.monticore.types.types._ast.ASTSimpleReferenceType varDecPort = 
+              TypesNodeFactory.createASTSimpleReferenceType(namesPort, null);
+          // ich glaube ich muss hier nicht einen solchen Type createn, sondern checken, ob er existiert oder?
+          
+//          ArrayList<de.monticore.types.types._ast.ASTComplexReferenceType> upperBounds = 
+//              new ArrayList<de.monticore.types.types._ast.ASTComplexReferenceType>();
+//          de.monticore.types.types._ast.ASTTypeVariableDeclaration varDecPort = 
+//              TypesNodeFactory.createASTTypeVariableDeclaration(p.getPortType(), upperBounds);
+//          ArrayList<ASTTypeVariableDeclaration> varDecPortList = new ArrayList<ASTTypeVariableDeclaration>();
+//          varDecPortList.add(varDecPort);
+//          System.out.println("varDecPortList " + varDecPortList.toString());
+//          de.monticore.types.types._ast.ASTTypeParameters typePort = 
+//               TypesNodeFactory.createASTTypeParameters(varDecPortList);
           
           // create astPort for each PortNode of the current ComponentNode
           de.monticore.lang.montiarc.montiarc._ast.ASTPort astPort = 
-              MontiArcNodeFactory.createASTPort(null, typePort, p.getTitle(), outgoing, incoming);
+              MontiArcNodeFactory.createASTPort(null, varDecPort, p.getTitle(), outgoing, incoming);
           // add astPort to List
           astPorts.add(astPort);
         }
@@ -220,10 +248,14 @@ public class MontiArcPlugin implements MontiCorePlugIn {
               ArrayList<String> titleTargets = new ArrayList<String>();
               titleTargets.add(e.getEndNode().getTitle());
               builderQualifiedNameTargets = builderQualifiedNameTargets.parts(titleTargets);
-              List<de.monticore.types.types._ast.ASTQualifiedName> targets = (List<ASTQualifiedName>) builderQualifiedNameTargets.build();
-              
+              ArrayList<de.monticore.types.types._ast.ASTQualifiedName> targets = 
+                  new ArrayList<de.monticore.types.types._ast.ASTQualifiedName>();
+              de.monticore.types.types._ast.ASTQualifiedName target = builderQualifiedNameTargets.build();
+              targets.add(target);
               de.monticore.lang.montiarc.montiarc._ast.ASTConnector astConnector =
                   MontiArcNodeFactory.createASTConnector(null, source, targets);
+              System.out.println("astConnector PrettyPrint Test" + astConnector.getPrettyPrinter().toString());
+              System.out.println("astConnector " + astConnector.getSource() + astConnector.getTargets() + astConnector.getStereotype());
               bodyElements.add(astConnector);
             }
           }
@@ -238,9 +270,13 @@ public class MontiArcPlugin implements MontiCorePlugIn {
         // create astComponents for each ComponentNode
         astComponent = 
             MontiArcNodeFactory.createASTComponent(stereotype, g.getTitle(), head, "", typeArgs, astBody);
-      
+       
+        
+        System.out.println("astComponent Head looks as follows: " + astComponent.getHead());
+        System.out.println("astComponent Body looks as follows: " + astComponent.getBody().getElements().toString());
+        
       // add each astComponent to elementsList (the list for the body of the outermost component)
-      elements.add(astComponent);
+        elements.add(astComponent);
       
       }  
     }

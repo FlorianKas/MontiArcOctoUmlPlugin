@@ -55,6 +55,7 @@ public class TabControllerMonti extends TabController {
   private TabPane tabPane;
   private Stage stage;
   private Map<Tab, AbstractDiagramController> tabMap = new HashMap<>();
+
   
   public static final String CLASS_DIAGRAM_VIEW_PATH = "view/fxml/classDiagramView.fxml";
   public static final String SEQUENCE_DIAGRAM_VIEW_PATH = "view/fxml/sequenceDiagramView.fxml";
@@ -101,6 +102,7 @@ public class TabControllerMonti extends TabController {
       tab.setText("MontiArc Diagram " + tabMap.size());
       String name = "";
       MontiInitDialogController montiController= null;
+      
       while(name.isEmpty()) {
         montiController = showMontiInitDialog();
         name = montiController.nameTextField.getText();
@@ -125,6 +127,8 @@ public class TabControllerMonti extends TabController {
     diagramController.setStage(stage);
     return tab;
   }
+  
+  
   
   public void handleMenuActionUML() {
     tabMap.get(tabPane.getSelectionModel().getSelectedItem()).handleMenuActionUML();

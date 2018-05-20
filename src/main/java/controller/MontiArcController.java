@@ -52,11 +52,14 @@ public class MontiArcController extends AbstractDiagramController {
   MontiRecognizeController recognizeController;
   TabControllerMonti tabController;
   EdgeControllerMonti edgeController;
+  SelectControllerMonti selectController;
   MontiArcPlugin plugin;
+  
   
   public static ArrayList<String> genericsArray = new ArrayList<String>();
   public static ArrayList<String> types = new ArrayList<String>();
   String modelName = "";
+  public static String packageName = ""; 
   @FXML
   VBox config;
   @FXML
@@ -71,7 +74,9 @@ public class MontiArcController extends AbstractDiagramController {
     nodeController = new NodeControllerMonti(drawPane, this);
     recognizeController = new MontiRecognizeController(drawPane, this);
     edgeController = new EdgeControllerMonti(drawPane,this);
+    selectController = new SelectControllerMonti(drawPane, this);
     plugin = new MontiArcPlugin();
+    
     
     
   }
@@ -86,15 +91,16 @@ public class MontiArcController extends AbstractDiagramController {
   
   public void showConfiguration(MontiInitDialogController controller) {
     if(controller.isOkClicked()) {
-      modelName = controller.nameTextField.getText();          
+      modelName = controller.nameTextField.getText();  
+      packageName = controller.packageTextField.getText();
       String genericsString = controller.genericsTextField.getText();
-      String[] genericsTmp = genericsString.split(",");
+      String[] genericsTmp = genericsString.split(";");
       for (String g: genericsTmp) {
         genericsArray.add(g);
       }
       String typeParam = controller.arcParameterTextField.getText();
 
-      String[] typesTmp = typeParam.split(",");
+      String[] typesTmp = typeParam.split(";");
       for (String t : typesTmp) {
         types.add(t);
       }
@@ -108,12 +114,17 @@ public class MontiArcController extends AbstractDiagramController {
   void showOutput(){
     config.getChildren().removeAll(config.getChildren());
     
+    Label packetName = new Label();
+    packetName.setText("Package Name: " + packageName);
+    config.getChildren().add(packetName);
+    
+    
     Label name = new Label();
     name.setText("Name: " + modelName);
     config.getChildren().add(name);
     
     Label generics = new Label();
-    if (genericsArray.size() > 1) {
+    if (genericsArray.size() > 0) {
       generics.setText("Generics: ");
       config.getChildren().add(generics);
       for( String g : genericsArray) {
@@ -122,7 +133,7 @@ public class MontiArcController extends AbstractDiagramController {
         config.getChildren().add(tmp);
       }
     }
-    if (types.size() > 1) {
+    if (types.size() > 0) {
       Label typeParameters = new Label();
       typeParameters.setText("Type Parameters: ");
       config.getChildren().add(typeParameters);

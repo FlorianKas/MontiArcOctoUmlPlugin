@@ -644,8 +644,18 @@ public class NodeControllerMonti extends NodeController {
             node.setTitle(controller.getName());
           }
           if (controller.hasStereotypeChanged()) {
-            command.add(new SetNodeStereotypeCommand(node, controller.getStereotype(), node.getStereotype()));
-            node.setStereotype(controller.getStereotype());
+            String stereotype = controller.getStereotype();
+            if(!(stereotype.contains("<<"))) {
+              String front = "<<";
+              stereotype = front + controller.getStereotype();
+            }
+            if(!(stereotype.contains(">>"))) {
+              String back = ">>";
+              stereotype = stereotype + back;
+            }
+            
+            command.add(new SetNodeStereotypeCommand(node, stereotype, node.getStereotype()));
+            node.setStereotype(stereotype);
           }
           if (controller.hasTypeChanged()) {
             command.add(new SetNodeComponentTypeCommand(node, controller.getType(), node.getComponentType()));

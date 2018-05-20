@@ -1,6 +1,7 @@
 package controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,6 +12,8 @@ import de.monticore.common.common._ast.ASTStereoValue;
 import de.monticore.common.common._ast.ASTStereotype;
 import de.monticore.common.common._ast.ASTStereotype.Builder;
 import de.monticore.common.common._ast.CommonNodeFactory;
+import de.monticore.java.javadsl._ast.ASTCompilationUnit;
+import de.monticore.java.javadsl._ast.JavaDSLNodeFactory;
 import de.monticore.types.types._ast.ASTComplexArrayType;
 import de.monticore.types.types._ast.ASTTypeParameters;
 import de.monticore.types.types._ast.ASTTypeVariableDeclaration;
@@ -98,9 +101,9 @@ public class MontiArcPlugin implements MontiCorePlugIn {
 
   @Override
   public TypesPrettyPrinterConcreteVisitor getPrettyPrinter() {
-    
+    IndentPrinter indent = new IndentPrinter();
     // TODO Auto-generated method stub
-    return null;
+    return new MAPrettyPrinter(indent);
   }
 
   @Override
@@ -109,48 +112,313 @@ public class MontiArcPlugin implements MontiCorePlugIn {
     return null;
   }
 
+  protected ArrayList<ASTTypeVariableDeclaration> createGenerics(ArrayList<String> generics) {
+    // create List of TypeVariableDeclarations called TypeParameters
+    ArrayList<de.monticore.types.types._ast.ASTTypeVariableDeclaration> genericsTypes = new ArrayList<ASTTypeVariableDeclaration>();
+    System.out.println("Generics looks as follows" + generics);
+// TODO TypeArgs for util.list<String,String> and not 3 simpleReferenceTypes 
+    
+    for (String g : generics) {
+      System.out.println("g" + g);
+   // create generic type params
+      String name = "";
+      ArrayList<de.monticore.types.types._ast.ASTComplexReferenceType> upperBounds = 
+          new ArrayList<de.monticore.types.types._ast.ASTComplexReferenceType>();
+      System.out.println("Length of g" + g.split("extends").length );
+      if (g.split("extends").length > 1) {
+        name = (g.split("extends")[0]).replaceAll("\\s+","");
+        System.out.println("Name " + name);
+        String[] supClasses = g.split("extends")[1].split("#");
+        System.out.println("supClasses" + supClasses.length);
+        for(String u : supClasses) {
+          // divide supClasses at '.'
+          String[] partsSmaller = u.split("<");
+          System.out.println("partsSmaller" + partsSmaller.length);
+          String withoutFirst = "";
+          for (int i=1; i<partsSmaller.length; i++) {
+            if (i > 1) {
+              withoutFirst = withoutFirst + "<" +partsSmaller[i];
+            }
+            else {
+              withoutFirst = withoutFirst + partsSmaller[i];
+            }
+          }
+          System.out.println("WithoutFirst" + withoutFirst);
+          String[] without = withoutFirst.split(">");
+          String lastElement = without[without.length-1];
+          String partsGreater[] = withoutFirst.split(">");
+          System.out.println("Length of parts Greater " + partsGreater.length);
+          String withoutLast = "";
+          for (int i=0; i<partsGreater.length; i++) {
+            System.out.println("partsGreater " + partsGreater[i]);
+            if (i < partsGreater.length) {
+              withoutLast = withoutLast + partsGreater[i] + ">" ;
+            }
+            else {
+              withoutLast = withoutLast + partsGreater[i];
+            }
+          }
+          System.out.println("withoutLast" + withoutLast);
+          String[] partsTmp = withoutLast.split(",");
+          String firstElement = partsSmaller[0];
+          System.out.println("First Element " + firstElement);
+          ArrayList<String> parts = new ArrayList<String>();
+          for (int i=0 ; i <partsTmp.length; i++) {
+            System.out.println("partsTmp " + partsTmp[i]);
+            parts.add(partsTmp[i]);
+          }
+          System.out.println("parts" + parts.size());
+          
+          List<de.monticore.types.types._ast.ASTSimpleReferenceType> typeArgs = 
+              new ArrayList<de.monticore.types.types._ast.ASTSimpleReferenceType>();
+          int k = 0;
+          int length = parts.size();
+          while (k <length) {
+            if (parts.get(k).contains("<") && parts.get(k).contains(">")) {
+              if (parts.get(k).split("<").length == 0) {
+                List<String> qn = new ArrayList<String>();
+                for (String s : parts.get(k).split("\\.")) {
+                  if (s.contains(">")) {
+                    s= s.split(">")[0];
+                  }
+                  qn.add(s);
+                }
+                de.monticore.types.types._ast.ASTSimpleReferenceType typeArg = 
+                    TypesNodeFactory.createASTSimpleReferenceType(qn, null);
+                System.out.println("typeArg" + typeArg);
+                typeArgs.add(typeArg);
+              }
+              else {
+                // create typeName 
+                String typeName = parts.get(k).split("<")[0];
+                List<String> qn = new ArrayList<String>();
+                for (String s : typeName.split("\\.")) {
+                  if (s.contains(">")) {
+                    s= s.split(">")[0];
+                  }
+                  qn.add(s);
+                }
+                // create typeArgs
+                String rest = parts.get(k).split("<")[1];
+                List<String> restArgs = new ArrayList<String>();
+                for (String s : rest.split("\\.")) {
+                  if (s.contains(">")) {
+                    s= s.split(">")[0];
+                  }
+                  restArgs.add(s);
+                }
+                // TODO Question if ASTSimpleReferenceType is a valid ASTTypeArgument
+                de.monticore.types.types._ast.ASTSimpleReferenceType typeArg =    
+                    TypesNodeFactory.createASTSimpleReferenceType(restArgs, null);
+                List<de.monticore.types.types._ast.ASTTypeArgument> typeArgRest= 
+                    new ArrayList<de.monticore.types.types._ast.ASTTypeArgument>();
+                typeArgRest.add(typeArg);
+                // TODO
+                de.monticore.types.types._ast.ASTTypeArguments typeArguments =
+                    TypesNodeFactory.createASTTypeArguments(typeArgRest);
+                de.monticore.types.types._ast.ASTSimpleReferenceType add = 
+                    TypesNodeFactory.createASTSimpleReferenceType(qn, typeArguments);
+                System.out.println("typeArg" + add);
+                
+                typeArgs.add(add);
+              }
+//              parts.remove(k);
+              k++;
+            }
+            else if (parts.get(k).contains("<")) {
+              String nameQu = "";
+              if(parts.get(k).split("<").length == 1) {
+                nameQu = parts.get(k).split("<")[0];
+                List<de.monticore.types.types._ast.ASTTypeArgument> tmpArgList = 
+                    new ArrayList<de.monticore.types.types._ast.ASTTypeArgument>();
+//                parts.remove(k);
+                k++;
+                while(!parts.get(k).contains(">")) {
+                  List<String> qn = new ArrayList<String>();
+                  for (String s : parts.get(k).split("\\.")) {
+                    if (s.contains(">")) {
+                      s= s.split(">")[0];
+                    }
+                    qn.add(s);
+                  }
+                  de.monticore.types.types._ast.ASTSimpleReferenceType add = 
+                      TypesNodeFactory.createASTSimpleReferenceType(qn, null);
+                  tmpArgList.add(add);
+//                  parts.remove(k);
+                  k++;
+                  
+                }
+                // the last one with ">"
+                List<String> qn = new ArrayList<String>();
+                for (String s : parts.get(k).split("\\.")) {
+                  if (s.contains(">")) {
+                    s= s.split(">")[0];
+                  }
+                  qn.add(s);
+                }
+                de.monticore.types.types._ast.ASTSimpleReferenceType add1 = 
+                    TypesNodeFactory.createASTSimpleReferenceType(qn, null);
+                tmpArgList.add(add1);
+                List<String> nameQuList = new ArrayList<String>();
+                for (String s : nameQu.split("\\.")) {
+                  if (s.contains(">")) {
+                    s= s.split(">")[0];
+                  }
+                  nameQuList.add(s);
+                }
+                de.monticore.types.types._ast.ASTTypeArguments typesList = 
+                    TypesNodeFactory.createASTTypeArguments(tmpArgList);
+                de.monticore.types.types._ast.ASTSimpleReferenceType toBeAdded = 
+                    TypesNodeFactory.createASTSimpleReferenceType(nameQuList, typesList);
+                System.out.println("typeArg" + toBeAdded);
+                
+                typeArgs.add(toBeAdded);
+                
+              }
+              else {
+                List<de.monticore.types.types._ast.ASTSimpleReferenceType> tmpArgList = 
+                    new ArrayList<de.monticore.types.types._ast.ASTSimpleReferenceType>();
+  //              parts.remove(k);
+                k++;
+                while(!parts.get(k).contains(">")) {
+                  List<String> qn = new ArrayList<String>();
+                  for (String s : parts.get(k).split("\\.")) {
+                    if (s.contains(">")) {
+                      s= s.split(">")[0];
+                    }
+                    qn.add(s);
+                  }
+                  de.monticore.types.types._ast.ASTSimpleReferenceType add = 
+                      TypesNodeFactory.createASTSimpleReferenceType(qn, null);
+                  tmpArgList.add(add);
+  //                parts.remove(k);
+                  k++;
+                  
+                }
+                // the last one with ">"
+                List<String> qn = new ArrayList<String>();
+                for (String s : parts.get(k).split("\\.")) {
+                  if (s.contains(">")) {
+                    s= s.split(">")[0];
+                  }
+                  qn.add(s);
+                }
+                de.monticore.types.types._ast.ASTSimpleReferenceType add1 = 
+                    TypesNodeFactory.createASTSimpleReferenceType(qn, null);
+                tmpArgList.add(add1);
+                System.out.println("tmpArgList" + tmpArgList.toString());
+                typeArgs.addAll(tmpArgList);
+                k++;
+              }
+            }
+            else {
+              List<String> onlyName = new ArrayList<String>();
+              if (parts.get(k).split(".").length > 0) {
+                for (String s : parts.get(k).split(".")) {
+                  System.out.println("Add " + s);
+                  if (s.contains(">")) {
+                    s= s.split(">")[0];
+                  }
+                  onlyName.add(s);
+                }
+              }
+              else {
+                onlyName.add(parts.get(k));
+              }
+              de.monticore.types.types._ast.ASTSimpleReferenceType lastAdd = 
+                  TypesNodeFactory.createASTSimpleReferenceType(onlyName, null);
+              System.out.println("lastAdd" +lastAdd.toString());
+              typeArgs.add(lastAdd);
+              
+              k++;
+            }
+          }
+          
+          // now we handle the first and the last one 
+          System.out.println("firstElement" + firstElement);
+          System.out.println("util " + firstElement.split("\\.")[0]);
+          System.out.println("list " + firstElement.split("\\.")[1]);
+          String[] qualifier = firstElement.split("\\.");
+          System.out.println("qualifier length " +qualifier.length);
+          ArrayList<String> qualifiers = new ArrayList<String>();
+          for (String s:qualifier) {
+            System.out.println("s " + s);
+            if (s.contains(">")) {
+              s= s.split(">")[0];
+            }
+            qualifiers.add(s);
+          }
+          de.monticore.types.types._ast.ASTSimpleReferenceType first = 
+              TypesNodeFactory.createASTSimpleReferenceType(qualifiers, null);
+          System.out.println("First element to add " + first.toString());
+          typeArgs.add(0,first);
+          System.out.println("typeArgs " + typeArgs.toString());
+          de.monticore.types.types._ast.ASTComplexReferenceType bla = 
+              TypesNodeFactory.createASTComplexReferenceType(typeArgs);
+          List<de.monticore.types.types._ast.ASTComplexReferenceType> upper= 
+              new ArrayList<de.monticore.types.types._ast.ASTComplexReferenceType>();
+          upper.add(bla);
+          de.monticore.types.types._ast.ASTTypeVariableDeclaration varDec = 
+              TypesNodeFactory.createASTTypeVariableDeclaration(name, upper);
+          genericsTypes.add(varDec);
+        }   
+      }  
+    }
+    return genericsTypes;    
+  }
+  
+  
   @Override
   public ASTNode shapeToAST(Graph graph, String modelName) {
     
     ArrayList<String> generics = MontiArcController.genericsArray;
     ArrayList<String> types = MontiArcController.types;
-    
-    // create AST
-    de.monticore.lang.montiarc.montiarc._ast.ASTMACompilationUnit ast = 
-        MontiArcNodeFactory.createASTMACompilationUnit();
-        
-    // create generic type params
-    ArrayList<de.monticore.types.types._ast.ASTTypeVariableDeclaration> genericsTypes = new ArrayList<ASTTypeVariableDeclaration>();
-    System.out.println("Generics looks as follows" + generics);
-    for (String g : generics) {
-      String name = "";
-      ArrayList<String> upperBounds = new ArrayList<String>();
-      if (g.split("extends").length > 1) {
-        name = (g.split("extends")[0]).replaceAll("\\s+","");
-        for(String u : g.split("extends")[1].split(",")) {
-          upperBounds.add(u.replaceAll("\\s+", ""));
-        }
-        ArrayList<de.monticore.types.types._ast.ASTSimpleReferenceType> simpleReferenceTypes = new ArrayList<de.monticore.types.types._ast.ASTSimpleReferenceType>();
-        de.monticore.types.types._ast.ASTSimpleReferenceType simpleReferenceType =    
-            TypesNodeFactory.createASTSimpleReferenceType(upperBounds, null);
-        simpleReferenceTypes.add(simpleReferenceType);
-        ArrayList<de.monticore.types.types._ast.ASTComplexReferenceType> complexReferenceTypes = 
-            new ArrayList<de.monticore.types.types._ast.ASTComplexReferenceType>();
-        de.monticore.types.types._ast.ASTComplexReferenceType complexReferenceType = 
-            TypesNodeFactory.createASTComplexReferenceType(simpleReferenceTypes);
-        complexReferenceTypes.add(complexReferenceType);
-        de.monticore.types.types._ast.ASTTypeVariableDeclaration typeVariableDec = 
-            TypesNodeFactory.createASTTypeVariableDeclaration(name, 
-                (List<de.monticore.types.types._ast.ASTComplexReferenceType>) complexReferenceTypes);
-        genericsTypes.add(typeVariableDec);
-        System.out.println("typeVariableDec" + typeVariableDec.toString());
+    // temporary
+    ArrayList<String> imports = new ArrayList<String>();
+    // temporary
+    String packageDec = "bla.bla2.bla3;";
+    List<de.monticore.types.types._ast.ASTImportStatement> importDecls = 
+        new ArrayList<de.monticore.types.types._ast.ASTImportStatement>();
+    for (String s : imports) {
+      boolean star = false;
+      if (s.contains("*")) {
+        star = true;
+        s = s.split("*")[0];
       }
-      else {
-        name = g.replaceAll("\\s+", "");
+      String[] qualifiers = s.split("\\.");
+      ArrayList<String> qual = new ArrayList<String>();
+      for (String t : qualifiers) {
+        qual.add(t);
       }
+      de.monticore.types.types._ast.ASTImportStatement importDec = 
+          TypesNodeFactory.createASTImportStatement(qual, star);
+      System.out.println("Imports " + importDec.toString());
+      importDecls.add(importDec);
     }
-    de.monticore.types.types._ast.ASTTypeParameters genericTypeParameters = 
+    List<String> packageParts = new ArrayList<String>();
+    for (String s : packageDec.split("\\.")) {
+      packageParts.add(s);
+    }
+    ASTQualifiedName packageName = TypesNodeFactory.createASTQualifiedName(packageParts);
+    de.monticore.java.javadsl._ast.ASTPackageDeclaration packageDeclaration = 
+        JavaDSLNodeFactory.createASTPackageDeclaration(null, packageName);
+    System.out.println("PackageDec " + packageDeclaration.toString());
+    
+    
+    
+    
+    
+    ArrayList<ASTTypeVariableDeclaration> genericsTypes = createGenerics(generics);
+    // Generics, needs to be added by construction of componentHead
+    // Darf auch leer sein. Dann muss ja eigentlich doch ein Optional zurueckgegeben werden der leer ist oder?
+
+    de.monticore.types.types._ast.ASTTypeParameters typeParams = 
         TypesNodeFactory.createASTTypeParameters(genericsTypes);
+    System.out.println("typeParams"+ typeParams.toString());
+    IndentPrinter print = new IndentPrinter();
+    TypesPrettyPrinterConcreteVisitor printer= new TypesPrettyPrinterConcreteVisitor(print);
+    printer.prettyprint(typeParams);
+    
     
     //create types param
     ArrayList<de.monticore.lang.montiarc.common._ast.ASTParameter> parameters = new ArrayList<ASTParameter>();
@@ -171,13 +439,13 @@ public class MontiArcPlugin implements MontiCorePlugIn {
     
     // create outermost component head
     de.monticore.lang.montiarc.montiarc._ast.ASTComponentHead astHead = 
-        MontiArcNodeFactory.createASTComponentHead(genericTypeParameters, parameters, null);
+        MontiArcNodeFactory.createASTComponentHead(typeParams, parameters, null);
     
     // create params for outermost component body
-    for (AbstractNode g : graph.getAllNodes()) {
-      if (g instanceof ComponentNode) {
+    for (AbstractNode node : graph.getAllNodes()) {
+      if (node instanceof ComponentNode) {
         de.monticore.common.common._ast.ASTStereotype.Builder builder = new Builder();
-        ASTStereoValue value = CommonNodeFactory.createASTStereoValue(((ComponentNode) g).getStereotype(), null);
+        ASTStereoValue value = CommonNodeFactory.createASTStereoValue(((ComponentNode) node).getStereotype(), null);
         ArrayList<ASTStereoValue> valueList = new ArrayList<ASTStereoValue>();
         valueList.add(value);
         builder.values(valueList);
@@ -187,7 +455,7 @@ public class MontiArcPlugin implements MontiCorePlugIn {
         
         ArrayList<de.monticore.lang.montiarc.montiarc._ast.ASTPort> astPorts = new ArrayList<ASTPort>();
         // create AstPorts
-        for (PortNode p : ((ComponentNode) g).getPorts()) {
+        for (PortNode p : ((ComponentNode) node).getPorts()) {
           boolean incoming = false;
           boolean outgoing = true;
           if (p.getPortDirection() == "in") {
@@ -234,8 +502,8 @@ public class MontiArcPlugin implements MontiCorePlugIn {
         // TODO ConnectorEdge anpassen auf List of targets
         for (Edge e: graph.getAllEdges()) {
           if (e instanceof ConnectorEdge) {
-            if (((PortNode)e.getStartNode()).getComponentNode() == g ||
-                ((PortNode)e.getEndNode()).getComponentNode() == g) {
+            if (((PortNode)e.getStartNode()).getComponentNode() == node ||
+                ((PortNode)e.getEndNode()).getComponentNode() == node) {
               de.monticore.types.types._ast.ASTQualifiedName.Builder builderQualifiedNameSource = 
                   new de.monticore.types.types._ast.ASTQualifiedName.Builder();
               ArrayList<String> title = new ArrayList<String>();
@@ -269,11 +537,12 @@ public class MontiArcPlugin implements MontiCorePlugIn {
         
         // create astComponents for each ComponentNode
         astComponent = 
-            MontiArcNodeFactory.createASTComponent(stereotype, g.getTitle(), head, "", typeArgs, astBody);
+            MontiArcNodeFactory.createASTComponent(stereotype, node.getTitle(), head, "", typeArgs, astBody);
        
         
         System.out.println("astComponent Head looks as follows: " + astComponent.getHead());
         System.out.println("astComponent Body looks as follows: " + astComponent.getBody().getElements().toString());
+        System.out.println("astComponent Stereotype looks as follows: " + astComponent.getStereotype());
         
       // add each astComponent to elementsList (the list for the body of the outermost component)
         elements.add(astComponent);
@@ -281,51 +550,17 @@ public class MontiArcPlugin implements MontiCorePlugIn {
       }  
     }
     
-//    ArrayList<Edge> edges = (ArrayList<Edge>) graph.getAllEdges();
-//    while(edges.isEmpty()) {
-//      Edge e = edges.get(0);
-//      ArrayList<ConnectorEdge> tmp = new ArrayList<ConnectorEdge>();
-//      if (e instanceof ConnectorEdge) {
-//        for (Edge e2 : graph.getAllEdges()) {
-//          if (e.getId() != e2.getId() && e.getStartNode() == e2.getStartNode()) {
-//            tmp.add((ConnectorEdge) e2);  
-//          }
-//        }
-//        
-//        de.monticore.types.types._ast.ASTQualifiedName.Builder builderQualifiedNameSource = new de.monticore.types.types._ast.ASTQualifiedName.Builder();
-//        ArrayList<String> title = new ArrayList<String>();
-//        title.add(e.getStartNode().getTitle());
-//        builderQualifiedNameSource.parts(title);
-//        de.monticore.types.types._ast.ASTQualifiedName source = builderQualifiedNameSource.build();
-//        
-//        de.monticore.types.types._ast.ASTQualifiedName.Builder builderQualifiedNameTargets = new de.monticore.types.types._ast.ASTQualifiedName.Builder();
-//        ArrayList<String> titleTargets = new ArrayList<String>();
-//        for (Edge t : tmp) {
-//          titleTargets.add(t.getEndNode().getTitle());
-//        }
-//        builderQualifiedNameTargets = builderQualifiedNameTargets.parts(titleTargets);
-//        List<de.monticore.types.types._ast.ASTQualifiedName> targets = (List<ASTQualifiedName>) builderQualifiedNameTargets.build();
-//        
-//        de.monticore.lang.montiarc.montiarc._ast.ASTConnector astConnector =
-//            MontiArcNodeFactory.createASTConnector(null, source, targets);
-//        bodyElements.add(astConnector);
-//      }
-//      else {
-//        edges.remove(e);
-//      }
-//      for (Edge t : tmp) {
-//        edges.remove(t);
-//      }
-//    }
-//    
     // create componentBody of outermost component
     de.monticore.lang.montiarc.montiarc._ast.ASTComponentBody astBody = 
         MontiArcNodeFactory.createASTComponentBody(elements);
     // create outermost component
     de.monticore.lang.montiarc.montiarc._ast.ASTComponent astComp = 
         MontiArcNodeFactory.createASTComponent(null, modelName, astHead, null, null, astBody);
-    ast.setComponent(astComp);
-    return null;
+ // create AST
+    de.monticore.lang.montiarc.montiarc._ast.ASTMACompilationUnit ast = 
+        MontiArcNodeFactory.createASTMACompilationUnit(packageParts, importDecls, astComp);
+
+   return ast;
   }
 
   @Override

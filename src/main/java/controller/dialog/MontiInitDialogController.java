@@ -1,5 +1,6 @@
 package controller.dialog;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -15,8 +16,7 @@ public class MontiInitDialogController {
   private boolean okClicked = false;
   
   @FXML
-  public TextField nameTextField, arcParameterTextField, genericsTextField;
-  
+  public TextField nameTextField, arcParameterTextField, genericsTextField, packageTextField;
   
   @FXML
   public void initialize() {
@@ -27,7 +27,7 @@ public class MontiInitDialogController {
    * Called when the user clicks ok.
    */
   @FXML
-  public void handleOk() {
+  public void handleOk(ActionEvent actionEvent) {
     if (isInputValid()) {
       okClicked = true;
       dialogStage.close();

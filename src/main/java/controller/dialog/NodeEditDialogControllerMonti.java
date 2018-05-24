@@ -14,7 +14,7 @@ import model.nodes.PortNode;
  *
  * @author Marco Jakob
  */
-public class NodeEditDialogController {
+public class NodeEditDialogControllerMonti extends NodeEditDialogController{
   
   @FXML
   private TextField titleField;

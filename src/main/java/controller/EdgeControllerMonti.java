@@ -13,6 +13,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import model.edges.*;
+import model.edges.ConnectorEdge;
 import model.nodes.ComponentNode;
 import model.nodes.PortNode;
 import util.commands.DirectionChangeEdgeCommand;

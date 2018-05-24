@@ -4,7 +4,7 @@ import model.nodes.AbstractNode;
 import model.nodes.ComponentNode;
 import model.nodes.Node;
 import model.nodes.PortNode;
-import util.Constants;
+import util.ConstantsMonti;
 
 public class ConnectorEdge extends AbstractEdge{
 //  private PortNode startPort;
@@ -84,13 +84,13 @@ public class ConnectorEdge extends AbstractEdge{
   }
   
   public void setDataType(String pDataType) {
-    changes.firePropertyChange(Constants.changeConnectorDataType, dataType, pDataType);
-    remoteChanges.firePropertyChange(Constants.changeConnectorDataType, dataType, pDataType);
+    changes.firePropertyChange(ConstantsMonti.changeConnectorDataType, dataType, pDataType);
+    remoteChanges.firePropertyChange(ConstantsMonti.changeConnectorDataType, dataType, pDataType);
     dataType = pDataType;
   }
   
   public void remoteSetDataType(String pDataType) {
-    changes.firePropertyChange(Constants.changeConnectorDataType, dataType, pDataType);
+    changes.firePropertyChange(ConstantsMonti.changeConnectorDataType, dataType, pDataType);
     dataType = pDataType;
   }
 

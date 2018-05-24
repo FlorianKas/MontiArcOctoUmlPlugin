@@ -169,14 +169,35 @@
 			<version>${emf.common.version}</version> </dependency> <dependency> <groupId>de.monticore</groupId> 
 			<artifactId>monticore-emf-runtime</artifactId> <version>${monticore.version}</version> 
 			</dependency> -->
-		<!-- 
-			<dependency>
-  		<groupId>octouml</groupId>
-  <artifactId>octouml-parent</artifactId>
+		 
+
+<!-- 		 
+<dependency>
+  <groupId>OctoUML</groupId>
+  <artifactId>OctoUML</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <type>pom</type>
 </dependency>
-		 -->
+ -->
+<dependency>
+  <groupId>OctoUML</groupId>
+  <artifactId>OctoUML</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <scope>system</scope>
+  <systemPath>${project.basedir}/src/main/resources/lib/OctoUML-0.0.1-20180522.232042-25.jar</systemPath>
+</dependency>
+<dependency>
+ 	<groupId>octouml</groupId>
+        <artifactId>diagram-control</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <scope>system</scope>
+        <systemPath>${project.basedir}/src/main/resources/lib/diagram-control-0.0.1-20180522.232001-24.jar</systemPath>
+ </dependency>
+<!-- <dependency>
+  <groupId>octouml</groupId>
+  <artifactId>diagram-control</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+</dependency>
+ -->
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
@@ -385,12 +406,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.sikulix</groupId>
-			<artifactId>sikulixapi</artifactId>
-			<version>1.1.0</version>
-		</dependency>
-
-		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-math3</artifactId>
 			<version>3.6.1</version>
@@ -402,12 +417,7 @@
 			<version>0.1.46</version>
 		</dependency>
 
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-			<version>1.0.13</version>
-			<scope>test</scope>
-		</dependency>
+		
 
 		<dependency>
 			<groupId>org.eclipse.jgit</groupId>
@@ -455,18 +465,30 @@
 	</dependencies>
 
 	<repositories>
-		<!--
+	<!--
+		
 		<repository>
 			<id>repository.jboss.org-public</id>
 			<name>JBoss.org Maven repository</name>
-			<url>https://repository.jboss.org/nexus/content/groups/public</url>
-		</repository>
-	-->
+			<url>https://repository.jboss.org/nexus/content/groups</url>
+		</repository>-->
 		<repository>
-			<id>se-nexus-public</id>
+			<id>se-nexus</id>
 			<name>yf</name>
 			<url>https://nexus.se.rwth-aachen.de/content/groups/public</url>
 		</repository>
+		<repository>
+			<id>se-nexus-1</id>
+			<name>yft</name>
+			<url>https://nexus.se.rwth-aachen.de/content/groups/octouml</url>
+		</repository>
+		<repository>
+			<id>se-nexus-2</id>
+			<name>yfa</name>
+			<url>https://nexus.se.rwth-aachen.de/content/groups/montiarc</url>
+		</repository>
+		
+ 		
 	</repositories>
 
 

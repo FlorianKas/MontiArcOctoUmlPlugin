@@ -1,53 +1,46 @@
 package controller;
 
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseButton;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
-import javafx.scene.shape.Rectangle;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import model.Sketch;
-import model.edges.AbstractEdge;
-import model.edges.AggregationEdge;
-import model.edges.CompositionEdge;
-import model.edges.ConnectorEdge;
-import model.edges.InheritanceEdge;
-import model.nodes.AbstractNode;
-
-import org.controlsfx.control.Notifications;
-import util.commands.CompoundCommand;
-import util.commands.MoveGraphElementCommand;
-
-import view.edges.AbstractEdgeView;
-import view.edges.AggregationEdgeView;
-import view.edges.AssociationEdgeView;
-import view.edges.CompositionEdgeView;
-import view.edges.ConnectorEdgeView;
-import view.edges.InheritanceEdgeView;
-import view.nodes.AbstractNodeView;
-import view.nodes.PackageNodeView;
-
-import controller.dialog.MontiInitDialogController;
-import controller.dialog.addGenericsController;
-import controller.dialog.addTypesController;
-
 import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.controlsfx.control.Notifications;
+
+import controller.dialog.MontiInitDialogController;
+import controller.dialog.AddGenericsController;
+import controller.dialog.AddTypesController;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import model.Sketch;
+import model.edges.AbstractEdge;
+import model.edges.ConnectorEdge;
+import model.nodes.AbstractNode;
+import model.nodes.ComponentNode;
+import model.nodes.PortNode;
+import util.commands.AddDeleteNodeCommand;
+import util.commands.CompoundCommand;
+import util.commands.MoveGraphElementCommand;
+import view.edges.AbstractEdgeView;
+import view.edges.ConnectorEdgeView;
+import view.nodes.AbstractNodeView;
+import view.nodes.ComponentNodeView;
+import view.nodes.PackageNodeView;
+
 public class MontiArcController extends AbstractDiagramController {
   
+  
+
   NodeControllerMonti nodeController;
   MontiRecognizeController recognizeController;
   TabControllerMonti tabController;
@@ -94,13 +87,13 @@ public class MontiArcController extends AbstractDiagramController {
       modelName = controller.nameTextField.getText();  
       packageName = controller.packageTextField.getText();
       String genericsString = controller.genericsTextField.getText();
-      String[] genericsTmp = genericsString.split(";");
+      String[] genericsTmp = genericsString.split("\\;");
       for (String g: genericsTmp) {
         genericsArray.add(g);
       }
       String typeParam = controller.arcParameterTextField.getText();
 
-      String[] typesTmp = typeParam.split(";");
+      String[] typesTmp = typeParam.split("\\;");
       for (String t : typesTmp) {
         types.add(t);
       }
@@ -133,8 +126,8 @@ public class MontiArcController extends AbstractDiagramController {
         config.getChildren().add(tmp);
       }
     }
+    Label typeParameters = new Label();
     if (types.size() > 0) {
-      Label typeParameters = new Label();
       typeParameters.setText("Type Parameters: ");
       config.getChildren().add(typeParameters);
       for( String t : types) {
@@ -149,8 +142,8 @@ public class MontiArcController extends AbstractDiagramController {
   }
   
   void addGenerics() {
-    addGenericsController controller = showGenericsDialog();
-    String[] tmp = controller.genericsTextField.getText().split(",");
+    AddGenericsController controller = showGenericsDialog();
+    String[] tmp = controller.genericsTextField.getText().split("\\;");
     for (String g: tmp) {
       genericsArray.add(g);
     }  
@@ -158,8 +151,8 @@ public class MontiArcController extends AbstractDiagramController {
   }
   
   
-  public addGenericsController showGenericsDialog() {
-    addGenericsController controllerGenerics = null; 
+  public AddGenericsController showGenericsDialog() {
+    AddGenericsController controllerGenerics = null; 
     
     try {
       FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view/fxml/addGenerics.fxml"));
@@ -189,8 +182,8 @@ public class MontiArcController extends AbstractDiagramController {
   
   
   void addTypes() {
-    addTypesController controller = showTypesDialog();
-    String[] tmp = controller.arcParameterTextField.getText().split(",");
+    AddTypesController controller = showTypesDialog();
+    String[] tmp = controller.arcParameterTextField.getText().split("\\;");
     for (String g: tmp) {
       types.add(g);
     }  
@@ -198,8 +191,8 @@ public class MontiArcController extends AbstractDiagramController {
 
   }
   
-  public addTypesController showTypesDialog() {
-    addTypesController controllerTypes = null; 
+  public AddTypesController showTypesDialog() {
+    AddTypesController controllerTypes = null; 
     
     try {
 
@@ -717,12 +710,38 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
     });
   }
   
+  public AbstractNodeView createNodeView(AbstractNode node, boolean remote) {
+    AbstractNodeView newView = null;
+    if (node instanceof ComponentNode) {
+      newView = new ComponentNodeView((ComponentNode) node);
+      System.out.println("We are in MONTIARCCONTROLLER BY CREATING NODEVIEW");
+    }
+    else if (node instanceof PortNode) {
+//      ComponentNodeView compView = new ComponentNodeView();
+      System.out.println("NodeMap " + nodeMap.toString());
+      System.out.println("AllNodeViews "+ allNodeViews);
+      for (AbstractNodeView view : allNodeViews) {
+        if(nodeMap.get(view) ==  (ComponentNode)((PortNode) node).getComponentNode()) {
+          newView = ((ComponentNodeView)view).getNodeToViewMap().get(node);
+          break;
+        }
+      } 
+    }
+    if (!graph.getAllNodes().contains(node)) {
+      // test; maybe also without AbstractDiagramController-cast
+      graph.addNode(node, remote);
+      undoManager.add(new AddDeleteNodeCommand((AbstractDiagramController)MontiArcController.this, graph, newView, node, true));
+    }
+    return addNodeView(newView, node);
+  }
+  
   
   public ConnectorEdgeView addEdgeView(AbstractEdge edge, boolean remote) {
     AbstractNodeView startNodeView = null;
     AbstractNodeView endNodeView = null;
     AbstractNode tempNode;
-    
+
+    System.out.println("We are in MONTIARCCONTROLLER BY ADDING EDGEVIEW");
     for (AbstractNodeView nodeView : allNodeViews) {
       tempNode = nodeMap.get(nodeView);
       System.out.println("TempNode " + tempNode);
@@ -748,6 +767,26 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
     return edgeView;
   }
   
+  public AbstractEdgeView createEdgeView(AbstractEdge edge, AbstractNodeView startNodeView, AbstractNodeView endNodeView) {
+    AbstractEdgeView edgeView;
+
+    System.out.println("We are in MONTIARCCONTROLLER BY CREATING EDGEVIEW");
+    if (edge instanceof ConnectorEdge) {
+      System.out.println("Detected a ConnectorEdge");
+      edgeView = new ConnectorEdgeView(edge, startNodeView, endNodeView);
+    }
+    else {
+      edgeView = null;
+    }
+    System.out.println("EdgeView" + edgeView.getStartX() + edgeView.getStartY() + edgeView.getEndX() + edgeView.getEndY());
+    return addEdgeView(edgeView);
+  }
+
+  @Override
+  public String getTabControllerName() {
+    // TODO Auto-generated method stub
+    return null;
+  }
   
   
 }

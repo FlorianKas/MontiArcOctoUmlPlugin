@@ -6,31 +6,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
+//import controller.AbstractDiagramController;
+
+import javafx.stage.Stage;
+
 import montiarc._ast.ASTMontiArcNode;
-import montiarc._symboltable.MontiArcLanguage;
 import montiarc._ast.ASTMACompilationUnit;
-import de.monticore.common.common._ast.ASTStereoValue;
-import de.monticore.common.common._ast.ASTStereotype;
+import de.monticore.ast.ASTNode;
+
+import de.monticore.common.common._ast.*;
 import de.monticore.common.common._ast.ASTStereotype.Builder;
-import de.monticore.common.common._ast.CommonNodeFactory;
-import de.monticore.java.javadsl._ast.ASTCompilationUnit;
-import de.monticore.java.javadsl._ast.JavaDSLNodeFactory;
-import de.monticore.types.types._ast.ASTComplexArrayType;
-import de.monticore.types.types._ast.ASTTypeParameters;
-import de.monticore.types.types._ast.ASTTypeVariableDeclaration;
-import de.monticore.types.types._ast.ASTComplexReferenceType;
-import de.monticore.types.types._ast.ASTQualifiedName;
-import de.monticore.types.types._ast.ASTQualifiedName.*;
-import de.monticore.types.types._ast.ASTSimpleReferenceType;
+import de.monticore.types.types._ast.*;
+import de.monticore.types.prettyprint.TypesPrettyPrinterConcreteVisitor;
+
 import de.monticore.lang.montiarc.common._ast.ASTParameter;
 import de.monticore.lang.montiarc.montiarc._ast.*;
-import de.monticore.types.types._ast.TypesNodeFactory;
-import de.monticore.ast.ASTNode;
+import de.monticore.lang.montiarc.montiarc._symboltable.MontiArcLanguage;
 import de.monticore.prettyprint.IndentPrinter;
-import de.monticore.types.prettyprint.TypesPrettyPrinterConcreteVisitor;
-import javafx.stage.Stage;
-import controller.AbstractDiagramController;
-import de.monticore.lang.montiarc.helper.SymbolPrinter;
+
+import de.monticore.java.javadsl._ast.ASTCompilationUnit;
+import de.monticore.java.javadsl._ast.JavaDSLNodeFactory;
+
 import model.Graph;
 import model.GraphElement;
 import model.edges.ConnectorEdge;
@@ -156,7 +152,7 @@ public class MontiArcPlugin implements MontiCorePlugIn {
           
           for (String u : firstSplit) {
             // divide supClasses at '.'
-            String[] partsSmaller = u.split("<");
+            String[] partsSmaller = u.split("\\<");
             System.out.println("partsSmaller" + partsSmaller.length);
             String withoutFirst = "";
             for (int i=1; i<partsSmaller.length; i++) {
@@ -168,9 +164,9 @@ public class MontiArcPlugin implements MontiCorePlugIn {
               }
             }
             System.out.println("WithoutFirst" + withoutFirst);
-            String[] without = withoutFirst.split(">");
+            String[] without = withoutFirst.split("\\>");
             String lastElement = without[without.length-1];
-            String partsGreater[] = withoutFirst.split(">");
+            String partsGreater[] = withoutFirst.split("\\>");
             System.out.println("Length of parts Greater " + partsGreater.length);
             String withoutLast = "";
             for (int i=0; i<partsGreater.length; i++) {
@@ -198,9 +194,9 @@ public class MontiArcPlugin implements MontiCorePlugIn {
             int k = 0;
             int length = parts.size();
             while (k <length) {
-              if (parts.get(k).contains("<") && parts.get(k).contains(">")) {
+              if (parts.get(k).contains("\\<") && parts.get(k).contains("\\>")) {
                 System.out.println("length of split at <" + parts.get(k).split("\\<")[0]);
-                if (parts.get(k).split("<")[0].isEmpty()) {
+                if (parts.get(k).split("\\<")[0].isEmpty()) {
 //                  should not happen
 //                  List<String> qn = new ArrayList<String>();
 //                  if (parts.get(k).split("\\.").length > 0) {
@@ -238,16 +234,16 @@ public class MontiArcPlugin implements MontiCorePlugIn {
                   
                   if (typeName.split("\\.").length > 0) {
                     for (String s : typeName.split("\\.")) {
-                      if (s.contains(">")) {
-                        s= s.split(">")[0];
+                      if (s.contains("\\>")) {
+                        s= s.split("\\>")[0];
                       }
                       typeNameQ.add(s.replaceAll("\\s+",""));
                     }
                   }
                   else {
                     String tmp = "";
-                    if (typeName.contains(">")) {
-                      tmp = typeName.split(">")[0];
+                    if (typeName.contains("\\>")) {
+                      tmp = typeName.split("\\>")[0];
                     }
                     else {
                       tmp = typeName;
@@ -256,11 +252,11 @@ public class MontiArcPlugin implements MontiCorePlugIn {
                   }
                   
                   // create typeArgs
-                  String rest = parts.get(k).split("<")[1];
+                  String rest = parts.get(k).split("\\<")[1];
                   
                   ArrayList<String> rests = new ArrayList<String>();
                   
-                  if(rest.contains(",")) {
+                  if(rest.contains("\\,")) {
                     String[] reste = rest.split("\\,");  
                     for (int l = 0 ; l<reste.length; l++) {
                       rests.add(reste[l]);
@@ -276,16 +272,16 @@ public class MontiArcPlugin implements MontiCorePlugIn {
                     ArrayList<String> argsQ = new ArrayList<String>();
                     if (rest1.split("\\.").length > 0) {
                       for (String s : rest.split("\\.")) {
-                        if (s.contains(">")) {
-                          s= s.split(">")[0];
+                        if (s.contains("\\>")) {
+                          s= s.split("\\>")[0];
                         }
                         argsQ.add(s.replaceAll("\\s+",""));
                       }
                     }
                     else {
                       String tmp = "";
-                      if (rest.contains(">")) {
-                        tmp = rest.split(">")[0];
+                      if (rest.contains("\\>")) {
+                        tmp = rest.split("\\>")[0];
                       }
                       else {
                         tmp = rest;
@@ -314,9 +310,9 @@ public class MontiArcPlugin implements MontiCorePlugIn {
   //              parts.remove(k);
                 k++;
               }
-              else if (parts.get(k).contains("<")) {
+              else if (parts.get(k).contains("\\<")) {
                 String nameQu = "";
-                if(parts.get(k).split("<").length == 1) {
+                if(parts.get(k).split("\\<").length == 1) {
                   nameQu = parts.get(k).split("<")[0];
                   List<de.monticore.types.types._ast.ASTTypeArgument> tmpArgList = 
                       new ArrayList<de.monticore.types.types._ast.ASTTypeArgument>();
@@ -326,16 +322,16 @@ public class MontiArcPlugin implements MontiCorePlugIn {
                     List<String> qn = new ArrayList<String>();
                     if (parts.get(k).split("\\.").length > 0) {
                       for (String s : parts.get(k).split("\\.")) {
-                        if (s.contains(">")) {
-                          s= s.split(">")[0];
+                        if (s.contains("\\>")) {
+                          s= s.split("\\>")[0];
                         }
                         qn.add(s.replaceAll("\\s+",""));
                       }
                     }
                     else {
                       String tmp = "";
-                      if (parts.get(k).contains(">")) {
-                        tmp = parts.get(k).split(">")[0];
+                      if (parts.get(k).contains("\\>")) {
+                        tmp = parts.get(k).split("\\>")[0];
                       }
                       else {
                         tmp = parts.get(k);
@@ -353,16 +349,16 @@ public class MontiArcPlugin implements MontiCorePlugIn {
                   List<String> qn = new ArrayList<String>();
                   if (parts.get(k).split("\\.").length > 0) {
                     for (String s : parts.get(k).split("\\.")) {
-                      if (s.contains(">")) {
-                        s= s.split(">")[0];
+                      if (s.contains("\\>")) {
+                        s= s.split("\\>")[0];
                       }
                       qn.add(s.replaceAll("\\s+",""));
                     }
                   }
                   else {
                     String tmp = "";
-                    if (parts.get(k).contains(">")) {
-                      tmp = parts.get(k).split(">")[0];
+                    if (parts.get(k).contains("\\>")) {
+                      tmp = parts.get(k).split("\\>")[0];
                     }
                     else {
                       tmp = parts.get(k);
@@ -375,16 +371,16 @@ public class MontiArcPlugin implements MontiCorePlugIn {
                   List<String> nameQuList = new ArrayList<String>();
                   if (nameQu.split("\\.").length > 0) {
                     for (String s : nameQu.split("\\.")) {
-                      if (s.contains(">")) {
-                        s= s.split(">")[0];
+                      if (s.contains("\\>")) {
+                        s= s.split("\\>")[0];
                       }
                       nameQuList.add(s.replaceAll("\\s+",""));
                     }
                   }
                   else {
                     String tmp = "";
-                    if (parts.get(k).contains(">")) {
-                      tmp = nameQu.split(">")[0];
+                    if (parts.get(k).contains("\\>")) {
+                      tmp = nameQu.split("\\>")[0];
                     }
                     else {
                       tmp = nameQu;
@@ -405,20 +401,20 @@ public class MontiArcPlugin implements MontiCorePlugIn {
                       new ArrayList<de.monticore.types.types._ast.ASTTypeArgument>();
     //              parts.remove(k);
                   k++;
-                  while(!parts.get(k).contains(">")) {
+                  while(!parts.get(k).contains("\\>")) {
                     List<String> qn = new ArrayList<String>();
                     if (parts.get(k).split("\\.").length > 0) {
                       for (String s : parts.get(k).split("\\.")) {
-                        if (s.contains(">")) {
-                          s= s.split(">")[0];
+                        if (s.contains("\\>")) {
+                          s= s.split("\\>")[0];
                         }
                         qn.add(s.replaceAll("\\s+",""));
                       }
                     }
                     else {
                       String tmp = "";
-                      if (parts.get(k).contains(">")) {
-                        tmp = parts.get(k).split(">")[0];
+                      if (parts.get(k).contains("\\>")) {
+                        tmp = parts.get(k).split("\\>")[0];
                       }
                       else {
                         tmp = parts.get(k);
@@ -434,18 +430,18 @@ public class MontiArcPlugin implements MontiCorePlugIn {
                   }
                   // the last one with ">"
                   List<String> qn = new ArrayList<String>();
-                  if (parts.get(k).split(".").length > 0) {  
+                  if (parts.get(k).split("\\.").length > 0) {  
                     for (String s : parts.get(k).split("\\.")) {
-                      if (s.contains(">")) {
-                        s= s.split(">")[0];
+                      if (s.contains("\\>")) {
+                        s= s.split("\\>")[0];
                       }
                       qn.add(s.replaceAll("\\s+",""));
                     }
                   }
                   else {
                     String tmp = "";
-                    if (parts.get(k).contains(">")) {
-                      tmp = parts.get(k).split(">")[0];
+                    if (parts.get(k).contains("\\>")) {
+                      tmp = parts.get(k).split("\\>")[0];
                     }
                     else {
                       tmp = parts.get(k);
@@ -465,16 +461,22 @@ public class MontiArcPlugin implements MontiCorePlugIn {
                 if (parts.get(k).split(".").length > 0) {
                   for (String s : parts.get(k).split("\\.")) {
                     System.out.println("Add " + s);
-                    if (s.contains(">")) {
-                      s= s.split(">")[0];
+                    if (s.contains("\\>")) {
+                      s= s.split("\\>")[0];
+                    }
+                    if (s.contains("\\>")) {
+                      s= s.split("\\>")[0];
                     }
                     onlyName.add(s.replaceAll("\\s+",""));
                   }
                 }
                 else {
                   String tmp = "";
-                  if (parts.get(k).contains(">")) {
-                    tmp = parts.get(k).split(">")[0];
+                  if (parts.get(k).contains("\\>")) {
+                    tmp = parts.get(k).split("\\>")[0];
+                    while(tmp.contains("\\>")) {
+                      tmp = parts.get(k).split("\\>")[0];
+                    }
                   }
                   else {
                     tmp = parts.get(k);
@@ -499,8 +501,8 @@ public class MontiArcPlugin implements MontiCorePlugIn {
             ArrayList<String> qualifiers = new ArrayList<String>();
             for (String s:qualifier) {
               System.out.println("s " + s);
-              if (s.contains(">")) {
-                s= s.split(">")[0];
+              if (s.contains("\\>")) {
+                s= s.split("\\>")[0];
               }
               qualifiers.add(s.replaceAll("\\s+",""));
             }
@@ -532,7 +534,7 @@ public class MontiArcPlugin implements MontiCorePlugIn {
   public ASTNode shapeToAST(Graph graph, String modelName) {
     
     ArrayList<String> generics = MontiArcController.genericsArray;
-    ArrayList<String> types = MontiArcController.types;
+    ArrayList<String> astTypes = MontiArcController.types;
     // temporary
     ArrayList<String> imports = new ArrayList<String>();
     // temporary
@@ -564,51 +566,48 @@ public class MontiArcPlugin implements MontiCorePlugIn {
     else {
       packageParts.add(packageDec);
     }
-    ASTQualifiedName packageName = TypesNodeFactory.createASTQualifiedName(packageParts);
-    List<de.monticore.java.javadsl._ast.ASTAnnotation> annotations = 
-        new ArrayList<de.monticore.java.javadsl._ast.ASTAnnotation>();
-    de.monticore.java.javadsl._ast.ASTPackageDeclaration packageDeclaration = 
-        JavaDSLNodeFactory.createASTPackageDeclaration(annotations, packageName);
-    System.out.println("PackageDec " + packageDeclaration.toString());
+//    ASTQualifiedName packageName = TypesNodeFactory.createASTQualifiedName(packageParts);
+//    List<de.monticore.java.javadsl._ast.ASTAnnotation> annotations = 
+//        new ArrayList<de.monticore.java.javadsl._ast.ASTAnnotation>();
+//    de.monticore.java.javadsl._ast.ASTPackageDeclaration packageDeclaration = 
+//        JavaDSLNodeFactory.createASTPackageDeclaration(annotations, packageName);
     
     
-    
-    
-    
-    ArrayList<ASTTypeVariableDeclaration> genericsTypes = createGenerics(generics);
+    ArrayList<ASTTypeVariableDeclaration> genericsTypes = new ArrayList<ASTTypeVariableDeclaration>();
+    if (!generics.isEmpty()) {
+      genericsTypes = createGenerics(generics);
+    } 
     // Generics, needs to be added by construction of componentHead
     // Darf auch leer sein. Dann muss ja eigentlich doch ein Optional zurueckgegeben werden der leer ist oder?
     de.monticore.types.types._ast.ASTTypeParameters typeParams = 
         TypesNodeFactory.createASTTypeParameters(genericsTypes);
-    IndentPrinter indentPrinter = new IndentPrinter();
-    TypesPrettyPrinterConcreteVisitor printer = new TypesPrettyPrinterConcreteVisitor(indentPrinter);
-    printer.visit(typeParams);
-    printer.handle(typeParams);
-    printer.endVisit(typeParams);
-    System.out.println("typeParams"+ typeParams.toString());
     
     
     //create types param
     ArrayList<de.monticore.lang.montiarc.common._ast.ASTParameter> parameters = new ArrayList<ASTParameter>();
-    System.out.println("Types looks as follows" + types);
-    for (String t : types) {
-      ArrayList<String> names = new ArrayList<String>();
-      names.add(t.split("\\s+")[1]);
-      de.monticore.types.types._ast.ASTSimpleReferenceType varDec = 
-          TypesNodeFactory.createASTSimpleReferenceType(names, null);
-      String typeName = t.split("\\s+")[1];
-      System.out.println("typeName " + typeName);
-      de.monticore.lang.montiarc.common._ast.ASTParameter parameter = 
-          MontiArcNodeFactory.createASTParameter(varDec, typeName, null);
-      parameters.add(parameter);    
+    System.out.println("Is types empty? " + astTypes.isEmpty());
+    if (!astTypes.isEmpty()) {
+      System.out.println("Types looks as follows" + astTypes);
+      for (String t : astTypes) {
+        System.out.println("t " + t);
+        ArrayList<String> names = new ArrayList<String>();
+        names.add(t.split("\\s+")[0]);
+        de.monticore.types.types._ast.ASTSimpleReferenceType varDec = 
+            TypesNodeFactory.createASTSimpleReferenceType(names, null);
+        String typeName = t.split("\\s+")[1];
+        System.out.println("typeName " + typeName);
+        de.monticore.lang.montiarc.common._ast.ASTParameter parameter = 
+            MontiArcNodeFactory.createASTParameter(varDec, typeName, null);
+        parameters.add(parameter);    
+      }
     }
     ArrayList<de.monticore.lang.montiarc.montiarc._ast.ASTElement> elements = new ArrayList<ASTElement>();
     de.monticore.lang.montiarc.montiarc._ast.ASTComponent astComponent = null;
-    
-    // create outermost component head
-    de.monticore.lang.montiarc.montiarc._ast.ASTComponentHead astHead = 
-        MontiArcNodeFactory.createASTComponentHead(typeParams, parameters, null);
-    
+  
+      // create outermost component head
+      de.monticore.lang.montiarc.montiarc._ast.ASTComponentHead astHead = 
+          MontiArcNodeFactory.createASTComponentHead(typeParams, parameters, null);
+      
     // create params for outermost component body
     for (AbstractNode node : graph.getAllNodes()) {
       if (node instanceof ComponentNode) {
@@ -624,6 +623,7 @@ public class MontiArcPlugin implements MontiCorePlugIn {
         ArrayList<de.monticore.lang.montiarc.montiarc._ast.ASTPort> astPorts = new ArrayList<ASTPort>();
         // create AstPorts
         for (PortNode p : ((ComponentNode) node).getPorts()) {
+          System.out.println("Ports of COmponnetNode " + ((ComponentNode) node).getPorts());
           boolean incoming = false;
           boolean outgoing = true;
           if (p.getPortDirection() == "in") {
@@ -688,22 +688,29 @@ public class MontiArcPlugin implements MontiCorePlugIn {
               }
             }
             else {
+              title.add(((PortNode)c.getStartNode()).getComponentNode().getTitle());
               title.add(portName);
             }
             ASTQualifiedName source = TypesNodeFactory.createASTQualifiedName(title);
             ArrayList<ASTQualifiedName> targets = new ArrayList<ASTQualifiedName>();
             visited.add(c.getStartPort());
+            ArrayList<String> firstTarget = new ArrayList<String>();
+            firstTarget.add(((PortNode)c.getEndNode()).getComponentNode().getTitle());
+            firstTarget.add(c.getEndNode().getTitle());
+            ASTQualifiedName astTargetFirst = TypesNodeFactory.createASTQualifiedName(firstTarget);
+            targets.add(astTargetFirst);
             for (ConnectorEdge e: edges) {
               if (c.getStartNode() == e.getStartNode() && c != e && !visited.contains(e)) {
                 // create all targets
                 ArrayList<String> target = new ArrayList<String>();
-                String portNameTarget = c.getEndNode().getTitle();
+                String portNameTarget = e.getEndNode().getTitle();
                 if (portNameTarget.split(".").length > 0) {
                   for (String s : portNameTarget.split(".")) {
                     target.add(s);
                   }
                 }
                 else {
+                  target.add(((PortNode)e.getEndNode()).getComponentNode().getTitle());
                   target.add(portName);
                 }
                 ASTQualifiedName astTarget = TypesNodeFactory.createASTQualifiedName(target);
@@ -728,21 +735,44 @@ public class MontiArcPlugin implements MontiCorePlugIn {
             MontiArcNodeFactory.createASTComponent(stereotype, node.getTitle(), head, "", typeArgs, astBody);
        // add each astComponent to elementsList (the list for the body of the outermost component)
         elements.add(astComponent);
-      }    
-    }
+     }    
+   }
     
     // create componentBody of outermost component
-    de.monticore.lang.montiarc.montiarc._ast.ASTComponentBody astBody = 
-        MontiArcNodeFactory.createASTComponentBody(elements);
-    // create outermost component
-    de.monticore.lang.montiarc.montiarc._ast.ASTComponent astComp = 
-        MontiArcNodeFactory.createASTComponent(null, modelName, astHead, null, null, astBody);
-    // create AST
-    de.monticore.lang.montiarc.montiarc._ast.ASTMACompilationUnit ast = 
-        MontiArcNodeFactory.createASTMACompilationUnit(packageParts, importDecls, astComp);
-
+   de.monticore.lang.montiarc.montiarc._ast.ASTComponentBody astBody = 
+       MontiArcNodeFactory.createASTComponentBody(elements);
+   // create outermost component
+   
+//   List<de.monticore.common.common._ast.ASTStereoValue> tmp = new ArrayList<de.monticore.common.common._ast.ASTStereoValue>();
+//   tmp.add(CommonNodeFactory.createASTStereoValue("tmp", "test"));
+//   de.monticore.common.common._ast.ASTStereotype stereo = CommonNodeFactory.createASTStereotype(tmp);
+   de.monticore.lang.montiarc.montiarc._ast.ASTComponent astComp = 
+       MontiArcNodeFactory.createASTComponent(null, modelName, astHead, null, null, astBody);
+   // create AST
+   de.monticore.lang.montiarc.montiarc._ast.ASTMACompilationUnit ast = 
+       MontiArcNodeFactory.createASTMACompilationUnit(packageParts, importDecls, astComp);
+    
+  // PrettyPrinting
+   IndentPrinter indentPrinter = new IndentPrinter();
+    
+   MAPrettyPrinter MaPrinter = new MAPrettyPrinter(indentPrinter);
+   ArrayList<String> packParts = new ArrayList<String>(); 
+   for (String s: ast.getPackage()) {
+     packParts.add(s);
+   }
+   MaPrinter.printPackageName(packParts);
+   ArrayList<ASTImportStatement> importSt = new ArrayList<ASTImportStatement>();
+   for (ASTImportStatement s : ast.getImportStatements()) {
+     importSt.add(s);
+   }
+   MaPrinter.printImport(importSt); 
+   MaPrinter.printComponent(ast.getComponent());    
+   MaPrinter.getPrinter().flushBuffer();
+   System.out.println(MaPrinter.getPrinter().getContent());
    return ast;
   }
+  
+  
 
   @Override
   public List<String> check(ASTNode node) {

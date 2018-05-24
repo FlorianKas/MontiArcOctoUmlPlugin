@@ -1,6 +1,6 @@
 package model.nodes;
 
-import util.Constants;
+import util.ConstantsMonti;
 
 public class PortNode extends AbstractNode {
   
@@ -105,13 +105,13 @@ public class PortNode extends AbstractNode {
   
   public void setPortType(String pportType) {
     portType = pportType;
-    changes.firePropertyChange(Constants.changePortNodeDataType, null, portType);
-    remoteChanges.firePropertyChange(Constants.changePortNodeDataType, null, portType);
+    changes.firePropertyChange(ConstantsMonti.changePortNodeDataType, null, portType);
+    remoteChanges.firePropertyChange(ConstantsMonti.changePortNodeDataType, null, portType);
   }
   
   public void remoteSetPortType(String pportType) {
     portType = pportType;
-    changes.firePropertyChange(Constants.changePortNodeDataType, null, portType);
+    changes.firePropertyChange(ConstantsMonti.changePortNodeDataType, null, portType);
   }
   
     

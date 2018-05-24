@@ -1,6 +1,6 @@
 package model.nodes;
 
-import util.Constants;
+import util.ConstantsMonti;
 import view.nodes.AbstractNodeView;
 
 import java.io.Serializable;
@@ -8,6 +8,9 @@ import java.util.ArrayList;
 
 public class ComponentNode extends AbstractNode implements Serializable {
   private static final String TYPE = "COMPONENT";
+ protected static final double COMPONENT_MIN_WIDTH = 120;
+ protected static final double COMPONENT_MIN_HEIGHT = 100;
+ 
   // pflicht, title is optional
   private String componentType = "";
   private String stereotype = "";
@@ -90,13 +93,13 @@ public class ComponentNode extends AbstractNode implements Serializable {
   
   public void setStereotype(String pStereotype) {
     stereotype = pStereotype;
-    changes.firePropertyChange(Constants.changeComponentStereotype, null, pStereotype);
-    remoteChanges.firePropertyChange(Constants.changeComponentStereotype, null, pStereotype);
+    changes.firePropertyChange(ConstantsMonti.changeComponentStereotype, null, pStereotype);
+    remoteChanges.firePropertyChange(ConstantsMonti.changeComponentStereotype, null, pStereotype);
   }
   
   public void remoteSetSterotype(String pStereotype) {
     stereotype = pStereotype;
-    changes.firePropertyChange(Constants.changeComponentStereotype, null, pStereotype);
+    changes.firePropertyChange(ConstantsMonti.changeComponentStereotype, null, pStereotype);
   }
   
   public String getStereotype() {
@@ -105,13 +108,13 @@ public class ComponentNode extends AbstractNode implements Serializable {
   
   public void setComponentType(String pcomponentType) {
     componentType = pcomponentType;
-    changes.firePropertyChange(Constants.changeComponentNodeDataType, null, pcomponentType);
-    remoteChanges.firePropertyChange(Constants.changeComponentNodeDataType, null, pcomponentType);
+    changes.firePropertyChange(ConstantsMonti.changeComponentNodeDataType, null, pcomponentType);
+    remoteChanges.firePropertyChange(ConstantsMonti.changeComponentNodeDataType, null, pcomponentType);
   }
   
   public void remoteSetComponentType(String pcomponentType) {
     componentType = pcomponentType;
-    changes.firePropertyChange(Constants.changeComponentNodeDataType, null, pcomponentType);
+    changes.firePropertyChange(ConstantsMonti.changeComponentNodeDataType, null, pcomponentType);
   }
   
   public String getComponentType() {

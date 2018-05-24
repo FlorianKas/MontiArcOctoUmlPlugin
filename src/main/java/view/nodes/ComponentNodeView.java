@@ -5,7 +5,7 @@ import model.nodes.ClassNode;
 import model.nodes.ComponentNode;
 import model.nodes.PortNode;
 import model.nodes.AbstractNode;
-import util.Constants;
+import util.ConstantsMonti;
 
 import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
@@ -101,9 +101,9 @@ public class ComponentNodeView extends AbstractNodeView {
     
   }
   
-  public ComponentNodeView() {
-    
-  }
+//  public ComponentNodeView() {
+//    
+//  }
     
   
   
@@ -309,7 +309,7 @@ public class ComponentNodeView extends AbstractNodeView {
   public void setSelected(boolean selected) {
     if (selected) {
       rectangle.setStrokeWidth(2);
-      setStroke(Constants.selected_color);
+      setStroke(ConstantsMonti.selected_color);
     }
     else {
       rectangle.setStrokeWidth(1);
@@ -364,25 +364,25 @@ public class ComponentNodeView extends AbstractNodeView {
   public void propertyChange(PropertyChangeEvent evt) {
     
     super.propertyChange(evt);
-    if (evt.getPropertyName().equals(Constants.changeNodeX)) {
+    if (evt.getPropertyName().equals(ConstantsMonti.changeNodeX)) {
       setX((double) evt.getNewValue());
     }
-    else if (evt.getPropertyName().equals(Constants.changeNodeY)) {
+    else if (evt.getPropertyName().equals(ConstantsMonti.changeNodeY)) {
       setY((double) evt.getNewValue());
     }
-    else if (evt.getPropertyName().equals(Constants.changeNodeWidth)) {
+    else if (evt.getPropertyName().equals(ConstantsMonti.changeNodeWidth)) {
       changeWidth((double) evt.getNewValue());
     }
-    else if (evt.getPropertyName().equals(Constants.changeNodeHeight)) {
+    else if (evt.getPropertyName().equals(ConstantsMonti.changeNodeHeight)) {
       changeHeight((double) evt.getNewValue());
     }
-    else if (evt.getPropertyName().equals(Constants.changeNodeTitle)) {
+    else if (evt.getPropertyName().equals(ConstantsMonti.changeNodeTitle)) {
       name.setText((String) evt.getNewValue());
     }
-    else if (evt.getPropertyName().equals(Constants.changeComponentNodeDataType)) {
+    else if (evt.getPropertyName().equals(ConstantsMonti.changeComponentNodeDataType)) {
       type.setText((String) evt.getNewValue());
     }
-    else if (evt.getPropertyName().equals(Constants.changeComponentStereotype)) {
+    else if (evt.getPropertyName().equals(ConstantsMonti.changeComponentStereotype)) {
       stereotype.setText((String) evt.getNewValue());
     }
   }

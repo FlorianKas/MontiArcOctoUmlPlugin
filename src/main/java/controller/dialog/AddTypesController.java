@@ -2,41 +2,25 @@ package controller.dialog;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.PasswordField;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
-public class GithubLoginDialogController {
+/**
+ * Created by chalmers on 2016-08-22.
+ */
+public class AddTypesController {
+  
   private Stage dialogStage;
   private boolean okClicked = false;
   
   @FXML
-  public TextField nameTextField;
+  public TextField arcParameterTextField;
+  
   
   @FXML
-  public PasswordField passwordField;
-  
-  @FXML
-  private void initialize() {
+  public void initialize() {
     
-  }
-  
-  /**
-   * Sets the stage of this dialog.
-   * 
-   * @param dialogStage
-   */
-  public void setDialogStage(Stage dialogStage) {
-    this.dialogStage = dialogStage;
-  }
-  
-  /**
-   * Returns true if the user clicked OK, false otherwise.
-   * 
-   * @return
-   */
-  public boolean isOkClicked() {
-    return okClicked;
   }
   
   /**
@@ -62,4 +46,26 @@ public class GithubLoginDialogController {
   private boolean isInputValid() {
     return true;
   }
+  
+  /**
+   * Sets the stage of this dialog.
+   * 
+   * @param dialogStage
+   */
+  public void setDialogStage(Stage dialogStage) {
+    this.dialogStage = dialogStage;
+  }
+  
+  /**
+   * Returns true if the user clicked OK, false otherwise.
+   * 
+   * @return
+   */
+  public boolean isOkClicked() {
+    return okClicked;
+  }
+  
+  
+  
+  
 }

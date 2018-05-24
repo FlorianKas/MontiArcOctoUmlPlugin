@@ -9,7 +9,7 @@ import model.edges.AbstractEdge;
  *
  * @author Marco Jakob
  */
-public class EdgeEditDialogController {
+public class EdgeEditDialogControllerMonti extends EdgeEditDialogController{
   
   @FXML
   private ChoiceBox directionBox;

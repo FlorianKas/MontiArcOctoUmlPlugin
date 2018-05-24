@@ -9,13 +9,13 @@ import javafx.stage.Stage;
 /**
  * Created by chalmers on 2016-08-22.
  */
-public class addTypesController {
+public class AddGenericsController {
   
   private Stage dialogStage;
   private boolean okClicked = false;
   
   @FXML
-  public TextField arcParameterTextField;
+  public TextField genericsTextField;
   
   
   @FXML

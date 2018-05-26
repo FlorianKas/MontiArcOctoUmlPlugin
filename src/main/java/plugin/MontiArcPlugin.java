@@ -1,4 +1,4 @@
-package controller;
+package plugin;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -6,11 +6,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
+import controller.AbstractDiagramController;
+import controller.MAPrettyPrinter;
+import controller.MontiArcController;
+//import controller.MontiCorePlugIn;
+
 //import controller.AbstractDiagramController;
 
 import javafx.stage.Stage;
 
 import montiarc._ast.ASTMontiArcNode;
+import view.nodes.AbstractNodeView;
 import montiarc._ast.ASTMACompilationUnit;
 import de.monticore.ast.ASTNode;
 
@@ -36,13 +42,25 @@ import model.nodes.ComponentNode;
 import model.nodes.PortNode;
 
 public class MontiArcPlugin implements MontiCorePlugIn {
+  private String usageFolderPath;
   
+  public MontiArcPlugin(){
+    
+  }
   public AbstractDiagramController getController() {
     return null;
   }
   
+  public static MontiArcPlugin getInstance() {
+    return controller.MontiArcController.plugin;
+  }
+  
+  public void setUsageFolderPath(String path) {
+    usageFolderPath = path;
+  }
+  
   public String getView() {
-	  String view= "montiArcView";
+	  String view= "/view/fxml/montiArcView.fxml";
 	  return view;
   }
   
@@ -530,8 +548,10 @@ public class MontiArcPlugin implements MontiCorePlugIn {
   }
   
   
+  
+  
   @Override
-  public ASTNode shapeToAST(Graph graph, String modelName) {
+  public ASTNode shapeToAST(Graph arg0, List<String> arg1) {
     
     ArrayList<String> generics = MontiArcController.genericsArray;
     ArrayList<String> astTypes = MontiArcController.types;
@@ -609,7 +629,7 @@ public class MontiArcPlugin implements MontiCorePlugIn {
           MontiArcNodeFactory.createASTComponentHead(typeParams, parameters, null);
       
     // create params for outermost component body
-    for (AbstractNode node : graph.getAllNodes()) {
+    for (AbstractNode node : arg0.getAllNodes()) {
       if (node instanceof ComponentNode) {
         de.monticore.common.common._ast.ASTStereotype.Builder builder = new Builder();
         ASTStereoValue value = CommonNodeFactory.createASTStereoValue(((ComponentNode) node).getStereotype(), null);
@@ -669,7 +689,7 @@ public class MontiArcPlugin implements MontiCorePlugIn {
         
         // add Connectors for this Component
         ArrayList<ConnectorEdge> edges = new ArrayList<ConnectorEdge>();
-        for (Edge e: graph.getAllEdges()) {
+        for (Edge e: arg0.getAllEdges()) {
           if (e instanceof ConnectorEdge) {
             if (((PortNode)e.getStartNode()).getComponentNode() == node ||
                 ((PortNode)e.getEndNode()).getComponentNode() == node) {
@@ -747,7 +767,7 @@ public class MontiArcPlugin implements MontiCorePlugIn {
 //   tmp.add(CommonNodeFactory.createASTStereoValue("tmp", "test"));
 //   de.monticore.common.common._ast.ASTStereotype stereo = CommonNodeFactory.createASTStereotype(tmp);
    de.monticore.lang.montiarc.montiarc._ast.ASTComponent astComp = 
-       MontiArcNodeFactory.createASTComponent(null, modelName, astHead, null, null, astBody);
+       MontiArcNodeFactory.createASTComponent(null, arg1.get(0), astHead, null, null, astBody);
    // create AST
    de.monticore.lang.montiarc.montiarc._ast.ASTMACompilationUnit ast = 
        MontiArcNodeFactory.createASTMACompilationUnit(packageParts, importDecls, astComp);
@@ -772,13 +792,7 @@ public class MontiArcPlugin implements MontiCorePlugIn {
    return ast;
   }
   
-  
-
-  @Override
-  public List<String> check(ASTNode node) {
-    // TODO Auto-generated method stub
-    return null;
-  }
+ 
 
   @Override
   public boolean generateCode(ASTNode node, String path) {
@@ -799,7 +813,13 @@ public class MontiArcPlugin implements MontiCorePlugIn {
   }
 
   @Override
-  public List<String> showContainerInfoDialog(Stage stage) {
+  public List<MontiCoreException> check(ASTNode arg0, HashMap<AbstractNodeView, AbstractNode> arg1) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+  
+  @Override
+  public List<String> showContainerInfoDialog(Stage arg0, List<String> arg1) {
     // TODO Auto-generated method stub
     return null;
   }

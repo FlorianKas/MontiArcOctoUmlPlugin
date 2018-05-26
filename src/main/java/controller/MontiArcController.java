@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import org.controlsfx.control.Notifications;
 
 import controller.dialog.MontiInitDialogController;
+import groovyjarjarantlr.collections.List;
 import controller.dialog.AddGenericsController;
 import controller.dialog.AddTypesController;
 import javafx.fxml.FXML;
@@ -28,6 +29,7 @@ import model.edges.ConnectorEdge;
 import model.nodes.AbstractNode;
 import model.nodes.ComponentNode;
 import model.nodes.PortNode;
+import plugin.MontiArcPlugin;
 import util.commands.AddDeleteNodeCommand;
 import util.commands.CompoundCommand;
 import util.commands.MoveGraphElementCommand;
@@ -46,7 +48,7 @@ public class MontiArcController extends AbstractDiagramController {
   TabControllerMonti tabController;
   EdgeControllerMonti edgeController;
   SelectControllerMonti selectController;
-  MontiArcPlugin plugin;
+  public static MontiArcPlugin plugin;
   
   
   public static ArrayList<String> genericsArray = new ArrayList<String>();
@@ -704,8 +706,10 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
     
     System.out.println("graph looks as follows " + graph.getAllNodes().toString() + graph.getAllEdges().toString());
     System.out.println("modelName " + modelName);
-      
-    plugin.shapeToAST(graph, modelName);
+    
+    ArrayList<String> arg = new ArrayList<String>();
+    arg.add(modelName);
+    plugin.shapeToAST(graph, arg);
     
     });
   }
@@ -785,7 +789,7 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
   @Override
   public String getTabControllerName() {
     // TODO Auto-generated method stub
-    return null;
+    return "MontiArcController";
   }
   
   

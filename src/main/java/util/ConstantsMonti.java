@@ -33,6 +33,7 @@ public class ConstantsMonti extends Constants{
   public static String changePortNodeDataType = "PortNodeDataType";
   public static String changeComponentNodeDataType = "ComponentNodeDataType";
   public static String changeComponentStereotype = "ComponentStereotype";
+  public static String changeComponentGenerics = "ComponentGenerics";
   public static String changeClassNodeAttributes = "ClassNodeAttributes";
   public static String changeClassNodeOperations = "ClassNodeOperations";
   public static String changeNodeIsChild = "ClassNodeIsChild";

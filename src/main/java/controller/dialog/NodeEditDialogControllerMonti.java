@@ -23,6 +23,8 @@ public class NodeEditDialogControllerMonti extends NodeEditDialogController{
   @FXML
   private TextField nameField;
   @FXML
+  private TextField genericsField;
+  @FXML
   private TextField stereotypeField;
   @FXML
   private TextField dataTypeField;
@@ -65,6 +67,7 @@ public class NodeEditDialogControllerMonti extends NodeEditDialogController{
       nameField.setText(((ComponentNode)this.node).getTitle());
       typeField.setText(((ComponentNode)this.node).getComponentType());
       stereotypeField.setText(((ComponentNode)this.node).getStereotype());
+      genericsField.setText(((ComponentNode) this.node).getGenerics());
     }
     else if (node instanceof PortNode) {
       this.node = (PortNode) node;
@@ -98,6 +101,10 @@ public class NodeEditDialogControllerMonti extends NodeEditDialogController{
   
   public String getStereotype() {
     return stereotypeField.getText();
+  }
+  
+  public String getGenerics() {
+    return genericsField.getText();
   }
   
   public String getAttributes() {
@@ -171,6 +178,15 @@ public class NodeEditDialogControllerMonti extends NodeEditDialogController{
     }
     else {
       return !((ComponentNode)this.node).getStereotype().equals(stereotypeField.getText());
+    }
+  }
+  
+  public boolean hasGenericsChanged() {
+    if (((ComponentNode)this.node).getGenerics() == null) {
+      return genericsField.getText() != null;
+    }
+    else {
+      return !((ComponentNode)this.node).getGenerics().equals(genericsField.getText());
     }
   }
   

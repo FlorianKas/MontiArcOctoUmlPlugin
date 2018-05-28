@@ -16,7 +16,7 @@ public class MontiInitDialogController {
   private boolean okClicked = false;
   
   @FXML
-  public TextField nameTextField, arcParameterTextField, genericsTextField, packageTextField;
+  public TextField nameTextField, arcParameterTextField, genericsTextField, packageTextField, importTextField;
   
   @FXML
   public void initialize() {

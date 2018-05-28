@@ -45,6 +45,7 @@ public class SelectControllerMonti extends SelectController{
         if (!(edgeView instanceof MessageEdgeView) && (distanceToLine(edgeView.getStartLine(), event.getX(), event.getY()) < 15 || distanceToLine(edgeView.getMiddleLine(), event.getX(), event.getY()) < 15 || distanceToLine(edgeView.getStartLine(), event.getX(), event.getY()) < 15)) {
           diagramController.selectedEdges.add(edgeView);
           if (event.getClickCount() == 1) {
+            System.out.println("We are in onMousePressed First");
             edgeView.setSelected(true);
             diagramController.setTool(ToolEnum.SELECT);
             diagramController.setButtonClicked(diagramController.selectBtn);
@@ -72,10 +73,13 @@ public class SelectControllerMonti extends SelectController{
             diagramController.selectedEdges.add(edgeView);
           }
           if (event.getClickCount() == 1) {
+
+            System.out.println("We are in onMousePressed Second");
             diagramController.selectedEdges.add(edgeView);
+            System.out.println("SelectedEdges " + diagramController.selectedEdges.toString());
             diagramController.setTool(ToolEnum.SELECT);
             diagramController.setButtonClicked(diagramController.selectBtn);
-            // diagramController.edgeController.onMousePressDragEdge(event);
+//            diagramController.edgeController.onMousePressDragEdge(event);
             
           }
           else {
@@ -99,6 +103,7 @@ public class SelectControllerMonti extends SelectController{
             diagramController.setButtonClicked(diagramController.selectBtn);
             diagramController.edgeController.onMousePressDragEdge(event);
           }
+          System.out.println("selected Edges " + diagramController.selectedEdges.toString());
           diagramController.drawSelected();
         }
       }

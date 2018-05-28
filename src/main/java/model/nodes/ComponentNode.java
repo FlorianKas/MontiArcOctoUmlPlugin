@@ -8,16 +8,14 @@ import java.util.ArrayList;
 
 public class ComponentNode extends AbstractNode implements Serializable {
   private static final String TYPE = "COMPONENT";
- protected static final double COMPONENT_MIN_WIDTH = 120;
- protected static final double COMPONENT_MIN_HEIGHT = 100;
+  protected static final double COMPONENT_MIN_WIDTH = 120;
+  protected static final double COMPONENT_MIN_HEIGHT = 100;
  
-  // pflicht, title is optional
   private String componentType = "";
   private String stereotype = "";
+  private String generics = "";
   private ArrayList<PortNode> Ports = new ArrayList<>();
   
-//  TODO: Future Work
-//  private String Subcomponents; 
   
   public ComponentNode(double x, double y, double height, double width, ArrayList<PortNode> ports) {
     super(x, y, height, width);
@@ -47,6 +45,9 @@ public class ComponentNode extends AbstractNode implements Serializable {
     }
     if (this.getStereotype() != null) {
       newCopy.setStereotype(this.getStereotype());
+    }
+    if (this.getGenerics() != null) {
+      newCopy.setGenerics(this.getGenerics());
     }
     newCopy.setTranslateX(this.getTranslateX());
     newCopy.setTranslateY(this.getTranslateY());
@@ -105,6 +106,22 @@ public class ComponentNode extends AbstractNode implements Serializable {
   public String getStereotype() {
     return stereotype;  
   }
+  
+  public void setGenerics(String pGenerics) {
+    generics = pGenerics;
+    changes.firePropertyChange(ConstantsMonti.changeComponentGenerics, null, pGenerics);
+    remoteChanges.firePropertyChange(ConstantsMonti.changeComponentGenerics, null, pGenerics);
+  }
+  
+  public void remoteSetGenerics(String pGenerics) {
+    stereotype = pGenerics;
+    changes.firePropertyChange(ConstantsMonti.changeComponentGenerics, null, pGenerics);
+  }
+  
+  public String getGenerics() {
+    return generics;  
+  }
+  
   
   public void setComponentType(String pcomponentType) {
     componentType = pcomponentType;

@@ -14,6 +14,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -54,14 +55,17 @@ public class MontiArcController extends AbstractDiagramController {
   public static ArrayList<String> genericsArray = new ArrayList<String>();
   public static ArrayList<String> types = new ArrayList<String>();
   String modelName = "";
+  ArrayList<String> importStatements = new ArrayList<String>(); 
   public static String packageName = ""; 
   @FXML
-  VBox config;
+  VBox config,topBox;
+  
   @FXML
-  protected Button createBtn, packageBtn, edgeBtn, selectBtn, drawBtn, undoBtn, redoBtn, moveBtn, deleteBtn, voiceBtn, recognizeBtn, checkValidityBtn, addGenericsBtn, addTypesBtn;
+  protected Button edgeBtn, selectBtn, drawBtn, undoBtn, redoBtn, moveBtn, deleteBtn, voiceBtn, recognizeBtn, checkValidityBtn, addGenericsBtn, addTypesBtn;
   
   @FXML
   public void initialize() {
+    System.out.println("We are in MontiArcController");
     super.initialize();
     initToolBarActions();
     initDrawPaneActions();  
@@ -72,9 +76,54 @@ public class MontiArcController extends AbstractDiagramController {
     selectController = new SelectControllerMonti(drawPane, this);
     plugin = new MontiArcPlugin();
     
+    String name = "";
+    MontiInitDialogController montiController= null;
     
-    
+    while(name.isEmpty()) {
+      montiController = showMontiInitDialog();
+      name = montiController.nameTextField.getText();
+      System.out.println("Name " + name);
+      if (name.isEmpty()) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText("No diagram name");
+        alert.setContentText("You have to add a diagram name.");
+        alert.showAndWait();
+      }
+    }
+    showConfiguration(montiController);
   }
+  
+  public MontiInitDialogController showMontiInitDialog() {
+    MontiInitDialogController controller = null; 
+    
+    try {
+      // Load the montiInitDialog.fxml file and create a new stage for the
+      // popup
+      FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view/fxml/montiInitDialog.fxml"));
+      System.out.println("Loader load " + loader.getLocation());
+      AnchorPane dialog = loader.load();
+      Stage dialogStage = new Stage();
+      dialogStage.initModality(Modality.WINDOW_MODAL);
+//      dialogStage.initOwner(this.stage);
+      dialogStage.setScene(new Scene(dialog));
+      
+      controller = loader.getController();
+      controller.setDialogStage(dialogStage);
+      dialogStage.showAndWait();
+    }
+    
+    
+    catch (IOException e) {
+      // Exception gets thrown if the classDiagramView.fxml file could not be
+      // loaded
+      e.printStackTrace();
+      return null;
+    }
+    
+    return controller;
+  }
+  
   
   public ArrayList<String> getGenerics() {
     return genericsArray;  
@@ -88,6 +137,11 @@ public class MontiArcController extends AbstractDiagramController {
     if(controller.isOkClicked()) {
       modelName = controller.nameTextField.getText();  
       packageName = controller.packageTextField.getText();
+      String importStates = controller.importTextField.getText();
+      String[] importTmp = importStates.split("\\;");
+      for (String i: importTmp) {
+        importStatements.add(i);
+      }
       String genericsString = controller.genericsTextField.getText();
       String[] genericsTmp = genericsString.split("\\;");
       for (String g: genericsTmp) {
@@ -101,10 +155,53 @@ public class MontiArcController extends AbstractDiagramController {
       }
       
       
-      showOutput();
+      showOutputTopBox();
       
     }
   }
+  
+  void showOutputTopBox(){
+//    topBox.getChildren().removeAll(topBox.getChildren());
+    
+    if (!packageName.isEmpty()) {
+      Label packetName = new Label();
+      packetName.setText("  package " + packageName + ";");
+      topBox.getChildren().add(packetName);
+    }
+    if (!(null == importStatements) && !(importStatements.isEmpty())) {
+      Label imports = new Label();
+      for( String g : importStatements) {
+        if (!g.isEmpty()) {
+          imports.setText("  import " + g + ";");
+          topBox.getChildren().add(imports);
+        }
+      }
+    }
+    
+    Label name = new Label();
+    name.setText("  component " + modelName);
+//    topBox.getChildren().add(name);
+    
+    
+    if (!genericsArray.isEmpty()) {
+      for( String g : genericsArray) {
+        name.setText(name.getText() + " <" + g + ", ");
+      }
+      name.setText(name.getText().substring(0,name.getText().length()-2) + ">");
+      
+    }
+    if (types.size() > 0) {
+      for( String t : types) {
+        name.setText(name.getText() + " (" + t + ", ");
+      }
+      name.setText(name.getText().substring(0,name.getText().length()-2) + ")");
+      topBox.getChildren().add(name);
+    }
+    this.topBox.setPadding(new Insets(0, 20, 0, 0));
+    this.topBox.setSpacing(5);
+    
+  }
+  
   
   void showOutput(){
     config.getChildren().removeAll(config.getChildren());
@@ -113,10 +210,22 @@ public class MontiArcController extends AbstractDiagramController {
     packetName.setText("Package Name: " + packageName);
     config.getChildren().add(packetName);
     
+    Label imports = new Label();
+    if (importStatements.size() > 0) {
+      imports.setText("Imports: ");
+      config.getChildren().add(imports);
+      for( String g : importStatements) {
+        Label tmp = new Label();
+        tmp.setText(g);
+        config.getChildren().add(tmp);
+      }
+    }
     
     Label name = new Label();
     name.setText("Name: " + modelName);
     config.getChildren().add(name);
+    
+    
     
     Label generics = new Label();
     if (genericsArray.size() > 0) {
@@ -128,10 +237,7 @@ public class MontiArcController extends AbstractDiagramController {
         config.getChildren().add(tmp);
       }
     }
-    Label typeParameters = new Label();
     if (types.size() > 0) {
-      typeParameters.setText("Type Parameters: ");
-      config.getChildren().add(typeParameters);
       for( String t : types) {
         Label tmp = new Label();
         tmp.setText(t);
@@ -157,16 +263,17 @@ public class MontiArcController extends AbstractDiagramController {
     AddGenericsController controllerGenerics = null; 
     
     try {
+      System.out.println("We are in showgenericsDIalog");
+      System.out.println(getClass().getClassLoader().getResource("view/fxml/addGenerics.fxml"));
       FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view/fxml/addGenerics.fxml"));
       System.out.println("Loader load " + loader.getLocation());
       AnchorPane dialog = loader.load();
-      
+      System.out.println("Loader Controller " + loader.getController());
       controllerGenerics = loader.getController();
       Stage dialogStage = new Stage();
       dialogStage.initModality(Modality.WINDOW_MODAL);
       dialogStage.setScene(new Scene(dialog));
       
-      controllerGenerics = loader.getController();
       controllerGenerics.setDialogStage(dialogStage);
       dialogStage.showAndWait();
     
@@ -242,7 +349,7 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
                                                                                                                  // or
                                                                                                                  // class.
           mode = Mode.CREATING;
-          createNodeController.onMousePressed(event);
+//          createNodeController.onMousePressed(event);
         }
         else if (tool == ToolEnum.MOVE_SCENE) { // Start panning of graph.
           mode = Mode.MOVING;
@@ -284,7 +391,7 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
                                                                                                                                         // class
                                                                                                                                         // or
                                                                                                                                         // package.
-        createNodeController.onMouseDragged(event);
+//        createNodeController.onMouseDragged(event);
       }
       else if (mode == Mode.MOVING && tool == ToolEnum.MOVE_SCENE) { // Continue
                                                                      // panning
@@ -314,7 +421,7 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
                                                                                                    // creation
                                                                                                    // of
                                                                                                    // class.
-        createNodeController.onMouseReleasedClass();
+//        createNodeController.onMouseReleasedClass();
         if (!createNodeController.currentlyCreating()) {
           mode = Mode.NO_MODE;
         }
@@ -324,7 +431,7 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
                                                                                                      // creation
                                                                                                      // of
                                                                                                      // package.
-        createNodeController.onMouseReleasedPackage();
+//        createNodeController.onMouseReleasedPackage();
         if (!createNodeController.currentlyCreating()) {
           mode = Mode.NO_MODE;
         }
@@ -343,7 +450,7 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
     drawPane.setOnTouchPressed(event -> {
       if ((tool == ToolEnum.CREATE_CLASS || tool == ToolEnum.CREATE_PACKAGE) && !mouseCreationActivated) {
         mode = Mode.CREATING;
-        createNodeController.onTouchPressed(event);
+//        createNodeController.onTouchPressed(event);
       }
       else if (tool == ToolEnum.DRAW && !mouseCreationActivated) {
         mode = Mode.DRAWING;
@@ -353,7 +460,7 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
     
     drawPane.setOnTouchMoved(event -> {
       if ((tool == ToolEnum.CREATE_CLASS || tool == ToolEnum.CREATE_PACKAGE) && mode == Mode.CREATING && !mouseCreationActivated) {
-        createNodeController.onTouchDragged(event);
+//        createNodeController.onTouchDragged(event);
       }
       else if (tool == ToolEnum.DRAW && mode == Mode.DRAWING && !mouseCreationActivated) {
         sketchController.onTouchMoved(event);
@@ -363,14 +470,14 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
     
     drawPane.setOnTouchReleased(event -> {
       if (tool == ToolEnum.CREATE_CLASS && mode == Mode.CREATING && !mouseCreationActivated) {
-        createNodeController.onTouchReleasedClass(event);
+//        createNodeController.onTouchReleasedClass(event);
         if (!createNodeController.currentlyCreating()) {
           mode = Mode.NO_MODE;
         }
         
       }
       else if (tool == ToolEnum.CREATE_PACKAGE && mode == Mode.CREATING && !mouseCreationActivated) {
-        createNodeController.onTouchReleasedPackage(event);
+//        createNodeController.onTouchReleasedPackage(event);
         if (!createNodeController.currentlyCreating()) {
           mode = Mode.NO_MODE;
         }
@@ -533,7 +640,7 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
     nodeView.setOnTouchPressed(event -> {
       if (nodeView instanceof PackageNodeView && (tool == ToolEnum.CREATE_CLASS || tool == ToolEnum.CREATE_PACKAGE)) {
         mode = Mode.CREATING;
-        createNodeController.onTouchPressed(event);
+//        createNodeController.onTouchPressed(event);
       }
       else if (tool == ToolEnum.DRAW) {
         mode = Mode.DRAWING;
@@ -545,7 +652,7 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
     
     nodeView.setOnTouchMoved(event -> {
       if (nodeView instanceof PackageNodeView && (tool == ToolEnum.CREATE_CLASS || tool == ToolEnum.CREATE_PACKAGE) && mode == Mode.CREATING) {
-        createNodeController.onTouchDragged(event);
+//        createNodeController.onTouchDragged(event);
       }
       else if (tool == ToolEnum.DRAW && mode == Mode.DRAWING) {
         sketchController.onTouchMoved(event);
@@ -556,14 +663,14 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
     
     nodeView.setOnTouchReleased(event -> {
       if (nodeView instanceof PackageNodeView && tool == ToolEnum.CREATE_CLASS && mode == Mode.CREATING) {
-        createNodeController.onTouchReleasedClass(event);
+//        createNodeController.onTouchReleasedClass(event);
         if (!createNodeController.currentlyCreating()) {
           mode = Mode.NO_MODE;
         }
         
       }
       else if (nodeView instanceof PackageNodeView && tool == ToolEnum.CREATE_PACKAGE && mode == Mode.CREATING) {
-        createNodeController.onTouchReleasedPackage(event);
+//        createNodeController.onTouchReleasedPackage(event);
         if (!createNodeController.currentlyCreating()) {
           mode = Mode.NO_MODE;
         }
@@ -584,15 +691,15 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
   
   // ------------ Init Buttons -------------------------------------------
   private void initToolBarActions() {
-    Image image = new Image("/icons/classw.png");
-    createBtn.setGraphic(new ImageView(image));
-    createBtn.setText("");
+//    Image image = new Image("/icons/classw.png");
+//    createBtn.setGraphic(new ImageView(image));
+//    createBtn.setText("");
+//    
+//    image = new Image("/icons/packagew.png");
+//    packageBtn.setGraphic(new ImageView(image));
+//    packageBtn.setText("");
     
-    image = new Image("/icons/packagew.png");
-    packageBtn.setGraphic(new ImageView(image));
-    packageBtn.setText("");
-    
-    image = new Image("/icons/edgew.png");
+    Image image = new Image("/icons/edgew.png");
     edgeBtn.setGraphic(new ImageView(image));
     edgeBtn.setText("");
     
@@ -628,35 +735,30 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
     voiceBtn.setGraphic(new ImageView(image));
     voiceBtn.setText("");
     
-    image = new Image("/icons/recow.png");
+    image = new Image("/icons/recognizew.png");
     // needs to be replaced by another picture
     checkValidityBtn.setGraphic(new ImageView(image));
     checkValidityBtn.setText("Check");
     
-    image = new Image("/icons/recow.png");
+//    image = new Image("/icons/add1.png");
     // needs to be replaced by another picture
-    addGenericsBtn.setGraphic(new ImageView(image));
-    addGenericsBtn.setText("");
+//    addGenericsBtn.setGraphic(new ImageView(image));
+    addGenericsBtn.setText("Add Generics");
     
-    image = new Image("/icons/recow.png");
+//    image = new Image("/icons/add1.png");
     // needs to be replaced by another picture
-    addTypesBtn.setGraphic(new ImageView(image));
-    addTypesBtn.setText("");
+//    addTypesBtn.setGraphic(addGenericsBtn);
+    addTypesBtn.setText("Add Types");
     
     
-    buttonInUse = createBtn;
+    buttonInUse = selectBtn;
     buttonInUse.getStyleClass().add("button-in-use");
     
     // ---------------------- Actions for buttons ----------------------------
-    createBtn.setOnAction(event -> {
-      tool = ToolEnum.CREATE_CLASS;
-      setButtonClicked(createBtn);
-    });
-    
-    packageBtn.setOnAction(event -> {
-      tool = ToolEnum.CREATE_PACKAGE;
-      setButtonClicked(packageBtn);
-    });
+//    createBtn.setOnAction(event ->addGenerics());
+//    
+//    packageBtn.setOnAction(event -> 
+//    addTypes());
     
     edgeBtn.setOnAction(event -> {
       tool = ToolEnum.EDGE;
@@ -761,7 +863,7 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
     System.out.println("We are in ConnectorEdge case");
     System.out.println("StartNodeView "+ startNodeView);
     System.out.println("EndNodeView "+ endNodeView);
-    ConnectorEdgeView edgeView = new ConnectorEdgeView(edge, startNodeView, endNodeView);
+    ConnectorEdgeView edgeView = new ConnectorEdgeView((ConnectorEdge)edge, startNodeView, endNodeView);
     
     allEdgeViews.add(edgeView);
     drawPane.getChildren().add(edgeView);
@@ -777,7 +879,7 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
     System.out.println("We are in MONTIARCCONTROLLER BY CREATING EDGEVIEW");
     if (edge instanceof ConnectorEdge) {
       System.out.println("Detected a ConnectorEdge");
-      edgeView = new ConnectorEdgeView(edge, startNodeView, endNodeView);
+      edgeView = new ConnectorEdgeView((ConnectorEdge)edge, startNodeView, endNodeView);
     }
     else {
       edgeView = null;
@@ -786,11 +888,41 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
     return addEdgeView(edgeView);
   }
 
-  @Override
   public String getTabControllerName() {
-    // TODO Auto-generated method stub
     return "MontiArcController";
   }
   
+  
+  void drawSelected() {
+    for (AbstractNodeView nodeView : allNodeViews) {
+      if (selectedNodes.contains(nodeView)) {
+        nodeView.setSelected(true);
+      }
+      else {
+        nodeView.setSelected(false);
+      }
+    }
+    System.out.println("We are in drawSelected");
+    System.out.println("selectedEdges looks as " + selectedEdges.toString());
+    for (AbstractEdgeView edgeView : allEdgeViews) {
+      if (selectedEdges.contains(edgeView)) {
+        System.out.println("edgeView is selected ? " + selectedEdges.contains(edgeView) + edgeView.toString());
+        ((ConnectorEdgeView)edgeView).setSelected(true);
+      }
+      else {
+        ((ConnectorEdgeView)edgeView).setSelected(false);
+      }
+    }
+    for (Sketch sketch : graph.getAllSketches()) {
+      if (selectedSketches.contains(sketch)) {
+        sketch.setSelected(true);
+        sketch.getPath().toFront();
+      }
+      else {
+        sketch.setSelected(false);
+        sketch.getPath().toFront();
+      }
+    }
+  }
   
 }

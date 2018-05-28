@@ -28,7 +28,7 @@ public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
     getPrinter().print("package ");
     de.monticore.types.types._ast.ASTQualifiedName pack = TypesNodeFactory.createASTQualifiedName(packageDeclaration);
     handle(pack);
-    getPrinter().println();
+    getPrinter().addLine("");
   }
   
   public void printComponent(de.monticore.lang.montiarc.montiarc._ast.ASTComponent astComp) {
@@ -81,6 +81,7 @@ public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
   
   public void printComponentBody(de.monticore.lang.montiarc.montiarc._ast.ASTComponentBody astBody) {
     getPrinter().println("{");
+    printer.indent();
     ArrayList<de.monticore.lang.montiarc.montiarc._ast.ASTPort> ports = 
         new ArrayList<de.monticore.lang.montiarc.montiarc._ast.ASTPort>();
     ArrayList<de.monticore.lang.montiarc.montiarc._ast.ASTConnector> connectors = 
@@ -103,6 +104,7 @@ public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
     for (de.monticore.lang.montiarc.montiarc._ast.ASTConnector connector : connectors) {
       printConnector(connector);
     }
+    printer.unindent();
     getPrinter().println("}");
 //    getPrinter().flushBuffer();
 //    System.out.println("Test "+ getPrinter().getContent());
@@ -115,6 +117,7 @@ public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
     else if(astPorts.size() > 1){
       getPrinter().println("ports");
     }
+    printer.indent();
     int numPorts = astPorts.size();
     int k = 1;
     if (numPorts > 0) {
@@ -142,6 +145,7 @@ public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
         }
         k++;
       }
+      printer.unindent();
     }
 //    getPrinter().flushBuffer();
 //    System.out.println("Test "+ getPrinter().getContent());
@@ -151,6 +155,7 @@ public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
     if (astConnector.getStereotype().isPresent()) {
       getPrinter().print(astConnector.getStereotype());
     }
+    getPrinter().indent();
     getPrinter().print("connect ");
     handle(astConnector.getSource());
     getPrinter().print(" -> ");
@@ -160,13 +165,14 @@ public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
       handle(target);
       if (k == numTarget) {
         getPrinter().print(";");
+        printer.unindent();
       }
       else {
         getPrinter().print(",");
+        printer.unindent();
       }
       k++;
     }
-    getPrinter().println();
 //    getPrinter().flushBuffer();
 //    System.out.println("Test "+ getPrinter().getContent());
   }

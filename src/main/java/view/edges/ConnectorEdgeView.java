@@ -21,13 +21,13 @@ import view.nodes.ComponentNodeView;
 import view.nodes.PortNodeView;
 
 public class ConnectorEdgeView extends AbstractEdgeView{
-  private AbstractEdge refEdge;
+  private ConnectorEdge refEdge;
   private AbstractNodeView startNode;
   private AbstractNodeView endNode;
   private ArrayList<Line> arrowHeadLines = new ArrayList<>();
   private Text dataType = new Text();
   
-  public ConnectorEdgeView(AbstractEdge edge, AbstractNodeView startNode, AbstractNodeView endNode) {
+  public ConnectorEdgeView(ConnectorEdge edge, AbstractNodeView startNode, AbstractNodeView endNode) {
     super(edge, startNode, endNode);
     startNode.setHeight(((PortNode)edge.getStartNode()).getPortHeight());
     startNode.setWidth(((PortNode)edge.getStartNode()).getPortWidth());
@@ -43,6 +43,10 @@ public class ConnectorEdgeView extends AbstractEdgeView{
     setPosition(start, ende);
     draw();
     this.getChildren().add(dataType);
+  }
+  
+  public ConnectorEdge getRefEdge() {
+    return this.refEdge;
   }
   protected void draw() {
     System.out.println("Now in draw");
@@ -108,16 +112,25 @@ public class ConnectorEdgeView extends AbstractEdgeView{
   
   public void setSelected(boolean selected) {
     super.setSelected(selected);
+    System.out.println("Set Selected is choosen and selected is " + selected);
+    System.out.println("ArrowHeadLines looks as follows " + arrowHeadLines.toString());
     if (selected) {
       for (Line l : arrowHeadLines) {
         l.setStroke(Constants.selected_color);
       }
+      startLine.setStroke(Constants.selected_color);
+      middleLine.setStroke(Constants.selected_color);
+      endLine.setStroke(Constants.selected_color);
     }
     else {
       for (Line l : arrowHeadLines) {
         l.setStroke(Color.BLACK);
       }
     }
+  }
+  
+  public double getStartY() {
+    return startLine.getStartY();
   }
   
   /**

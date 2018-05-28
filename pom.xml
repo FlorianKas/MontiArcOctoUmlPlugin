@@ -482,11 +482,6 @@
 			<name>yft</name>
 			<url>https://nexus.se.rwth-aachen.de/content/groups/octouml</url>
 		</repository>
-		<repository>
-			<id>se-nexus-2</id>
-			<name>yfa</name>
-			<url>https://nexus.se.rwth-aachen.de/content/groups/montiarc</url>
-		</repository>
 		
  		
 	</repositories>

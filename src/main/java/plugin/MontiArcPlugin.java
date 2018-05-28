@@ -1,5 +1,7 @@
 package plugin;
 
+import java.io.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -60,7 +62,7 @@ public class MontiArcPlugin implements MontiCorePlugIn {
   }
   
   public String getView() {
-	  String view= "/view/fxml/montiArcView.fxml";
+	  String view= "C:\\Users\\Flo\\Desktop\\GitPlugin\\MontiArcOctoUmlPlugin\\target\\classes\\view\\fxml\\montiArcView.fxml";
 	  return view;
   }
   
@@ -558,7 +560,7 @@ public class MontiArcPlugin implements MontiCorePlugIn {
     // temporary
     ArrayList<String> imports = new ArrayList<String>();
     // temporary
-    String packageDec = "bla.bla2.bla3;";
+    String packageDec = "Test.Test1.Test2;";
     List<de.monticore.types.types._ast.ASTImportStatement> importDecls = 
         new ArrayList<de.monticore.types.types._ast.ASTImportStatement>();
     for (String s : imports) {
@@ -774,7 +776,7 @@ public class MontiArcPlugin implements MontiCorePlugIn {
     
   // PrettyPrinting
    IndentPrinter indentPrinter = new IndentPrinter();
-    
+   indentPrinter.setIndentLength(2);
    MAPrettyPrinter MaPrinter = new MAPrettyPrinter(indentPrinter);
    ArrayList<String> packParts = new ArrayList<String>(); 
    for (String s: ast.getPackage()) {
@@ -789,6 +791,59 @@ public class MontiArcPlugin implements MontiCorePlugIn {
    MaPrinter.printComponent(ast.getComponent());    
    MaPrinter.getPrinter().flushBuffer();
    System.out.println(MaPrinter.getPrinter().getContent());
+   
+   usageFolderPath = "C:\\Users\\Flo\\Desktop\\usage\\test.txt";
+   File f = new File(usageFolderPath);
+   boolean blnCreated = false;
+   try
+   {
+     blnCreated = f.createNewFile();
+   }
+   catch(IOException ioe)
+   {
+     System.out.println("Error while creating a new empty file :" + ioe);
+   }
+   System.out.println("Was file " + f.getPath() + " created ? : " + blnCreated);
+   
+   
+   
+     BufferedWriter bw = null;
+     FileWriter fw = null;
+
+     try {
+
+       String content = MaPrinter.getPrinter().getContent();
+
+       fw = new FileWriter(usageFolderPath);
+       bw = new BufferedWriter(fw);
+       bw.write(content);
+
+       System.out.println("Done");
+
+     } catch (IOException e) {
+
+       e.printStackTrace();
+
+     } finally {
+
+       try {
+
+         if (bw != null)
+           bw.close();
+
+         if (fw != null)
+           fw.close();
+
+       } catch (IOException ex) {
+
+         ex.printStackTrace();
+
+       }
+
+     }
+
+   
+   
    return ast;
   }
   

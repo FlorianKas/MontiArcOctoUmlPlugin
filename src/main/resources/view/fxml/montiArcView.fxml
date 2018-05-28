@@ -13,11 +13,9 @@
 
 <BorderPane fx:id="borderPane" fx:controller="controller.MontiArcController" xmlns:fx="http://javafx.com/fxml">
     <top>
-        <VBox>
+        <VBox fx:id="topBox">
             <ToolBar fx:id="aToolBar" orientation="HORIZONTAL">
                 <HBox fx:id="umlBox">
-                    <Button text="Create" fx:id="createBtn"/>
-                    <Button text="Package" fx:id="packageBtn"/>
                     <Button text="Edge" fx:id="edgeBtn"/>
                     <Button text="Draw" fx:id="drawBtn"/>
                 </HBox>
@@ -37,8 +35,8 @@
                     <Button text="Add Generics" fx:id="addGenericsBtn"/>
                     <Button text="Add Types" fx:id="addTypesBtn"/> 
                 </HBox>
-            </ToolBar>
-        </VBox>
+            </ToolBar>   
+    	</VBox>
     </top>
     <left>
             
@@ -64,7 +62,7 @@
         </StackPane>
     </bottom>
     <center>
-        <ScrollPane fx:id="scrollPane" pannable="true" BorderPane.alignment="CENTER">
+   		<ScrollPane fx:id="scrollPane" pannable="true" BorderPane.alignment="CENTER">
             <content>
             	<Pane fx:id="drawPane" prefHeight="8000.0" prefWidth="8000.0">
             	<Label layoutX="38.0" layoutY="56.0" fx:id="name"/>

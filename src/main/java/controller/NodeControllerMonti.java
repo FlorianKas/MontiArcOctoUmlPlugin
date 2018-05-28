@@ -565,6 +565,10 @@ public class NodeControllerMonti extends NodeController {
             command.add(new SetNodeComponentTypeCommand(node, controller.getType(), node.getComponentType()));
             node.setComponentType(controller.getType());
           }
+          if (controller.hasGenericsChanged()) {
+            command.add(new SetNodeGenericsCommand(node, controller.getGenerics(), node.getGenerics()));
+            node.setGenerics(controller.getGenerics());
+          }
           if (command.size() > 0) {
             diagramController.getUndoManager().add(command);
           }

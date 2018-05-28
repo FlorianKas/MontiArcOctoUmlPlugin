@@ -36,6 +36,7 @@ public class ComponentNodeView extends AbstractNodeView {
   private Label type;
   private Label name;
   private Label stereotype;
+//  private Label generics;
   
   private Rectangle rectangle;
   private ArrayList<Rectangle> portViewArray;
@@ -91,7 +92,7 @@ public class ComponentNodeView extends AbstractNodeView {
     
     changeHeight(node.getHeight());
     changeWidth(node.getWidth());
-    container.setGridLinesVisible(true);
+    container.setGridLinesVisible(false);
     System.out.println("Container Input " + container.getChildren().toString());
     this.getChildren().add(container);
     System.out.println("Children " + this.getChildren().toString());
@@ -259,6 +260,8 @@ public class ComponentNodeView extends AbstractNodeView {
     type.setMaxWidth(width); 
     type.setPrefWidth(width);
     
+//    generics.setMaxWidth(width);
+//    generics.setPrefWidth(width);
   }
   
   private void changeWidthPort(double width, Rectangle rec) {
@@ -276,6 +279,7 @@ public class ComponentNodeView extends AbstractNodeView {
     type = new Label();
     name = new Label();
     stereotype = new Label();
+//    generics = new Label();
     
     vbox.setPadding(new Insets(0, 20, 0, 0));
     vbox.setSpacing(5);
@@ -283,6 +287,7 @@ public class ComponentNodeView extends AbstractNodeView {
     type.setFont(Font.font("Verdana", FontWeight.LIGHT, 10));
     name.setFont(Font.font("Verdana", FontWeight.LIGHT, 10));
     stereotype.setFont(Font.font("Verdana", FontWeight.LIGHT, 10));
+//    generics.setFont(Font.font("Verdana", FontWeight.LIGHT, 10));
     System.out.println("We are going to set a title" + node.getComponentType());
     if(node.getComponentType() != null) {
       type.setText(node.getComponentType());
@@ -293,9 +298,13 @@ public class ComponentNodeView extends AbstractNodeView {
     if(node.getStereotype() != null) {
       stereotype.setText(node.getStereotype());
     }
+//    if(node.getGenerics() != null) {
+//      generics.setText(node.getGenerics().split("extends")[0] + "...");
+//    }
     type.setAlignment(Pos.TOP_CENTER);
     name.setAlignment(Pos.TOP_CENTER);
     stereotype.setAlignment(Pos.TOP_CENTER);
+//    generics.setAlignment(Pos.TOP_LEFT);
     vbox.setAlignment(Pos.TOP_CENTER);
     vbox.getChildren().addAll(stereotype, type, name);
   }
@@ -385,6 +394,9 @@ public class ComponentNodeView extends AbstractNodeView {
     else if (evt.getPropertyName().equals(ConstantsMonti.changeComponentStereotype)) {
       stereotype.setText((String) evt.getNewValue());
     }
+//    else if (evt.getPropertyName().equals(ConstantsMonti.changeComponentGenerics)) {
+//      generics.setText((String) evt.getNewValue());
+//    }
   }
  
   

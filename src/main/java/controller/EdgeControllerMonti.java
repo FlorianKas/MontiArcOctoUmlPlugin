@@ -20,6 +20,7 @@ import util.commands.DirectionChangeEdgeCommand;
 import util.commands.MoveMessageCommand;
 import util.commands.ReplaceEdgeCommand;
 import view.edges.AbstractEdgeView;
+import view.edges.ConnectorEdgeView;
 import view.edges.MessageEdgeView;
 import view.nodes.AbstractNodeView;
 import view.nodes.ComponentNodeView;
@@ -52,13 +53,18 @@ public class EdgeControllerMonti extends EdgeController {
     double tmp = event.getX() + ((AbstractNodeView) event.getSource()).getTranslateX() + 1.5*((ComponentNodeView) event.getSource()).getPortNodeViews().get(0).getPortWidth();
     
     ComponentNodeView tmpView = (ComponentNodeView) event.getSource();
-    System.out.println("Start at position x" + tmpView.getTranslateX());
-    System.out.println("event get x" + event.getX());
     
     for (PortNodeView pView : tmpView.getPortNodeViews()) {
-      System.out.println("port getX" + pView.getPortX());
+      System.out.println("port getX " + pView.getPortX());
+      System.out.println("port getY " + pView.getPortY());
+      System.out.println(" port height " + pView.getPortHeight());
+      System.out.println(" componentNodeView translate Y " + tmpView.getTranslateY());
+      System.out.println(" event get Y " + event.getY());
+      
       if (event.getX() + tmpView.getTranslateX() > pView.getPortX() + 0.5*pView.getPortWidth() 
-          && event.getX() + tmpView.getTranslateX()  < pView.getPortX() + 1.5*pView.getPortWidth()) {
+          && event.getX() + tmpView.getTranslateX()  < pView.getPortX() + 1.5*pView.getPortWidth() &&
+          event.getY() + tmpView.getTranslateY() > pView.getPortY() &&
+          event.getY() + tmpView.getTranslateY() < pView.getY() + pView.getHeight()) {
         System.out.println("Test");
         dragStartX = pView.getX() + 1.5*pView.getPortWidth();
         dragStartY = pView.getY() + 0.5*pView.getPortHeight(); 
@@ -184,7 +190,16 @@ public class EdgeControllerMonti extends EdgeController {
   protected void onMouseReleaseDragEdge(MouseEvent event) {
     diagramController.mode = AbstractDiagramController.Mode.NO_MODE;
     for (AbstractEdgeView edgeView : diagramController.selectedEdges) {
-      diagramController.undoManager.add(new MoveMessageCommand((MessageEdge) edgeView.getRefEdge(), 0, edgeView.getStartY() - dragStartY));
+      if (edgeView instanceof ConnectorEdgeView) {
+        System.out.println("EdgeView " + edgeView.getId() + edgeView.getRefEdge());
+        System.out.println("Moving Edges in onMouseRelaseDragEdge");
+//        diagramController.undoManager.add(new MoveMessageCommand((MessageEdge) tmp, 0, edgeView.getStartY() - dragStartY));
+      
+        ConnectorEdge con = ((ConnectorEdgeView) edgeView).getRefEdge();
+        AbstractEdge tmp = (AbstractEdge) con;
+        diagramController.undoManager.add(new MoveMessageCommand((MessageEdge) tmp, 0, ((ConnectorEdgeView)edgeView).getStartY() - dragStartY));
+        
+      }
     }
     previousEdgeStartY = 0;
   }

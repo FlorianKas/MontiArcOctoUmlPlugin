@@ -13,6 +13,7 @@ import controller.dialog.AddTypesController;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -55,13 +56,13 @@ public class MontiArcController extends AbstractDiagramController {
   public static ArrayList<String> genericsArray = new ArrayList<String>();
   public static ArrayList<String> types = new ArrayList<String>();
   String modelName = "";
-  ArrayList<String> importStatements = new ArrayList<String>(); 
+  public static ArrayList<String> importStatements = new ArrayList<String>(); 
   public static String packageName = ""; 
   @FXML
   VBox config,topBox;
   
   @FXML
-  protected Button edgeBtn, selectBtn, drawBtn, undoBtn, redoBtn, moveBtn, deleteBtn, voiceBtn, recognizeBtn, checkValidityBtn, addGenericsBtn, addTypesBtn;
+  protected Button edgeBtn, selectBtn, drawBtn, undoBtn, redoBtn, moveBtn, deleteBtn, voiceBtn, recognizeBtn, checkValidityBtn, generateBtn;
   
   @FXML
   public void initialize() {
@@ -75,13 +76,19 @@ public class MontiArcController extends AbstractDiagramController {
     edgeController = new EdgeControllerMonti(drawPane,this);
     selectController = new SelectControllerMonti(drawPane, this);
     plugin = new MontiArcPlugin();
-    
+    showSomething();
+   
+  }
+  
+  public void showSomething() {
     String name = "";
     MontiInitDialogController montiController= null;
     
     while(name.isEmpty()) {
       montiController = showMontiInitDialog();
       name = montiController.nameTextField.getText();
+      montiController.nameTextField.setText(name);
+      
       System.out.println("Name " + name);
       if (name.isEmpty()) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -139,20 +146,27 @@ public class MontiArcController extends AbstractDiagramController {
       packageName = controller.packageTextField.getText();
       String importStates = controller.importTextField.getText();
       String[] importTmp = importStates.split("\\;");
+      importStatements.clear();
       for (String i: importTmp) {
         importStatements.add(i);
       }
       String genericsString = controller.genericsTextField.getText();
       String[] genericsTmp = genericsString.split("\\;");
+      genericsArray.clear();
       for (String g: genericsTmp) {
         genericsArray.add(g);
       }
       String typeParam = controller.arcParameterTextField.getText();
-
+      types.clear();
       String[] typesTmp = typeParam.split("\\;");
       for (String t : typesTmp) {
+        if (t.contains(";")) {
+          t = t.replace(";", "");
+        }
         types.add(t);
       }
+      
+      System.out.println("modelName "+ modelName );
       
       
       showOutputTopBox();
@@ -161,16 +175,33 @@ public class MontiArcController extends AbstractDiagramController {
   }
   
   void showOutputTopBox(){
-//    topBox.getChildren().removeAll(topBox.getChildren());
-    
+    VBox tmp  = new VBox();
+    tmp.getChildren().add(topBox.getChildren().get(0));
+    topBox.getChildren().removeAll(topBox.getChildren());
+    System.out.println("tmp children 0" + tmp.getChildren().get(0).toString());
+    topBox.getChildren().add(tmp.getChildren().get(0));
+    System.out.println("topBox " +topBox.getChildren().toString());
     if (!packageName.isEmpty()) {
       Label packetName = new Label();
       packetName.setText("  package " + packageName + ";");
+      if (topBox.getChildren().contains(packetName)) {
+        topBox.getChildren().remove(packetName);
+      }
       topBox.getChildren().add(packetName);
     }
     if (!(null == importStatements) && !(importStatements.isEmpty())) {
-      Label imports = new Label();
+//      if (topBox.getChildren().contains(imports)) {
+//        topBox.getChildren().remove(imports);
+//      }
+      for (Node n : topBox.getChildren()) {
+        if (n instanceof Label) {
+          if (((Label) n).getText().contains("import")) {
+            topBox.getChildren().remove(n);
+          }
+        }
+      }
       for( String g : importStatements) {
+        Label imports = new Label();
         if (!g.isEmpty()) {
           imports.setText("  import " + g + ";");
           topBox.getChildren().add(imports);
@@ -184,22 +215,42 @@ public class MontiArcController extends AbstractDiagramController {
     
     
     if (!genericsArray.isEmpty()) {
-      for( String g : genericsArray) {
-        name.setText(name.getText() + " <" + g + ", ");
+      int k = 0;
+      if (!genericsArray.get(0).isEmpty()) {
+        name.setText(name.getText() + " <"); 
       }
-      name.setText(name.getText().substring(0,name.getText().length()-2) + ">");
-      
+      for( String g : genericsArray) {
+        if(!g.isEmpty()) {
+          k++;
+          name.setText(name.getText() + g + "; ");
+        }
+      }
+      if (k>0) {
+        name.setText(name.getText().substring(0,name.getText().length()-2) + ">");
+      }
     }
     if (types.size() > 0) {
-      for( String t : types) {
-        name.setText(name.getText() + " (" + t + ", ");
+      int i = 0;
+      if (!types.get(0).isEmpty()) {
+        name.setText(name.getText() + " (");
       }
-      name.setText(name.getText().substring(0,name.getText().length()-2) + ")");
+      for( String t : types) {
+        if (!t.isEmpty()) {
+          i++;
+          name.setText(name.getText() + t + ", ");
+        }
+      }
+      if (i > 0) {
+        name.setText(name.getText().substring(0,name.getText().length()-2) + ")");
+      }
+      if (topBox.getChildren().contains(name)) {
+        topBox.getChildren().remove(name);
+      }
       topBox.getChildren().add(name);
     }
     this.topBox.setPadding(new Insets(0, 20, 0, 0));
     this.topBox.setSpacing(5);
-    
+    System.out.println("ViewBox " + topBox.getChildren().toString());
   }
   
   
@@ -736,29 +787,16 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
     voiceBtn.setText("");
     
     image = new Image("/icons/recognizew.png");
-    // needs to be replaced by another picture
     checkValidityBtn.setGraphic(new ImageView(image));
     checkValidityBtn.setText("Check");
-    
-//    image = new Image("/icons/add1.png");
-    // needs to be replaced by another picture
-//    addGenericsBtn.setGraphic(new ImageView(image));
-    addGenericsBtn.setText("Add Generics");
-    
-//    image = new Image("/icons/add1.png");
-    // needs to be replaced by another picture
-//    addTypesBtn.setGraphic(addGenericsBtn);
-    addTypesBtn.setText("Add Types");
-    
-    
+        
+    image = new Image("/icons/recognizew.png");
+    generateBtn.setGraphic(new ImageView(image));
+    generateBtn.setText("Generate");
     buttonInUse = selectBtn;
     buttonInUse.getStyleClass().add("button-in-use");
     
     // ---------------------- Actions for buttons ----------------------------
-//    createBtn.setOnAction(event ->addGenerics());
-//    
-//    packageBtn.setOnAction(event -> 
-//    addTypes());
     
     edgeBtn.setOnAction(event -> {
       tool = ToolEnum.EDGE;
@@ -789,8 +827,6 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
     deleteBtn.setOnAction(event -> deleteSelected());
     
     recognizeBtn.setOnAction(event -> recognizeController.recognize(selectedSketches));
-    addGenericsBtn.setOnAction(event -> addGenerics());
-    addTypesBtn.setOnAction(event -> addTypes());
     
     voiceBtn.setOnAction(event -> {
       if (voiceController.voiceEnabled) {
@@ -814,7 +850,9 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
     plugin.shapeToAST(graph, arg);
     
     });
+    topBox.setOnMouseClicked(event -> this.showSomething());
   }
+  
   
   public AbstractNodeView createNodeView(AbstractNode node, boolean remote) {
     AbstractNodeView newView = null;

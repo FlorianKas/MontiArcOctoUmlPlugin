@@ -7,6 +7,7 @@ import java.util.Arrays;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import javafx.scene.control.Label;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 import model.edges.AbstractEdge;
@@ -14,7 +15,7 @@ import model.edges.ConnectorEdge;
 
 import model.nodes.PortNode;
 
-import util.Constants;
+import util.ConstantsMonti;
 import view.edges.AbstractEdgeView.Position;
 import view.nodes.AbstractNodeView;
 import view.nodes.ComponentNodeView;
@@ -26,6 +27,7 @@ public class ConnectorEdgeView extends AbstractEdgeView{
   private AbstractNodeView endNode;
   private ArrayList<Line> arrowHeadLines = new ArrayList<>();
   private Text dataType = new Text();
+  private Label StereoType = new Label();
   
   public ConnectorEdgeView(ConnectorEdge edge, AbstractNodeView startNode, AbstractNodeView endNode) {
     super(edge, startNode, endNode);
@@ -106,7 +108,14 @@ public class ConnectorEdgeView extends AbstractEdgeView{
 //    this.getChildren().add(super.getEndMultiplicity());
 //    this.getChildren().add(super.getStartMultiplicity());
     this.getChildren().add(drawArrowHead(getEndLine().getEndX(), getEndLine().getEndY(), getEndLine().getStartX(), getEndLine().getStartY()));
+    if(((ConnectorEdge)refEdge).getStereoType() != null) {
+      StereoType.setText(((ConnectorEdge)refEdge).getStereoType());
+    }
     
+    StereoType.setLayoutX((startNode.getX() + endNode.getX()) / 2);
+    StereoType.setLayoutY(middleLine.getEndY() + 20);
+    StereoType.toFront();
+    this.getChildren().add(StereoType);
     
   }
   
@@ -116,11 +125,11 @@ public class ConnectorEdgeView extends AbstractEdgeView{
     System.out.println("ArrowHeadLines looks as follows " + arrowHeadLines.toString());
     if (selected) {
       for (Line l : arrowHeadLines) {
-        l.setStroke(Constants.selected_color);
+        l.setStroke(ConstantsMonti.selected_color);
       }
-      startLine.setStroke(Constants.selected_color);
-      middleLine.setStroke(Constants.selected_color);
-      endLine.setStroke(Constants.selected_color);
+      startLine.setStroke(ConstantsMonti.selected_color);
+      middleLine.setStroke(ConstantsMonti.selected_color);
+      endLine.setStroke(ConstantsMonti.selected_color);
     }
     else {
       for (Line l : arrowHeadLines) {
@@ -159,7 +168,7 @@ public class ConnectorEdgeView extends AbstractEdgeView{
       arrowHeadLine.setStrokeWidth(super.STROKE_WIDTH);
       arrowHeadLines.add(arrowHeadLine);
       if (super.isSelected()) {
-        arrowHeadLine.setStroke(Constants.selected_color);
+        arrowHeadLine.setStroke(ConstantsMonti.selected_color);
       }
       group.getChildren().add(arrowHeadLine);
       rho = theta - phi;
@@ -167,9 +176,10 @@ public class ConnectorEdgeView extends AbstractEdgeView{
     return group;
   }
   
+  @Override
   public void propertyChange(PropertyChangeEvent evt) {
     super.propertyChange(evt);
-    if (evt.getPropertyName().equals(Constants.changeNodeTranslateX) || evt.getPropertyName().equals(Constants.changeNodeTranslateY) || evt.getPropertyName().equals(Constants.changeEdgeDirection)) {
+    if (evt.getPropertyName().equals(ConstantsMonti.changeEdgeStereoType)) {
       draw();
     }
   } 
@@ -334,5 +344,7 @@ public class ConnectorEdgeView extends AbstractEdgeView{
     }
     // TODO Handle when the nodes are overlapping.
   }
+  
+  
   
 }

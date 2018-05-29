@@ -10,6 +10,7 @@ public class ConnectorEdge extends AbstractEdge{
 //  private PortNode startPort;
 //  private PortNode endPort;
   private String dataType;
+  private String stereoType;
   
   public ConnectorEdge(PortNode startPort, PortNode endPort) {
     super(startPort, endPort);
@@ -96,6 +97,15 @@ public class ConnectorEdge extends AbstractEdge{
 
   public String getType() {
     return "Connector";
+  }
+
+  public String getStereoType() {
+    // TODO Auto-generated method stub
+    return stereoType;
+  }
+  
+  public void setStereoType(String pStereoType) {
+    stereoType = pStereoType;
   }
   
 }

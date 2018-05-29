@@ -16,6 +16,7 @@
         <VBox fx:id="topBox">
             <ToolBar fx:id="aToolBar" orientation="HORIZONTAL">
                 <HBox fx:id="umlBox">
+               		<Button text="Voice" fx:id="voiceBtn"/>
                     <Button text="Edge" fx:id="edgeBtn"/>
                     <Button text="Draw" fx:id="drawBtn"/>
                 </HBox>
@@ -30,10 +31,8 @@
                 </HBox>
                 <HBox fx:id="recognizeBox">
                     <Button text="Recognize" fx:id="recognizeBtn"/>
-                    <Button text="Voice" fx:id="voiceBtn"/>
                     <Button text="checkValidity" fx:id="checkValidityBtn"/>
-                    <Button text="Add Generics" fx:id="addGenericsBtn"/>
-                    <Button text="Add Types" fx:id="addTypesBtn"/> 
+                    <Button text="Generate" fx:id="generateBtn"/>
                 </HBox>
             </ToolBar>   
     	</VBox>

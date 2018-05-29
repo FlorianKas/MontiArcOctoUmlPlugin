@@ -3,6 +3,8 @@ package controller.dialog;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import model.edges.AbstractEdge;
+import model.edges.ConnectorEdge;
+import model.nodes.ComponentNode;
 
 /**
  * Dialog to edit Edge settings.
@@ -10,17 +12,8 @@ import model.edges.AbstractEdge;
  * @author Marco Jakob
  */
 public class EdgeEditDialogControllerMonti extends EdgeEditDialogController{
-  
   @FXML
-  private ChoiceBox directionBox;
-  @FXML
-  private ChoiceBox typeBox;
-  @FXML
-  private TextField startMultiplicity;
-  @FXML
-  private TextField endMultiplicity;
-  @FXML
-  private TextField label;
+  private TextField StereoType;
   @FXML
   private Button okButton;
   @FXML
@@ -39,16 +32,8 @@ public class EdgeEditDialogControllerMonti extends EdgeEditDialogController{
     
   }
   
-  public String getStartMultiplicity() {
-    return startMultiplicity.getText();
-  }
-  
-  public String getEndMultiplicity() {
-    return endMultiplicity.getText();
-  }
-  
-  public String getLabel() {
-    return label.getText();
+  public String getStereoType() {
+    return StereoType.getText();
   }
   
   public Button getOkButton() {
@@ -59,24 +44,11 @@ public class EdgeEditDialogControllerMonti extends EdgeEditDialogController{
     return cancelButton;
   }
   
-  public ChoiceBox getDirectionBox() {
-    return directionBox;
-  }
-  
-  public ChoiceBox getTypeBox() {
-    return typeBox;
-  }
   
   public void setEdge(AbstractEdge edge) {
     this.edge = edge;
     // TODO Hardcoded values. Where to put them?
-    typeBox.getItems().setAll("Association", "Inheritance", "Aggregation", "Composition");
-    typeBox.getSelectionModel().select(edge.getType());
-    directionBox.getItems().setAll(AbstractEdge.Direction.values());
-    directionBox.getSelectionModel().select(edge.getDirection());
-    startMultiplicity.setText(edge.getStartMultiplicity());
-    endMultiplicity.setText(edge.getEndMultiplicity());
-    label.setText(edge.getLabel());
+    StereoType.setText(((ConnectorEdge)edge).getStereoType());
   }
   
   /**
@@ -95,5 +67,14 @@ public class EdgeEditDialogControllerMonti extends EdgeEditDialogController{
    */
   private boolean isInputValid() {
     return true; // Use if we want to
+  }
+  
+  public boolean hasStereoTypeChanged() {
+    if (((ConnectorEdge)this.edge).getStereoType() == null) {
+      return StereoType.getText() != null;
+    }
+    else {
+      return !((ConnectorEdge)this.edge).getStereoType().equals(StereoType.getText());
+    }
   }
 }

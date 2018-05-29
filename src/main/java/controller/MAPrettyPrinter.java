@@ -16,8 +16,13 @@ public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
   
   public void printImport(ArrayList<de.monticore.types.types._ast.ASTImportStatement> importDec) {
     for (de.monticore.types.types._ast.ASTImportStatement imp : importDec) {
-      handle(imp);
-      
+      de.monticore.types.types._ast.ASTQualifiedName imported =  TypesNodeFactory.createASTQualifiedName(imp.getImportList());
+      getPrinter().print("import ");
+      handle(imported);
+      if (imp.isStar()) {
+        getPrinter().print("*");
+      }
+      getPrinter().print(";");
       getPrinter().println("");
     }
 //    getPrinter().flushBuffer();
@@ -28,6 +33,7 @@ public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
     getPrinter().print("package ");
     de.monticore.types.types._ast.ASTQualifiedName pack = TypesNodeFactory.createASTQualifiedName(packageDeclaration);
     handle(pack);
+    getPrinter().print(";");
     getPrinter().addLine("");
   }
   
@@ -88,8 +94,10 @@ public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
         new ArrayList<de.monticore.lang.montiarc.montiarc._ast.ASTConnector>();
     
     for (de.monticore.lang.montiarc.montiarc._ast.ASTElement e : astBody.getElements()) {
-      if (e instanceof de.monticore.lang.montiarc.montiarc._ast.ASTPort) {
-        ports.add((de.monticore.lang.montiarc.montiarc._ast.ASTPort)e);
+      if (e instanceof de.monticore.lang.montiarc.montiarc._ast.ASTInterface) {
+        for (de.monticore.lang.montiarc.montiarc._ast.ASTPort p : ((de.monticore.lang.montiarc.montiarc._ast.ASTInterface) e).getPorts()) {
+          ports.add((de.monticore.lang.montiarc.montiarc._ast.ASTPort)p);
+        }
       }
       if (e instanceof de.monticore.lang.montiarc.montiarc._ast.ASTConnector) {
         connectors.add((de.monticore.lang.montiarc.montiarc._ast.ASTConnector)e);

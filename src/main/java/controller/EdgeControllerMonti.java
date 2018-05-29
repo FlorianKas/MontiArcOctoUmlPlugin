@@ -1,6 +1,7 @@
 package controller;
 
 import controller.dialog.EdgeEditDialogController;
+import controller.dialog.EdgeEditDialogControllerMonti;
 import controller.dialog.MessageEditDialogController;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -16,9 +17,12 @@ import model.edges.*;
 import model.edges.ConnectorEdge;
 import model.nodes.ComponentNode;
 import model.nodes.PortNode;
+import util.commands.CompoundCommand;
 import util.commands.DirectionChangeEdgeCommand;
 import util.commands.MoveMessageCommand;
 import util.commands.ReplaceEdgeCommand;
+import util.commands.SetEdgeStereoTypeCommand;
+import util.commands.SetNodeNameCommand;
 import view.edges.AbstractEdgeView;
 import view.edges.ConnectorEdgeView;
 import view.edges.MessageEdgeView;
@@ -215,11 +219,11 @@ public class EdgeControllerMonti extends EdgeController {
   public boolean showEdgeEditDialog(AbstractEdge edge) {
     System.out.println("We are here");
     System.out.println("edge is of type connectoredge" + (edge instanceof ConnectorEdge));
-    if (!(edge instanceof ConnectorEdge)) {
+    if ((edge instanceof ConnectorEdge)) {
       try {
         // Load the classDiagramView.fxml file and create a new stage for the
         // popup
-        FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view/fxml/edgeEditDialog.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view/fxml/connectorEdgeEditDialog.fxml"));
         AnchorPane dialog = loader.load();
         dialog.setBackground(new Background(new BackgroundFill(Color.WHITESMOKE, new CornerRadii(1), null)));
         dialog.setStyle("-fx-border-color: black");
@@ -227,13 +231,19 @@ public class EdgeControllerMonti extends EdgeController {
         dialog.setLayoutX((edge.getStartNode().getTranslateX() + edge.getEndNode().getTranslateX()) / 2);
         dialog.setLayoutY((edge.getStartNode().getTranslateY() + edge.getEndNode().getTranslateY()) / 2);
         
-        EdgeEditDialogController controller = loader.getController();
+        EdgeEditDialogControllerMonti controller = loader.getController();
         controller.setEdge(edge);
         ChoiceBox directionBox = controller.getDirectionBox();
         ChoiceBox typeBox = controller.getTypeBox();
+        String stereoType = controller.getStereoType();
         controller.getOkButton().setOnAction(new EventHandler<ActionEvent>() {
           @Override
           public void handle(ActionEvent event) {
+            CompoundCommand command = new CompoundCommand();
+            if (controller.hasStereoTypeChanged()) {
+              command.add(new SetEdgeStereoTypeCommand(edge, controller.getStereoType(), ((ConnectorEdge)edge).getStereoType()));
+              ((ConnectorEdge)edge).setStereoType(controller.getStereoType());
+            }
             // If no change in type of edge we just change direction of old edge
             // if(typeBox.getValue().equals(edge.getType()) || typeBox.getValue()
             // == null){
@@ -253,24 +263,24 @@ public class EdgeControllerMonti extends EdgeController {
             
             // solved the bug of change multiplicity and edge type in remote
             // collaboration setting
-            AbstractEdge newEdge = null;
-            if (typeBox.getValue().equals("Inheritance")) {
-              newEdge = new InheritanceEdge(edge.getStartNode(), edge.getEndNode());
-            }
-            else if (typeBox.getValue().equals("Association") || typeBox.getValue() == null) {
-              newEdge = new AssociationEdge(edge.getStartNode(), edge.getEndNode());
-            }
-            else if (typeBox.getValue().equals("Aggregation")) {
-              newEdge = new AggregationEdge(edge.getStartNode(), edge.getEndNode());
-            }
-            else if (typeBox.getValue().equals("Composition")) {
-              newEdge = new CompositionEdge(edge.getStartNode(), edge.getEndNode());
-            }
-            newEdge.setDirection(AbstractEdge.Direction.valueOf(directionBox.getValue().toString()));
-            newEdge.setStartMultiplicity(controller.getStartMultiplicity());
-            newEdge.setEndMultiplicity(controller.getEndMultiplicity());
-            newEdge.setLabel(controller.getLabel());
-            replaceEdge(edge, newEdge);
+//            AbstractEdge newEdge = null;
+//            if (typeBox.getValue().equals("Inheritance")) {
+//              newEdge = new InheritanceEdge(edge.getStartNode(), edge.getEndNode());
+//            }
+//            else if (typeBox.getValue().equals("Association") || typeBox.getValue() == null) {
+//              newEdge = new AssociationEdge(edge.getStartNode(), edge.getEndNode());
+//            }
+//            else if (typeBox.getValue().equals("Aggregation")) {
+//              newEdge = new AggregationEdge(edge.getStartNode(), edge.getEndNode());
+//            }
+//            else if (typeBox.getValue().equals("Composition")) {
+//              newEdge = new CompositionEdge(edge.getStartNode(), edge.getEndNode());
+//            }
+//            newEdge.setDirection(AbstractEdge.Direction.valueOf(directionBox.getValue().toString()));
+//            newEdge.setStartMultiplicity(controller.getStartMultiplicity());
+//            newEdge.setEndMultiplicity(controller.getEndMultiplicity());
+//            newEdge.setLabel(controller.getLabel());
+//            replaceEdge(edge, newEdge);
             
             aDrawPane.getChildren().remove(dialog);
             diagramController.removeDialog(dialog);

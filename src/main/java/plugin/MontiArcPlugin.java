@@ -8,6 +8,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
+import exceptions.ComponentGenericsException;
+import exceptions.ConnectorSourceException;
+import exceptions.InnerNameMissingException;
+import exceptions.InterfaceException;
+import exceptions.OuterComponentGenericsException;
+import exceptions.OuterNameMissingException;
+import exceptions.PortDirectionException;
+import exceptions.PortTypeException;
 import controller.AbstractDiagramController;
 import controller.MAPrettyPrinter;
 import controller.MontiArcController;
@@ -18,7 +26,9 @@ import controller.MontiArcController;
 import javafx.stage.Stage;
 
 import montiarc._ast.ASTMontiArcNode;
+import view.edges.AbstractEdgeView;
 import view.nodes.AbstractNodeView;
+import view.nodes.ComponentNodeView;
 import montiarc._ast.ASTMACompilationUnit;
 import de.monticore.ast.ASTNode;
 
@@ -37,6 +47,7 @@ import de.monticore.java.javadsl._ast.JavaDSLNodeFactory;
 
 import model.Graph;
 import model.GraphElement;
+import model.edges.AbstractEdge;
 import model.edges.ConnectorEdge;
 import model.edges.Edge;
 import model.nodes.AbstractNode;
@@ -46,6 +57,7 @@ import model.nodes.PortNode;
 public class MontiArcPlugin implements MontiCorePlugIn {
   private String usageFolderPath;
   private static final MontiArcPlugin plugIn = new MontiArcPlugin();
+  private HashMap<ASTElement,GraphElement> astMap = new HashMap<ASTElement, GraphElement>();
   
   public MontiArcPlugin(){
     
@@ -801,6 +813,7 @@ public class MontiArcPlugin implements MontiCorePlugIn {
           // create astPort for each PortNode of the current ComponentNode
           de.monticore.lang.montiarc.montiarc._ast.ASTPort astPort = 
               MontiArcNodeFactory.createASTPort(null, varDecPort, p.getTitle(), outgoing, incoming);
+          astMap.put((ASTElement) astPort, p);
           // add astPort to List
           System.out.println("astPort " +astPort.toString());
           astPorts.add(astPort);
@@ -868,6 +881,8 @@ public class MontiArcPlugin implements MontiCorePlugIn {
             }
             de.monticore.lang.montiarc.montiarc._ast.ASTConnector astConnector =
                 MontiArcNodeFactory.createASTConnector(null, source, targets);
+            //TODO we need to build connectorEdges differently with a list of targets
+            astMap.put(astConnector, e);
             bodyElements.add(astConnector);
           }
         }
@@ -882,6 +897,7 @@ public class MontiArcPlugin implements MontiCorePlugIn {
         // create astComponents for each ComponentNode
         astComponent = 
             MontiArcNodeFactory.createASTComponent(stereotype, node.getTitle(), head, "", typeArgs, astBody);
+        astMap.put(astComponent, node);
        // add each astComponent to elementsList (the list for the body of the outermost component)
         elements.add(astComponent);
      }    
@@ -998,7 +1014,105 @@ public class MontiArcPlugin implements MontiCorePlugIn {
 
   @Override
   public List<MontiCoreException> check(ASTNode arg0, HashMap<AbstractNodeView, AbstractNode> arg1) {
-    // TODO Auto-generated method stub
+    List errors = new ArrayList();
+    ASTMACompilationUnit compUnit = (ASTMACompilationUnit)arg0;
+    montiarc._ast.ASTComponent component = compUnit.getComponent();
+    montiarc._ast.ASTComponentHead outerHead = component.getHead();
+    Optional<de.monticore.types.types._ast.ASTTypeParameters> outerGens = outerHead.getGenericTypeParameters();
+    List<montiarc._ast.ASTParameter> outerParams = outerHead.getParameters();
+    montiarc._ast.ASTComponentBody outerBody = component.getBody();
+    String outerName = component.getName();
+    if (outerName == null) {
+      errors.add(new OuterNameMissingException());
+    }
+    if (outerGens.isPresent()) {
+      for (de.monticore.types.types._ast.ASTTypeVariableDeclaration varDecs :
+        outerGens.get().getTypeVariableDeclarations()) {
+        if (varDecs.getUpperBounds() == null) {
+          // error because extends need to contains at least one upperBound
+          errors.add(new OuterComponentGenericsException());
+        }
+      }  
+    }
+    List<montiarc._ast.ASTElement> elements = outerBody.getElements();
+    for (montiarc._ast.ASTElement e : elements) {
+      
+      if (e instanceof montiarc._ast.ASTComponent) {
+        String innerName = ((montiarc._ast.ASTComponent) e).getName();
+        montiarc._ast.ASTComponentHead innerHead = ((montiarc._ast.ASTComponent) e).getHead();
+        if(innerHead.getGenericTypeParameters().isPresent()) {
+          for (de.monticore.types.types._ast.ASTTypeVariableDeclaration varDecs :
+            innerHead.getGenericTypeParameters().get().getTypeVariableDeclarations()) {
+            if (varDecs.getUpperBounds() == null) {
+              // error because extends need to contains at least one upperBound
+              errors.add(new ComponentGenericsException((AbstractNode) astMap.get(e), 
+                  getNodeView((AbstractNode) astMap.get(e),arg1)));
+            }
+          }
+        }
+        if (innerName == null) {
+          errors.add(new InnerNameMissingException((AbstractNode) astMap.get(e), 
+              getNodeView((AbstractNode) astMap.get(e),arg1)));
+        }
+        List<montiarc._ast.ASTElement> innerElements = ((montiarc._ast.ASTComponent) e).getBody().getElements();
+        for (montiarc._ast.ASTElement innerE : innerElements) {
+          if (e instanceof montiarc._ast.ASTConnector) {
+            if (((montiarc._ast.ASTConnector)e).getSource() == null) {
+              // error because there needs to be a source
+              errors.add(new ConnectorSourceException(((ConnectorEdge)e).getStartPort(), 
+                  getNodeView((AbstractNode)((ConnectorEdge)e).getStartPort(),arg1)
+                  ));
+            }
+            if (((montiarc._ast.ASTConnector)e).getTargets() == null) {
+              // error because there needs to be at least one target
+              // we need to change something here because the getEndPort will soon return a list of targets
+              errors.add(new ConnectorSourceException(((ConnectorEdge)e).getEndPort(), 
+                  getNodeView((AbstractNode)((ConnectorEdge)e).getEndPort(),arg1)
+                  ));
+            }
+          }
+          else if (e instanceof montiarc._ast.ASTInterface) {
+            if (((montiarc._ast.ASTInterface)e).getPorts() == null) {
+              // error because there neeeds to be at least one port
+              errors.add(new InterfaceException((AbstractNode) astMap.get(e), 
+              getNodeView((AbstractNode) astMap.get(e),arg1)));
+            }
+          }
+          else if (e instanceof montiarc._ast.ASTPort) {
+            if (((montiarc._ast.ASTPort)e).getType() == null) {
+              // error because there needs to be a type
+              errors.add(new PortTypeException((AbstractNode) astMap.get(e), 
+                  getNodeView((AbstractNode) astMap.get(e),arg1)));
+            }
+            if (!((montiarc._ast.ASTPort)e).isIncoming() && !((montiarc._ast.ASTPort)e).isOutgoing()) {
+              // error because a port needs to hava a direction
+              errors.add(new PortDirectionException((AbstractNode) astMap.get(e), 
+              getNodeView((AbstractNode) astMap.get(e),arg1)));
+            }
+          }
+        }
+        
+      }
+    }
+    
+    return errors;
+  }
+  
+  private AbstractNodeView getNodeView(AbstractNode node, HashMap<AbstractNodeView, AbstractNode> arg1) {
+    for (AbstractNodeView nodeView : arg1.keySet()) {
+      if (arg1.get(nodeView) == node) {
+        return nodeView;
+      }
+    }
+    return null;
+  }
+  
+  private AbstractEdgeView getEdgeView(AbstractEdge edge, HashMap<AbstractEdgeView, AbstractEdge> arg1) {
+    for (AbstractEdgeView edgeView : arg1.keySet()) {
+      if (arg1.get(edgeView) == edge) {
+        return edgeView;
+      }
+    }
     return null;
   }
   

@@ -10,6 +10,7 @@ import java.util.Optional;
 
 import exceptions.ComponentGenericsException;
 import exceptions.ConnectorSourceException;
+import exceptions.ConnectorTargetsException;
 import exceptions.InnerNameMissingException;
 import exceptions.InterfaceException;
 import exceptions.OuterComponentGenericsException;
@@ -35,6 +36,7 @@ import de.monticore.ast.ASTNode;
 import de.monticore.common.common._ast.*;
 import de.monticore.common.common._ast.ASTStereotype.Builder;
 import de.monticore.types.types._ast.*;
+import de.monticore.types.types._parser.TypesParser;
 import de.monticore.types.prettyprint.TypesPrettyPrinterConcreteVisitor;
 
 import de.monticore.lang.montiarc.common._ast.ASTParameter;
@@ -57,7 +59,8 @@ import model.nodes.PortNode;
 public class MontiArcPlugin implements MontiCorePlugIn {
   private String usageFolderPath;
   private static final MontiArcPlugin plugIn = new MontiArcPlugin();
-  private HashMap<ASTElement,GraphElement> astMap = new HashMap<ASTElement, GraphElement>();
+  private HashMap<ASTNode,GraphElement> astMap = new HashMap<ASTNode, GraphElement>();
+  private HashMap<ASTNode,List<GraphElement>> astConnect = new HashMap();
   
   public MontiArcPlugin(){
     
@@ -218,6 +221,12 @@ public class MontiArcPlugin implements MontiCorePlugIn {
     System.out.println("Generics looks as follows" + generics);
     
     for (String g : generics) {
+      List<de.monticore.types.types._ast.ASTSimpleReferenceType> firstList = 
+          new ArrayList<de.monticore.types.types._ast.ASTSimpleReferenceType>();
+      List<de.monticore.types.types._ast.ASTComplexReferenceType> upper= 
+          new ArrayList<de.monticore.types.types._ast.ASTComplexReferenceType>();
+      
+      
       System.out.println("g" + g);
    // create generic type params
       String name = "";
@@ -234,6 +243,15 @@ public class MontiArcPlugin implements MontiCorePlugIn {
 //        String[] supClasses = g.split("extends")[1].split("\\;");
 //        System.out.println("supClasses" + supClasses.length);
         for(String sup : supClasses) {
+          List<String> tmpName = new ArrayList<String>();
+          if (!sup.contains("<") && !sup.contains(">")) {
+            for (String s : sup.split("\\.")) {
+              tmpName.add(sup.replaceAll("\\s+",""));
+            }
+            List<ASTSimpleReferenceType> tmpList = new ArrayList<ASTSimpleReferenceType>();
+            tmpList.add(TypesNodeFactory.createASTSimpleReferenceType(tmpName, null));
+            upper.add(TypesNodeFactory.createASTComplexReferenceType(tmpList));
+          }
           String[] firstSplit1 = sup.split("\\>\\."); 
           ArrayList<String> firstSplit = new ArrayList<String>();
           System.out.println("Num of splits" +sup.split("\\>\\.").length);
@@ -252,44 +270,47 @@ public class MontiArcPlugin implements MontiCorePlugIn {
             firstSplit.add(sup);
           }
           
-          List<de.monticore.types.types._ast.ASTSimpleReferenceType> firstList = 
-              new ArrayList<de.monticore.types.types._ast.ASTSimpleReferenceType>();
-          List<de.monticore.types.types._ast.ASTComplexReferenceType> upper= 
-              new ArrayList<de.monticore.types.types._ast.ASTComplexReferenceType>();
-          
           for (String u : firstSplit) {
             // divide supClasses at '.'
-            String[] partsSmaller = u.split("\\<");
-            System.out.println("partsSmaller" + partsSmaller.length);
-            System.out.println("parts Smaller " + partsSmaller);
             String withoutFirst = "";
-            for (int i=1; i<partsSmaller.length; i++) {
-              if (i > 1) {
-                withoutFirst = withoutFirst + "<" +partsSmaller[i];
+            String firstElement  = "";
+            if (u.contains("<")) {
+              String[] partsSmaller = u.split("\\<");
+              System.out.println("partsSmaller" + partsSmaller.length);
+              System.out.println("parts Smaller " + partsSmaller);
+              for (int i=1; i < partsSmaller.length; i++) {
+                if (i > 1) {
+                  withoutFirst = withoutFirst + "<" +partsSmaller[i];
+                }
+                else {
+                  withoutFirst = withoutFirst + partsSmaller[i];
+                }
               }
-              else {
-                withoutFirst = withoutFirst + partsSmaller[i];
-              }
+              firstElement = partsSmaller[0];
+              System.out.println("First Element " + firstElement);
+              
             }
             System.out.println("WithoutFirst" + withoutFirst);
-            String[] without = withoutFirst.split("\\>");
-            String lastElement = without[without.length-1];
-            String partsGreater[] = withoutFirst.split("\\>");
-            System.out.println("Length of parts Greater " + partsGreater.length);
+            
             String withoutLast = "";
-            for (int i=0; i<partsGreater.length; i++) {
-              System.out.println("partsGreater " + partsGreater[i]);
-              if (i < partsGreater.length) {
-                withoutLast = withoutLast + partsGreater[i] + ">" ;
-              }
-              else {
-                withoutLast = withoutLast + partsGreater[i];
+            
+            if (withoutFirst.contains(">")) {
+              String[] without = withoutFirst.split("\\>");
+              String lastElement = without[without.length-1];
+              String partsGreater[] = withoutFirst.split("\\>");
+              System.out.println("Length of parts Greater " + partsGreater.length);
+              for (int i=0; i<partsGreater.length; i++) {
+                System.out.println("partsGreater " + partsGreater[i]);
+                if (i < partsGreater.length) {
+                  withoutLast = withoutLast + partsGreater[i] + ">" ;
+                }
+                else {
+                  withoutLast = withoutLast + partsGreater[i];
+                }
               }
             }
             System.out.println("withoutLast" + withoutLast);
             String[] partsTmp = withoutLast.split("\\,");
-            String firstElement = partsSmaller[0];
-            System.out.println("First Element " + firstElement);
             ArrayList<String> parts = new ArrayList<String>();
             for (int i=0 ; i <partsTmp.length; i++) {
               parts.add(partsTmp[i]);
@@ -686,6 +707,8 @@ public class MontiArcPlugin implements MontiCorePlugIn {
   @Override
   public ASTNode shapeToAST(Graph arg0, List<String> arg1) {
     
+    
+    TypesParser typeParser = new TypesParser();
     ArrayList<String> generics = MontiArcController.genericsArray;
     ArrayList<String> astTypes = MontiArcController.types;
     String packageDec = MontiArcController.packageName;
@@ -794,10 +817,27 @@ public class MontiArcPlugin implements MontiCorePlugIn {
           }
           
           
-          ArrayList<String> namesPort = new ArrayList<String>();
-          namesPort.add(p.getPortType());
-          de.monticore.types.types._ast.ASTSimpleReferenceType varDecPort = 
-              TypesNodeFactory.createASTSimpleReferenceType(namesPort, null);
+//          ArrayList<String> namesPort = new ArrayList<String>();
+//          namesPort.add(p.getPortType());
+          Optional typeResult = null;
+          ASTType typeOfPort = null;
+          if (!p.getPortType().isEmpty()) {
+            try {
+              typeResult = typeParser.parse_String(p.getPortType());
+            }
+            catch (IOException e1) {
+              // TODO Auto-generated catch block
+              e1.printStackTrace();
+            }
+            typeOfPort = (ASTType)typeResult.get();
+            
+          }
+          else {
+            typeOfPort = TypesNodeFactory.createASTSimpleReferenceType();
+          }
+          
+//            de.monticore.types.types._ast.ASTSimpleReferenceType varDecPort = 
+//              TypesNodeFactory.createASTSimpleReferenceType(namesPort, null);
           // ich glaube ich muss hier nicht einen solchen Type createn, sondern checken, ob er existiert oder?
           
 //          ArrayList<de.monticore.types.types._ast.ASTComplexReferenceType> upperBounds = 
@@ -812,8 +852,8 @@ public class MontiArcPlugin implements MontiCorePlugIn {
           
           // create astPort for each PortNode of the current ComponentNode
           de.monticore.lang.montiarc.montiarc._ast.ASTPort astPort = 
-              MontiArcNodeFactory.createASTPort(null, varDecPort, p.getTitle(), outgoing, incoming);
-          astMap.put((ASTElement) astPort, p);
+              MontiArcNodeFactory.createASTPort(null, typeOfPort, p.getTitle(), outgoing, incoming);
+          astMap.put(astPort, p);
           // add astPort to List
           System.out.println("astPort " +astPort.toString());
           astPorts.add(astPort);
@@ -841,17 +881,21 @@ public class MontiArcPlugin implements MontiCorePlugIn {
         }
         ArrayList<PortNode> visited = new ArrayList<PortNode>();
         for (ConnectorEdge c : edges) {
+          List<GraphElement> tEdges = new ArrayList<GraphElement>();
           if (!visited.contains(c)) {
+            tEdges.add(c);
             ArrayList<String> title = new ArrayList<String>();
             String portName = c.getStartNode().getTitle();
-            if (portName.split(".").length > 0) {
-              for (String s : portName.split(".")) {
-                title.add(s);
+            if (portName != null) {
+              if (portName.split(".").length > 0) {
+                for (String s : portName.split(".")) {
+                  title.add(s);
+                }
               }
-            }
-            else {
-              title.add(((PortNode)c.getStartNode()).getComponentNode().getTitle());
-              title.add(portName);
+              else {
+                title.add(((PortNode)c.getStartNode()).getComponentNode().getTitle());
+                title.add(portName);
+              }
             }
             ASTQualifiedName source = TypesNodeFactory.createASTQualifiedName(title);
             ArrayList<ASTQualifiedName> targets = new ArrayList<ASTQualifiedName>();
@@ -865,6 +909,7 @@ public class MontiArcPlugin implements MontiCorePlugIn {
               if (c.getStartNode() == e.getStartNode() && c != e && !visited.contains(e)) {
                 // create all targets
                 ArrayList<String> target = new ArrayList<String>();
+                tEdges.add(e);
                 String portNameTarget = e.getEndNode().getTitle();
                 if (portNameTarget.split(".").length > 0) {
                   for (String s : portNameTarget.split(".")) {
@@ -881,8 +926,7 @@ public class MontiArcPlugin implements MontiCorePlugIn {
             }
             de.monticore.lang.montiarc.montiarc._ast.ASTConnector astConnector =
                 MontiArcNodeFactory.createASTConnector(null, source, targets);
-            //TODO we need to build connectorEdges differently with a list of targets
-            astMap.put(astConnector, e);
+            astConnect.put(astConnector, tEdges);
             bodyElements.add(astConnector);
           }
         }
@@ -933,7 +977,7 @@ public class MontiArcPlugin implements MontiCorePlugIn {
      importSt.add(s);
    }
    MaPrinter.printImport(importSt); 
-   MaPrinter.printComponent(ast.getComponent());    
+   MaPrinter.printComponentOuter(ast.getComponent());    
    MaPrinter.getPrinter().flushBuffer();
    System.out.println(MaPrinter.getPrinter().getContent());
    
@@ -1015,12 +1059,12 @@ public class MontiArcPlugin implements MontiCorePlugIn {
   @Override
   public List<MontiCoreException> check(ASTNode arg0, HashMap<AbstractNodeView, AbstractNode> arg1) {
     List errors = new ArrayList();
-    ASTMACompilationUnit compUnit = (ASTMACompilationUnit)arg0;
-    montiarc._ast.ASTComponent component = compUnit.getComponent();
-    montiarc._ast.ASTComponentHead outerHead = component.getHead();
+    de.monticore.lang.montiarc.montiarc._ast.ASTMACompilationUnit compUnit = (de.monticore.lang.montiarc.montiarc._ast.ASTMACompilationUnit)arg0;
+    ASTComponent component = compUnit.getComponent();
+    ASTComponentHead outerHead = component.getHead();
     Optional<de.monticore.types.types._ast.ASTTypeParameters> outerGens = outerHead.getGenericTypeParameters();
-    List<montiarc._ast.ASTParameter> outerParams = outerHead.getParameters();
-    montiarc._ast.ASTComponentBody outerBody = component.getBody();
+    List<ASTParameter> outerParams = outerHead.getParameters();
+    ASTComponentBody outerBody = component.getBody();
     String outerName = component.getName();
     if (outerName == null) {
       errors.add(new OuterNameMissingException());
@@ -1034,12 +1078,13 @@ public class MontiArcPlugin implements MontiCorePlugIn {
         }
       }  
     }
-    List<montiarc._ast.ASTElement> elements = outerBody.getElements();
-    for (montiarc._ast.ASTElement e : elements) {
-      
-      if (e instanceof montiarc._ast.ASTComponent) {
-        String innerName = ((montiarc._ast.ASTComponent) e).getName();
-        montiarc._ast.ASTComponentHead innerHead = ((montiarc._ast.ASTComponent) e).getHead();
+    List<ASTElement> elements = outerBody.getElements();
+    for (ASTElement e : elements) {
+      System.out.println("e " + e.toString());
+      if (e instanceof ASTComponent) {
+        System.out.println("in Component");
+        String innerName = ((ASTComponent) e).getName();
+        ASTComponentHead innerHead = ((ASTComponent) e).getHead();
         if(innerHead.getGenericTypeParameters().isPresent()) {
           for (de.monticore.types.types._ast.ASTTypeVariableDeclaration varDecs :
             innerHead.getGenericTypeParameters().get().getTypeVariableDeclarations()) {
@@ -1054,40 +1099,48 @@ public class MontiArcPlugin implements MontiCorePlugIn {
           errors.add(new InnerNameMissingException((AbstractNode) astMap.get(e), 
               getNodeView((AbstractNode) astMap.get(e),arg1)));
         }
-        List<montiarc._ast.ASTElement> innerElements = ((montiarc._ast.ASTComponent) e).getBody().getElements();
-        for (montiarc._ast.ASTElement innerE : innerElements) {
-          if (e instanceof montiarc._ast.ASTConnector) {
-            if (((montiarc._ast.ASTConnector)e).getSource() == null) {
+        List<ASTElement> innerElements =  ((ASTComponent)e).getBody().getElements();
+        
+        
+        System.out.println("innerElements " + innerElements.toString());
+        for (ASTElement innerE : innerElements) {
+          System.out.println("innerE " + innerE.toString());
+          if (innerE instanceof ASTConnector) {
+            if (((ASTConnector)innerE).getSource() == null) {
               // error because there needs to be a source
-              errors.add(new ConnectorSourceException(((ConnectorEdge)e).getStartPort(), 
-                  getNodeView((AbstractNode)((ConnectorEdge)e).getStartPort(),arg1)
+              errors.add(new ConnectorSourceException(((ConnectorEdge)innerE).getStartPort(), 
+                  getNodeView((AbstractNode)((ConnectorEdge)innerE).getStartPort(),arg1)
                   ));
             }
-            if (((montiarc._ast.ASTConnector)e).getTargets() == null) {
-              // error because there needs to be at least one target
-              // we need to change something here because the getEndPort will soon return a list of targets
-              errors.add(new ConnectorSourceException(((ConnectorEdge)e).getEndPort(), 
-                  getNodeView((AbstractNode)((ConnectorEdge)e).getEndPort(),arg1)
-                  ));
+            if (((ASTConnector)innerE).getTargets() == null) {
+              errors.add(new ConnectorTargetsException());
             }
           }
-          else if (e instanceof montiarc._ast.ASTInterface) {
-            if (((montiarc._ast.ASTInterface)e).getPorts() == null) {
+          else if (innerE instanceof ASTInterface) {
+            System.out.println(" inner E " + innerE.toString());
+            if (((ASTInterface)innerE).getPorts().isEmpty()) {
+              
               // error because there neeeds to be at least one port
-              errors.add(new InterfaceException((AbstractNode) astMap.get(e), 
-              getNodeView((AbstractNode) astMap.get(e),arg1)));
+              errors.add(new InterfaceException((AbstractNode) astMap.get(innerE), 
+              getNodeView((AbstractNode) astMap.get(innerE),arg1)));
             }
-          }
-          else if (e instanceof montiarc._ast.ASTPort) {
-            if (((montiarc._ast.ASTPort)e).getType() == null) {
-              // error because there needs to be a type
-              errors.add(new PortTypeException((AbstractNode) astMap.get(e), 
-                  getNodeView((AbstractNode) astMap.get(e),arg1)));
-            }
-            if (!((montiarc._ast.ASTPort)e).isIncoming() && !((montiarc._ast.ASTPort)e).isOutgoing()) {
-              // error because a port needs to hava a direction
-              errors.add(new PortDirectionException((AbstractNode) astMap.get(e), 
-              getNodeView((AbstractNode) astMap.get(e),arg1)));
+            else {
+              List<ASTPort> ports = ((ASTInterface )innerE).getPorts();
+              System.out.println("ports " + ports.toString());
+              for (ASTPort p : ports) {
+                System.out.println(p.getType());
+                System.out.println(((ASTSimpleReferenceType)p.getType()).getNames().isEmpty());
+                if (((ASTSimpleReferenceType)p.getType()).getNames().isEmpty()) {
+                  // error because there needs to be a type
+                  errors.add(new PortTypeException((AbstractNode) astMap.get(p), 
+                      getNodeView((AbstractNode) astMap.get(p),arg1)));
+                }
+                if (!p.isIncoming() && !p.isOutgoing()) {
+                  // error because a port needs to hava a direction
+                  errors.add(new PortDirectionException((AbstractNode) astMap.get(p), 
+                  getNodeView((AbstractNode) astMap.get(p),arg1)));
+                }
+              }
             }
           }
         }

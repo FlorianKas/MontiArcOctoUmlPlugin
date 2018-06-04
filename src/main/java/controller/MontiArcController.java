@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import org.controlsfx.control.Notifications;
 
 import controller.dialog.MontiInitDialogController;
+import de.monticore.ast.ASTNode;
 import groovyjarjarantlr.collections.List;
 import controller.dialog.AddGenericsController;
 import controller.dialog.AddTypesController;
@@ -22,7 +23,11 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.Sketch;
@@ -32,6 +37,7 @@ import model.nodes.AbstractNode;
 import model.nodes.ComponentNode;
 import model.nodes.PortNode;
 import plugin.MontiArcPlugin;
+import plugin.MontiCoreException;
 import util.commands.AddDeleteNodeCommand;
 import util.commands.CompoundCommand;
 import util.commands.MoveGraphElementCommand;
@@ -110,6 +116,7 @@ public class MontiArcController extends AbstractDiagramController {
       FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view/fxml/montiInitDialog.fxml"));
       System.out.println("Loader load " + loader.getLocation());
       AnchorPane dialog = loader.load();
+      
       Stage dialogStage = new Stage();
       dialogStage.initModality(Modality.WINDOW_MODAL);
 //      dialogStage.initOwner(this.stage);
@@ -847,7 +854,9 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
     
     ArrayList<String> arg = new ArrayList<String>();
     arg.add(modelName);
-    plugin.shapeToAST(graph, arg);
+    ASTNode node = plugin.shapeToAST(graph, arg);
+    ArrayList<MontiCoreException> errors = (ArrayList<MontiCoreException>) plugin.check(node, getNodeMap());
+    System.out.println("Errors " + errors);
     
     });
     topBox.setOnMouseClicked(event -> this.showSomething());

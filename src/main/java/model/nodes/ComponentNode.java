@@ -14,6 +14,7 @@ public class ComponentNode extends AbstractNode implements Serializable {
   private String componentType = "";
   private String stereotype = "";
   private String generics = "";
+  private String aTitle = "";
   private ArrayList<PortNode> Ports = new ArrayList<>();
   
   

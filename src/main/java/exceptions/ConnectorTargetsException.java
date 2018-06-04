@@ -17,18 +17,18 @@ import view.nodes.ComponentNodeView;
 public class ConnectorTargetsException implements MontiCoreException {
   private Pane tmpPane; 
   private MontiArcPlugInErrors.ExceptionType type = MontiArcPlugInErrors.ExceptionType.NO_CONNECTOR_TARGET_AVAILABLE;
-  private AbstractNode tmpNode;
-  private AbstractNodeView tmpNodeView;
+//  private AbstractNode tmpNode;
+//  private AbstractNodeView tmpNodeView;
   
-  public ConnectorTargetsException(AbstractNode node, AbstractNodeView nodeView)
+  public ConnectorTargetsException()
   {
-    this.tmpNode = node;
-    this.tmpNodeView = nodeView;
+//    this.tmpNode = node;
+//    this.tmpNodeView = nodeView;
     setPane();
   }
   @Override
   public String getContentMessage() {
-    return "Name of inner Component is missing";
+    return "No target Component available";
   }
 
   @Override
@@ -38,17 +38,18 @@ public class ConnectorTargetsException implements MontiCoreException {
 
   @Override
   public AbstractNode getNode() {
-    return this.tmpNode;
+    return null;
+//    return this.tmpNode;
   }
   
   public void setNode(AbstractNode pTmpNode) {
-    this.tmpNode = pTmpNode;
+//    this.tmpNode = pTmpNode;
   }
   
 
   @Override
   public void handleActionClickOnPane() {
-    this.tmpNodeView.setSelected(true);
+//    this.tmpNodeView.setSelected(true);
   }
   public MontiArcPlugInErrors.ExceptionType getType() {
     return type;

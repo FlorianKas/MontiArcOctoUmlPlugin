@@ -37,15 +37,6 @@
             </ToolBar>   
     	</VBox>
     </top>
-    <left>
-            
-   			<VBox fx:id="config" alignment="TOP_CENTER">
-    			<Label fx:id="name"/>
-    			<Label fx:id="generics"/>
-    			<Label fx:id="typeParameters"/>
-    		</VBox>
-    	
-    </left>
     <bottom>
         <StackPane fx:id="infoPane">
             <ToolBar fx:id="zoomPane">

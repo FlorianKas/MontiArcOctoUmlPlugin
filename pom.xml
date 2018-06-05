@@ -171,33 +171,16 @@
 			</dependency> -->
 		 
 
-<!-- 		 
 <dependency>
   <groupId>OctoUML</groupId>
   <artifactId>OctoUML</artifactId>
   <version>0.0.1-SNAPSHOT</version>
 </dependency>
- -->
 <dependency>
-  <groupId>OctoUML</groupId>
-  <artifactId>OctoUML</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
-  <scope>system</scope>
-  <systemPath>${project.basedir}/src/main/resources/lib/OctoUML-0.0.1-20180522.232042-25.jar</systemPath>
-</dependency>
-<dependency>
- 	<groupId>octouml</groupId>
-        <artifactId>diagram-control</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
-        <scope>system</scope>
-        <systemPath>${project.basedir}/src/main/resources/lib/diagram-control-0.0.1-20180522.232001-24.jar</systemPath>
- </dependency>
-<!-- <dependency>
   <groupId>octouml</groupId>
   <artifactId>diagram-control</artifactId>
   <version>0.0.1-SNAPSHOT</version>
 </dependency>
- -->
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>

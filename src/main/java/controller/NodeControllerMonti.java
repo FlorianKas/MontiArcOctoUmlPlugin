@@ -526,7 +526,7 @@ public class NodeControllerMonti extends NodeController {
     try {
       // Load the classDiagramView.fxml file and create a new stage for the
       // popup
-      FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view/fxml/componentnodeEditDialogReal.fxml"));
+      FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view/fxml/componentNodeEditDialogReal.fxml"));
       System.out.println("Loader load " + loader.getLocation());
       AnchorPane dialog = loader.load();
       dialog.setBackground(new Background(new BackgroundFill(Color.WHITESMOKE, new CornerRadii(1), null)));

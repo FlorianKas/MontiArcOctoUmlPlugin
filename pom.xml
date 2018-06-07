@@ -187,6 +187,14 @@
 			<version>${guava.version}</version>
 		</dependency>
 
+	<dependency>
+  <groupId>de.monticore.lang</groupId>
+  <artifactId>montiarc</artifactId>
+  <version>4.1.2-SNAPSHOT</version>
+</dependency>
+	
+
+
 		<dependency>
 			<groupId>montiarc.languages</groupId>
 			<artifactId>montiarc-fe</artifactId>
@@ -304,12 +312,7 @@
             </exclusions>
 		</dependency>
 		
-		<dependency>
-  <groupId>de.monticore.lang</groupId>
-  <artifactId>montiarc</artifactId>
-  <version>4.1.2-SNAPSHOT</version>
-</dependency>
-
+	
 
 
 		<dependency>
@@ -455,7 +458,7 @@
 			<name>JBoss.org Maven repository</name>
 			<url>https://repository.jboss.org/nexus/content/groups</url>
 		</repository>-->
-		<repository>
+		<!--  <repository>
 			<id>se-nexus</id>
 			<name>yf</name>
 			<url>https://nexus.se.rwth-aachen.de/content/groups/public</url>
@@ -465,7 +468,7 @@
 			<name>yft</name>
 			<url>https://nexus.se.rwth-aachen.de/content/groups/octouml</url>
 		</repository>
-		
+		-->
  		
 	</repositories>
 

@@ -56,9 +56,10 @@ public class MontiArcController extends AbstractDiagramController {
   TabControllerMonti tabController;
   EdgeControllerMonti edgeController;
   SelectControllerMonti selectController;
-  public static MontiArcPlugin plugin;
+  MontiArcPlugin plugin;
   
   
+  private ArrayList<MontiCoreException> errorList = new ArrayList<MontiCoreException>();
   public static ArrayList<String> genericsArray = new ArrayList<String>();
   public static ArrayList<String> types = new ArrayList<String>();
   String modelName = "";
@@ -81,7 +82,6 @@ public class MontiArcController extends AbstractDiagramController {
     recognizeController = new MontiRecognizeController(drawPane, this);
     edgeController = new EdgeControllerMonti(drawPane,this);
     selectController = new SelectControllerMonti(drawPane, this);
-    plugin = new MontiArcPlugin();
     showSomething();
    
   }
@@ -747,6 +747,13 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
     
   }
   
+  private void setErrors(ArrayList<MontiCoreException> errors) {
+    errorList = errors;
+  }
+  
+  public ArrayList<MontiCoreException> getErrors(){
+    return errorList;
+  }
   // ------------ Init Buttons -------------------------------------------
   private void initToolBarActions() {
 //    Image image = new Image("/icons/classw.png");
@@ -756,7 +763,7 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
 //    image = new Image("/icons/packagew.png");
 //    packageBtn.setGraphic(new ImageView(image));
 //    packageBtn.setText("");
-    
+   
     Image image = new Image("/icons/edgew.png");
     edgeBtn.setGraphic(new ImageView(image));
     edgeBtn.setText("");
@@ -797,9 +804,18 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
     checkValidityBtn.setGraphic(new ImageView(image));
     checkValidityBtn.setText("Check");
         
-    image = new Image("/icons/recognizew.png");
+    image = new Image("/icons/generatew.png");
     generateBtn.setGraphic(new ImageView(image));
     generateBtn.setText("Generate");
+    
+    image = new Image("/icons/editinfow.png");
+    editInfoBtn.setGraphic(new ImageView(image));
+    editInfoBtn.setText("MontiArc - Model Configuration");
+    
+    image = new Image("/icons/showerrorlogw.png");
+    showErrorLogBtn.setGraphic(new ImageView(image));
+    showErrorLogBtn.setText("Show errors");
+    
     buttonInUse = selectBtn;
     buttonInUse.getStyleClass().add("button-in-use");
     
@@ -849,17 +865,32 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
    
     checkValidityBtn.setOnAction(event -> {
     
-    System.out.println("graph looks as follows " + graph.getAllNodes().toString() + graph.getAllEdges().toString());
-    System.out.println("modelName " + modelName);
-    
-    ArrayList<String> arg = new ArrayList<String>();
-    arg.add(modelName);
-    ASTNode node = plugin.shapeToAST(graph, arg);
-    ArrayList<MontiCoreException> errors = (ArrayList<MontiCoreException>) plugin.check(node, getNodeMap());
-    System.out.println("Errors " + errors);
+      System.out.println("graph looks as follows " + graph.getAllNodes().toString() + graph.getAllEdges().toString());
+      System.out.println("modelName " + modelName);
+      
+      checkPortNames();
+      ArrayList<String> arg = new ArrayList<String>();
+      arg.add(modelName);
+      MontiArcPlugin plug = plugin.getInstance();
+      ASTNode node = plug.shapeToAST(graph, arg);
+      ArrayList<MontiCoreException> errors = (ArrayList<MontiCoreException>) plug.check(node, getNodeMap());
+      setErrors(errors);
+      System.out.println("Errors " + errors);
     
     });
+    editInfoBtn.setOnAction(event -> {
+      
+    });
+    showErrorLogBtn.setOnAction(event -> {
+      showErrorLog(errorList);
+    });
+    
     topBox.setOnMouseClicked(event -> this.showSomething());
+    generateBtn.setOnAction(event -> {
+      System.out.println("In generate Btn");
+      MontiArcPlugin plug = plugin.getInstance();
+      plug.generateCode(null, null);
+    });
   }
   
   
@@ -968,6 +999,22 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
       else {
         sketch.setSelected(false);
         sketch.getPath().toFront();
+      }
+    }
+  }
+  
+  public void checkPortNames() {
+    for (AbstractNode node: graph.getAllNodes()) {
+      if (node instanceof PortNode) {
+
+        System.out.println("node.getTitile() " + node.getTitle());
+      }
+      if(node instanceof PortNode) {
+        if (node.getTitle() == ""|| node.getTitle() == null) {
+          String name = ((PortNode)node).getPortType();
+          name = name.replaceAll("([A-Z])", "$1").toLowerCase();
+          node.setTitle(name);
+        }
       }
     }
   }

@@ -16,7 +16,8 @@ public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
   }
   
   public void printImport(ArrayList<de.monticore.types.types._ast.ASTImportStatement> importDec) {
-    if (importDec != null) {
+    if (importDec.isEmpty()) {
+      System.out.println("ImportDec " + importDec.toString() + importDec.isEmpty());
       for (de.monticore.types.types._ast.ASTImportStatement imp : importDec) {
         de.monticore.types.types._ast.ASTQualifiedName imported =  TypesNodeFactory.createASTQualifiedName(imp.getImportList());
         getPrinter().print("import ");
@@ -213,7 +214,8 @@ public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
         else {
           getPrinter().print("      out ");
         }
-        handle(port.getType());
+        handle((de.monticore.types.types._ast.ASTSimpleReferenceType)port.getType());
+        getPrinter().print(" ");
         //TODO optional
         if (port.getName().isPresent()) {
           getPrinter().print(port.getName().get());

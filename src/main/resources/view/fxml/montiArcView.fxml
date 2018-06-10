@@ -34,6 +34,11 @@
                     <Button text="checkValidity" fx:id="checkValidityBtn"/>
                     <Button text="Generate" fx:id="generateBtn"/>
                 </HBox>
+                
+               <HBox fx:id="infoBox" spacing="5">
+					<Button fx:id="editInfoBtn" text="MontiArc model - configuration" />
+					<Button fx:id="showErrorLogBtn" text="Errors" />
+				</HBox>
             </ToolBar>   
     	</VBox>
     </top>

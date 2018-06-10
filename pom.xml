@@ -170,7 +170,11 @@
 			<artifactId>monticore-emf-runtime</artifactId> <version>${monticore.version}</version> 
 			</dependency> -->
 		 
-
+<dependency>
+  <groupId>montiarc.generators</groupId>
+  <artifactId>maa2java</artifactId>
+  <version>4.3.4-SNAPSHOT</version>
+</dependency>
 <dependency>
   <groupId>OctoUML</groupId>
   <artifactId>OctoUML</artifactId>
@@ -186,7 +190,12 @@
 			<artifactId>guava</artifactId>
 			<version>${guava.version}</version>
 		</dependency>
-
+<dependency>
+    <groupId>org.slf4j</groupId>
+    <artifactId>slf4j-nop</artifactId>
+    <version>1.8.0-alpha0</version>
+    <scope>test</scope>
+</dependency>
 	<dependency>
   <groupId>de.monticore.lang</groupId>
   <artifactId>montiarc</artifactId>

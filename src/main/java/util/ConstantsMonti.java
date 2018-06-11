@@ -59,4 +59,11 @@ public class ConstantsMonti extends Constants{
   public static String changeSketchTranslateX = "SketchTranslateX";
   public static String changeSketchTranslateY = "SketchTranslateY";
   
+  public static String changeInfoName;
+  public static String changeInfoPackage;
+  public static String changeInfoImport;
+  public static String changeInfoGeneric;
+  public static String changeInfoArcParam;
+  
+  
 }

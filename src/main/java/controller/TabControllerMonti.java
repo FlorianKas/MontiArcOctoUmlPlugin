@@ -307,36 +307,36 @@ public class TabControllerMonti extends TabController {
   
   
   
-  public MontiInitDialogController showMontiInitDialog() {
-    MontiInitDialogController controller = null; 
-    
-    try {
-      // Load the montiInitDialog.fxml file and create a new stage for the
-      // popup
-      FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view/fxml/montiInitDialog.fxml"));
-      System.out.println("Loader load " + loader.getLocation());
-      AnchorPane dialog = loader.load();
-      Stage dialogStage = new Stage();
-      dialogStage.initModality(Modality.WINDOW_MODAL);
-      dialogStage.initOwner(this.stage);
-      dialogStage.setScene(new Scene(dialog));
-      
-      controller = loader.getController();
-      controller.setDialogStage(dialogStage);
-      dialogStage.showAndWait();
-    }
-    
-    
-    catch (IOException e) {
-      // Exception gets thrown if the classDiagramView.fxml file could not be
-      // loaded
-      e.printStackTrace();
-      return null;
-    }
-    
-    return controller;
-  }
-  
+//  public MontiInitDialogController showMontiInitDialog() {
+//    MontiInitDialogController controller = null; 
+//    
+//    try {
+//      // Load the montiInitDialog.fxml file and create a new stage for the
+//      // popup
+//      FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view/fxml/montiInitDialog.fxml"));
+//      System.out.println("Loader load " + loader.getLocation());
+//      AnchorPane dialog = loader.load();
+//      Stage dialogStage = new Stage();
+//      dialogStage.initModality(Modality.WINDOW_MODAL);
+//      dialogStage.initOwner(this.stage);
+//      dialogStage.setScene(new Scene(dialog));
+//      
+//      controller = loader.getController();
+//      controller.setDialogStage(dialogStage);
+//      dialogStage.showAndWait();
+//    }
+//    
+//    
+//    catch (IOException e) {
+//      // Exception gets thrown if the classDiagramView.fxml file could not be
+//      // loaded
+//      e.printStackTrace();
+//      return null;
+//    }
+//    
+//    return controller;
+//  }
+//  
   
   
   

@@ -28,6 +28,8 @@ public class ConnectorEdgeView extends AbstractEdgeView{
   private ArrayList<Line> arrowHeadLines = new ArrayList<>();
   private Text dataType = new Text();
   private Label StereoType = new Label();
+  private Double startX;
+  private Double startY;
   
   public ConnectorEdgeView(ConnectorEdge edge, AbstractNodeView startNode, AbstractNodeView endNode) {
     super(edge, startNode, endNode);
@@ -179,7 +181,22 @@ public class ConnectorEdgeView extends AbstractEdgeView{
   @Override
   public void propertyChange(PropertyChangeEvent evt) {
     super.propertyChange(evt);
-    if (evt.getPropertyName().equals(ConstantsMonti.changeEdgeStereoType)) {
+    String propertyName = evt.getPropertyName();
+    if (propertyName.equals(ConstantsMonti.changeEdgeStereoType)) {
+      draw();
+    }
+    if (propertyName.equals(ConstantsMonti.changeMessageStartX) ){
+      startX = (Double)evt.getNewValue();
+//      setPositionNoStartNode();
+      draw();
+    } else if (propertyName.equals(ConstantsMonti.changeMessageStartY)){
+      startY = (Double)evt.getNewValue();
+//      if(startNode != null){
+//          setPosition2();
+//      } else {
+//          setPositionNoStartNode();
+//      }
+//      drawTitle(title.getText());
       draw();
     }
   } 
@@ -344,7 +361,5 @@ public class ConnectorEdgeView extends AbstractEdgeView{
     }
     // TODO Handle when the nodes are overlapping.
   }
-  
-  
   
 }

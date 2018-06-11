@@ -7,10 +7,13 @@ import java.util.ArrayList;
 import org.controlsfx.control.Notifications;
 
 import controller.dialog.MontiInitDialogController;
+import controller.dialog.NodeEditDialogControllerMonti;
 import de.monticore.ast.ASTNode;
 import groovyjarjarantlr.collections.List;
 import controller.dialog.AddGenericsController;
 import controller.dialog.AddTypesController;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -26,6 +29,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
@@ -35,17 +39,28 @@ import model.edges.AbstractEdge;
 import model.edges.ConnectorEdge;
 import model.nodes.AbstractNode;
 import model.nodes.ComponentNode;
+import model.nodes.Infos;
 import model.nodes.PortNode;
 import plugin.MontiArcPlugin;
 import plugin.MontiCoreException;
 import util.commands.AddDeleteNodeCommand;
 import util.commands.CompoundCommand;
 import util.commands.MoveGraphElementCommand;
+import util.commands.SetInfoArcParamCommand;
+import util.commands.SetInfoGenericCommand;
+import util.commands.SetInfoImportCommand;
+import util.commands.SetInfoNameCommand;
+import util.commands.SetInfoPackageCommand;
+import util.commands.SetNodeComponentTypeCommand;
+import util.commands.SetNodeGenericsCommand;
+import util.commands.SetNodeNameCommand;
+import util.commands.SetNodeStereotypeCommand;
 import view.edges.AbstractEdgeView;
 import view.edges.ConnectorEdgeView;
 import view.nodes.AbstractNodeView;
 import view.nodes.ComponentNodeView;
 import view.nodes.PackageNodeView;
+import controller.SketchController;
 
 public class MontiArcController extends AbstractDiagramController {
   
@@ -57,8 +72,11 @@ public class MontiArcController extends AbstractDiagramController {
   EdgeControllerMonti edgeController;
   SelectControllerMonti selectController;
   MontiArcPlugin plugin;
+  Infos in;
+  MontiInitDialogController controller;
+  SketchController sketchController;
   
-  
+  private AnchorPane dialog;
   private ArrayList<MontiCoreException> errorList = new ArrayList<MontiCoreException>();
   public static ArrayList<String> genericsArray = new ArrayList<String>();
   public static ArrayList<String> types = new ArrayList<String>();
@@ -78,53 +96,113 @@ public class MontiArcController extends AbstractDiagramController {
     initToolBarActions();
     initDrawPaneActions();  
     
+    sketchController = new SketchController(drawPane, this);
     nodeController = new NodeControllerMonti(drawPane, this);
     recognizeController = new MontiRecognizeController(drawPane, this);
     edgeController = new EdgeControllerMonti(drawPane,this);
     selectController = new SelectControllerMonti(drawPane, this);
-    showSomething();
-   
+    in = new Infos();
+//    String tmp = new String();
+//    ArrayList<String> tmp1 = new ArrayList<String>();
+//    inView = new InfoView(in, tmp1, tmp1, tmp, tmp1, tmp);
   }
   
   public void showSomething() {
     String name = "";
-    MontiInitDialogController montiController= null;
-    
-    while(name.isEmpty()) {
-      montiController = showMontiInitDialog();
-      name = montiController.nameTextField.getText();
-      montiController.nameTextField.setText(name);
-      
-      System.out.println("Name " + name);
-      if (name.isEmpty()) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Error");
-        alert.setHeaderText("No diagram name");
-        alert.setContentText("You have to add a diagram name.");
-        alert.showAndWait();
-      }
-    }
-    showConfiguration(montiController);
+    System.out.println("Here we are " + name);
+    boolean bla = showMontiInitDialog();
+//    while(name.isEmpty()) {
+//      boolean bla = showMontiInitDialog();
+//      System.out.println("After ShowMonti");
+//      name = controller.nameTextField.getText();
+//      controller.nameTextField.setText(name);
+//      
+//      System.out.println("Name " + name);
+//      if (name.isEmpty()) {
+//        Alert alert = new Alert(Alert.AlertType.ERROR);
+//        alert.setTitle("Error");
+//        alert.setHeaderText("No diagram name");
+//        alert.setContentText("You have to add a diagram name.");
+//        alert.showAndWait();
+//      }
+//    }
+    showConfiguration();
   }
   
-  public MontiInitDialogController showMontiInitDialog() {
-    MontiInitDialogController controller = null; 
-    
+  public boolean showMontiInitDialog() {
     try {
       // Load the montiInitDialog.fxml file and create a new stage for the
       // popup
       FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view/fxml/montiInitDialog.fxml"));
-      System.out.println("Loader load " + loader.getLocation());
-      AnchorPane dialog = loader.load();
-      
-      Stage dialogStage = new Stage();
-      dialogStage.initModality(Modality.WINDOW_MODAL);
-//      dialogStage.initOwner(this.stage);
-      dialogStage.setScene(new Scene(dialog));
-      
+      System.out.println("Loader load TestActtion" + loader.getLocation());
+      dialog = loader.load();    
+      System.out.println("After load" + dialog);
+      dialog.toFront();
+      dialog.setBackground(new Background(new BackgroundFill(Color.WHITESMOKE, new CornerRadii(1), null)));
+      dialog.setStyle("-fx-border-color: black");
       controller = loader.getController();
+      controller.set(in);
+      Stage dialogStage = new Stage();
+      dialogStage.initOwner(getStage());
+      //dialogStage.initModality(Modality.APPLICATION_MODAL);
+      dialogStage.setAlwaysOnTop(true);
+      dialogStage.setScene(new Scene(dialog));
       controller.setDialogStage(dialogStage);
       dialogStage.showAndWait();
+    
+      System.out.println("controller " +controller.toString());
+     
+//      controller.getOkButton().setOnAction(new EventHandler<ActionEvent>() {
+//        @Override
+//        public void handle(ActionEvent event) {
+//          CompoundCommand command = new CompoundCommand();
+//          if (controller.hasNameChanged()) {
+//            command.add(new SetInfoNameCommand(in, controller.getName(), in.getName()));
+//            in.setName(controller.getName());
+//          }
+//          if (controller.hasPackageChanged()) {
+//            command.add(new SetInfoPackageCommand(in, controller.getPackageName(), in.getPackageName()));
+//            in.setPackageName(controller.getPackageName());
+//          }
+//          if (controller.hasImportChanged()) {
+//            command.add(new SetInfoImportCommand(in, controller.getImport(), in.getImports()));
+//            in.setImports(controller.getImport());
+//          }
+//          if (controller.hasGenericChanged()) {
+//            command.add(new SetInfoGenericCommand(in, controller.getGeneric(), in.getGenerics()));
+//            in.setGenerics(controller.getGeneric());
+//          }
+//          if (controller.hasArcParamChanged()) {
+//            command.add(new SetInfoArcParamCommand(in, controller.getArcParam(), in.getArcParam()));
+//            in.setArcParam(controller.getArcParam());
+//          }
+//          if (command.size() > 0) {
+//            getUndoManager().add(command);
+//          }
+//          drawPane.getChildren().remove(dialog);
+//          removeDialog(dialog);
+//        }
+//      });
+      
+//      controller.getCancelButton().setOnAction(new EventHandler<ActionEvent>() {
+//        @Override
+//        public void handle(ActionEvent event) {
+//          drawPane.getChildren().remove(dialog);
+//          removeDialog(dialog);
+//        }
+//      });
+//      drawPane.getChildren().add(dialog);
+//      addDialog(dialog);
+//      System.out.println("End of Function");
+//      System.out.println("isOkClicked " + controller.isOkClicked());
+      return controller.isOkClicked();
+    
+      
+      
+      
+      
+      
+      
     }
     
     
@@ -132,10 +210,9 @@ public class MontiArcController extends AbstractDiagramController {
       // Exception gets thrown if the classDiagramView.fxml file could not be
       // loaded
       e.printStackTrace();
-      return null;
+      return false;
     }
     
-    return controller;
   }
   
   
@@ -147,23 +224,30 @@ public class MontiArcController extends AbstractDiagramController {
     return types;  
   }
   
-  public void showConfiguration(MontiInitDialogController controller) {
+  public void showConfiguration() {
+    System.out.println("Before ok is clicked question");
     if(controller.isOkClicked()) {
+      System.out.println("Ok is clicked");
       modelName = controller.nameTextField.getText();  
       packageName = controller.packageTextField.getText();
       String importStates = controller.importTextField.getText();
+      in.setName(controller.nameTextField.getText());
+      in.setPackageName(controller.packageTextField.getText());
+      in.setImports(controller.importTextField.getText());
       String[] importTmp = importStates.split("\\;");
       importStatements.clear();
       for (String i: importTmp) {
         importStatements.add(i);
       }
       String genericsString = controller.genericsTextField.getText();
+      in.setGenerics(controller.genericsTextField.getText());
       String[] genericsTmp = genericsString.split("\\;");
       genericsArray.clear();
       for (String g: genericsTmp) {
         genericsArray.add(g);
       }
       String typeParam = controller.arcParameterTextField.getText();
+      in.setArcParam(controller.arcParameterTextField.getText());
       types.clear();
       String[] typesTmp = typeParam.split("\\;");
       for (String t : typesTmp) {
@@ -605,7 +689,10 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
             }
             drawSelected();
             nodeController.moveNodesStart(event);
+            System.out.println("Before moving skectes");
             sketchController.moveSketchStart(event);
+
+            System.out.println("After moving skectes");
           }
         }
       }
@@ -620,9 +707,11 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
       if ((tool == ToolEnum.SELECT || tool == ToolEnum.CREATE_CLASS) && mode == Mode.DRAGGING) { // Continue
                                                                                                  // dragging
                                                                                                  // selected
-                                                                                                 // elements
+        System.out.println("Before moving nodes");                                                   // elements
         nodeController.moveNodes(event);
+        System.out.println("Before moving sketches");
         sketchController.moveSketches(event);
+        System.out.println("After moving skeches");
       }
       else if (mode == Mode.MOVING && tool == ToolEnum.MOVE_SCENE) { // Continue
                                                                      // panning
@@ -879,7 +968,7 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
     
     });
     editInfoBtn.setOnAction(event -> {
-      
+      showSomething();
     });
     showErrorLogBtn.setOnAction(event -> {
       showErrorLog(errorList);

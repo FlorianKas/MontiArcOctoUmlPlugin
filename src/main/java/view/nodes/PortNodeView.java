@@ -1,6 +1,7 @@
 package view.nodes;
 
 import model.nodes.PortNode;
+import util.Constants;
 import util.ConstantsMonti;
 
 import java.beans.PropertyChangeEvent;
@@ -23,16 +24,15 @@ public class PortNodeView extends AbstractNodeView {
   private Rectangle rectangle;
   private Pane portPane;
   private final int STROKE_WIDTH = 1;
-  private double portX;
-  double portY;
+//  private double portX;
+//  private double portY;
   double portHeight;
   double portWidth;
 
   public PortNodeView(PortNode node) {
     super(node);
-    
-    this.portX = node.getXDraw();
-    this.portY = node.getYDraw();
+//    this.portX = node.getXDraw();
+//    this.portY = node.getYDraw();
     this.portHeight = node.getPortHeight();
     this.portWidth = node.getPortWidth();
     this.setTranslateX(node.getTranslateX());
@@ -56,13 +56,13 @@ public class PortNodeView extends AbstractNodeView {
     return portPane;
   }
   
-  public double getPortX() {
-    return this.portX;
-  }
-  
-  public double getPortY() {
-    return this.portY;
-  }
+//  public double getPortX() {
+//    return this.portX;
+//  }
+//  
+//  public double getPortY() {
+//    return this.portY;
+//  }
   
   public double getPortWidth() {
     return this.portWidth;
@@ -165,19 +165,19 @@ public class PortNodeView extends AbstractNodeView {
   public void propertyChange(PropertyChangeEvent evt) {
     
     super.propertyChange(evt);
-    if (evt.getPropertyName().equals(ConstantsMonti.changeNodeX)) {
+    if (evt.getPropertyName().equals(Constants.changeNodeX)) {
       setX((double) evt.getNewValue());
     }
-    else if (evt.getPropertyName().equals(ConstantsMonti.changeNodeY)) {
+    else if (evt.getPropertyName().equals(Constants.changeNodeY)) {
       setY((double) evt.getNewValue());
     }
-    else if (evt.getPropertyName().equals(ConstantsMonti.changeNodeWidth)) {
+    else if (evt.getPropertyName().equals(Constants.changeNodeWidth)) {
       changeWidth((double) evt.getNewValue());
     }
-    else if (evt.getPropertyName().equals(ConstantsMonti.changeNodeHeight)) {
+    else if (evt.getPropertyName().equals(Constants.changeNodeHeight)) {
       changeHeight((double) evt.getNewValue());
     }
-    else if (evt.getPropertyName().equals(ConstantsMonti.changeNodeTitle)) {
+    else if (evt.getPropertyName().equals(Constants.changeNodeTitle)) {
       title.setText((String) evt.getNewValue());
     }
     else if (evt.getPropertyName().equals(ConstantsMonti.changePortNodeDataType)) {

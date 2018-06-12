@@ -7,21 +7,17 @@ import model.nodes.PortNode;
 import util.ConstantsMonti;
 
 public class ConnectorEdge extends AbstractEdge{
-//  private PortNode startPort;
-//  private PortNode endPort;
   private String dataType;
   private String stereoType;
   
   public ConnectorEdge(PortNode startPort, PortNode endPort) {
     super(startPort, endPort);
-//    this.startPort = startPort;
-//    this.endPort = endPort;
   }
 
   @Override
   public Edge copy(AbstractNode startNodeCopy, AbstractNode endNodeCopy) {
     // TODO Auto-generated method stub
-    return null;
+    return new ConnectorEdge((PortNode)startNodeCopy, (PortNode)endNodeCopy);
   }
 
   @Override

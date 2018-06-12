@@ -15,7 +15,7 @@ import java.util.HashMap;
 /**
  * Created by chris on 2016-02-15.
  */
-public class SketchController {
+public class SketchControllerMonti {
   // private Sketch currentSketch;
   // private Stroke currentStroke;
   private Pane aDrawPane;
@@ -30,7 +30,7 @@ public class SketchController {
   
   public Color color = Color.BLACK;
   
-  public SketchController(Pane pDrawPane, AbstractDiagramController diagramController) {
+  public SketchControllerMonti(Pane pDrawPane, AbstractDiagramController diagramController) {
     this.aDrawPane = pDrawPane;
     this.mController = diagramController;
     
@@ -118,7 +118,7 @@ public class SketchController {
     initMoveX = event.getSceneX();
     initMoveY = event.getSceneY();
     Point2D.Double initTranslate;
-    System.out.println(mController.getSelectedSketches());
+    System.out.println("Test " + mController.getSelectedSketches());
     System.out.println(mController.getSelectedEdges());
     System.out.println(mController.getSelectedNodes());
     for (Sketch sketch : mController.getSelectedSketches()) {

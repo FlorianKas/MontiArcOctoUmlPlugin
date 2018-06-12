@@ -25,9 +25,9 @@ public class SelectControllerMonti extends SelectController{
   Rectangle selectRectangle;
   
   private Pane aDrawPane;
-  private MontiArcController diagramController;
+  private AbstractDiagramController diagramController;
   
-  public SelectControllerMonti(Pane pDrawPane, MontiArcController diagramController) {
+  public SelectControllerMonti(Pane pDrawPane, AbstractDiagramController diagramController) {
     super(pDrawPane, diagramController);
     aDrawPane = pDrawPane;
     this.diagramController = diagramController;
@@ -44,6 +44,7 @@ public class SelectControllerMonti extends SelectController{
       for (AbstractEdgeView edgeView : diagramController.allEdgeViews) {
         if (!(edgeView instanceof MessageEdgeView) && (distanceToLine(edgeView.getStartLine(), event.getX(), event.getY()) < 15 || distanceToLine(edgeView.getMiddleLine(), event.getX(), event.getY()) < 15 || distanceToLine(edgeView.getStartLine(), event.getX(), event.getY()) < 15)) {
           diagramController.selectedEdges.add(edgeView);
+          System.out.println("edgeView is added to selected Edges in case 1" + edgeView);
           if (event.getClickCount() == 1) {
             System.out.println("We are in onMousePressed First");
             edgeView.setSelected(true);
@@ -58,6 +59,7 @@ public class SelectControllerMonti extends SelectController{
         }
         else if ((edgeView instanceof MessageEdgeView) && distanceToLine(edgeView.getStartLine(), event.getX(), event.getY()) < 15) {
           diagramController.selectedEdges.add(edgeView);
+          System.out.println("Edgeview is added to selectedEdges in case 2 " + edgeView);
           if (event.getClickCount() > 1) {
             diagramController.edgeController.showMessageEditDialog((MessageEdge) edgeView.getRefEdge());
             diagramController.setTool(ToolEnum.SELECT);
@@ -65,17 +67,20 @@ public class SelectControllerMonti extends SelectController{
           }
         }
       }
+      System.out.println("EdgeView not selected in 1 loop");
     }
     else if (diagramController.getTool() == ToolEnum.SELECT) {
       for (AbstractEdgeView edgeView : diagramController.allEdgeViews) {
         if (!(edgeView instanceof MessageEdgeView) && (distanceToLine(edgeView.getStartLine(), event.getX(), event.getY()) < 15 || distanceToLine(edgeView.getMiddleLine(), event.getX(), event.getY()) < 15 || distanceToLine(edgeView.getEndLine(), event.getX(), event.getY()) < 15)) {
           if (!diagramController.selectedEdges.contains(edgeView)) {
             diagramController.selectedEdges.add(edgeView);
+            System.out.println("Edgeview is added in case 3 " + edgeView);
           }
           if (event.getClickCount() == 1) {
 
             System.out.println("We are in onMousePressed Second");
             diagramController.selectedEdges.add(edgeView);
+            System.out.println("Edgeview is added in case 4 " + edgeView);
             System.out.println("SelectedEdges " + diagramController.selectedEdges.toString());
             diagramController.setTool(ToolEnum.SELECT);
             diagramController.setButtonClicked(diagramController.selectBtn);
@@ -92,6 +97,7 @@ public class SelectControllerMonti extends SelectController{
         else if ((edgeView instanceof MessageEdgeView) && distanceToLine(edgeView.getStartLine(), event.getX(), event.getY()) < 15) {
           if (!diagramController.selectedEdges.contains(edgeView)) {
             diagramController.selectedEdges.add(edgeView);
+            System.out.println("Edgeview is added in case 5 " + edgeView);
           }
           if (event.getClickCount() > 1) {
             diagramController.edgeController.showMessageEditDialog((MessageEdge) edgeView.getRefEdge());
@@ -107,6 +113,7 @@ public class SelectControllerMonti extends SelectController{
           diagramController.drawSelected();
         }
       }
+      System.out.println("EdgeView not selected in 2 loop");
       if (diagramController.mode != Mode.DRAGGING_EDGE) {
         diagramController.setMode(Mode.SELECTING);
         // TODO This should not be needed, should be in nodeView.initActions().
@@ -115,6 +122,7 @@ public class SelectControllerMonti extends SelectController{
             diagramController.selectedNodes.add(nodeView);
           }
         }
+        System.out.println("EdgeView not selected in 3 loop");
         selectStartX = event.getX();
         selectStartY = event.getY();
         selectRectangle.setX(event.getX());

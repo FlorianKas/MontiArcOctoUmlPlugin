@@ -59,15 +59,15 @@ public class EdgeControllerMonti extends EdgeController {
     ComponentNodeView tmpView = (ComponentNodeView) event.getSource();
     
     for (PortNodeView pView : tmpView.getPortNodeViews()) {
-      System.out.println("port getX " + pView.getPortX());
-      System.out.println("port getY " + pView.getPortY());
+//      System.out.println("port getX " + pView.getPortX());
+//      System.out.println("port getY " + pView.getPortY());
       System.out.println(" port height " + pView.getPortHeight());
       System.out.println(" componentNodeView translate Y " + tmpView.getTranslateY());
       System.out.println(" event get Y " + event.getY());
       
-      if (event.getX() + tmpView.getTranslateX() > pView.getPortX() + 0.5*pView.getPortWidth() 
-          && event.getX() + tmpView.getTranslateX()  < pView.getPortX() + 1.5*pView.getPortWidth() &&
-          event.getY() + tmpView.getTranslateY() > pView.getPortY() &&
+      if (event.getX() + tmpView.getTranslateX() > pView.getX() + 0.5*pView.getPortWidth() 
+          && event.getX() + tmpView.getTranslateX()  < pView.getX() + 1.5*pView.getPortWidth() &&
+          event.getY() + tmpView.getTranslateY() > pView.getY() &&
           event.getY() + tmpView.getTranslateY() < pView.getY() + pView.getHeight()) {
         System.out.println("Test");
         dragStartX = pView.getX() + 1.5*pView.getPortWidth();
@@ -126,16 +126,12 @@ public class EdgeControllerMonti extends EdgeController {
     }
     PortNode endNode = new PortNode();
     PortNode startNode = new PortNode();
-    ComponentNode endCompNode = new ComponentNode();
-    ComponentNode startCompNode = new ComponentNode();
     if (endNodeView != null && endNodeView instanceof PortNodeView) {
       endNode = (PortNode) diagramController.getNodeMap().get(endNodeView);
-      endCompNode = endNode.getComponentNode();
       startNode = (PortNode) diagramController.getNodeMap().get(startNodeView);
-      startCompNode = startNode.getComponentNode();
       ConnectorEdge edge = new ConnectorEdge(startNode, endNode);
       System.out.println("Edge " + edge.toString());
-      diagramController.createEdgeView(edge, startNodeView, endNodeView);
+      ((MontiArcController)diagramController).createEdgeView(edge, (PortNodeView)startNodeView, (PortNodeView)endNodeView);
     } 
     else if (endNodeView != null) {
       System.out.println("We have a ComponentNodeView as recognized");
@@ -143,14 +139,12 @@ public class EdgeControllerMonti extends EdgeController {
       for (PortNodeView pView: ((ComponentNodeView) endNodeView).getPortNodeViews()) {
         System.out.println("pView " + pView.getX() + pView.getY() + pView.getWidth() + pView.getHeight());
         
-        if(pView.getPortX() <= getEndPoint().getX() && pView.getPortX() + pView.getPortWidth() >= getEndPoint().getX()
-            && pView.getPortY() <= getEndPoint().getY() && pView.getPortY() + pView.getPortHeight() >= getEndPoint().getY()) {
+        if(pView.getX() <= getEndPoint().getX() && pView.getX() + pView.getPortWidth() >= getEndPoint().getX()
+            && pView.getY() <= getEndPoint().getY() && pView.getY() + pView.getPortHeight() >= getEndPoint().getY()) {
           endNode = (PortNode)diagramController.getNodeMap().get(pView);
-          endCompNode = endNode.getComponentNode();
           startNode = (PortNode) diagramController.getNodeMap().get(startNodeView);
-          startCompNode = startNode.getComponentNode();
           ConnectorEdge edge = new ConnectorEdge(startNode, endNode);
-          diagramController.createEdgeView(edge, startNodeView, endNodeView);
+          ((MontiArcController)diagramController).createEdgeView(edge, (PortNodeView)startNodeView, (PortNodeView)endNodeView);
           System.out.println("Found a endNode");
         }
       }
@@ -199,7 +193,7 @@ public class EdgeControllerMonti extends EdgeController {
         System.out.println("Moving Edges in onMouseRelaseDragEdge");
 //        diagramController.undoManager.add(new MoveMessageCommand((MessageEdge) tmp, 0, edgeView.getStartY() - dragStartY));
       
-        ConnectorEdge con = ((ConnectorEdgeView) edgeView).getRefEdge();
+        ConnectorEdge con = (ConnectorEdge) ((ConnectorEdgeView) edgeView).getRefEdge();
         AbstractEdge tmp = (AbstractEdge) con;
         diagramController.undoManager.add(new MoveMessageCommand((MessageEdge) tmp, 0, ((ConnectorEdgeView)edgeView).getStartY() - dragStartY));
         
@@ -244,44 +238,6 @@ public class EdgeControllerMonti extends EdgeController {
               command.add(new SetEdgeStereoTypeCommand(edge, controller.getStereoType(), ((ConnectorEdge)edge).getStereoType()));
               ((ConnectorEdge)edge).setStereoType(controller.getStereoType());
             }
-            // If no change in type of edge we just change direction of old edge
-            // if(typeBox.getValue().equals(edge.getType()) || typeBox.getValue()
-            // == null){
-            //
-            // edge.setStartMultiplicity(controller.getStartMultiplicity());
-            // edge.setEndMultiplicity(controller.getEndMultiplicity());
-            // edge.setLabel(controller.getLabel());
-            // if (directionBox.getValue() != null) {
-            // diagramController.getUndoManager().add(new
-            // DirectionChangeEdgeCommand(edge, edge.getDirection(),
-            // AbstractEdge.Direction.valueOf(directionBox.getValue().toString())));
-            // edge.setDirection(AbstractEdge.Direction.valueOf(directionBox.getValue().toString()));
-            // }
-            //
-            //
-            // } else { //Else we create a new one to replace the old
-            
-            // solved the bug of change multiplicity and edge type in remote
-            // collaboration setting
-//            AbstractEdge newEdge = null;
-//            if (typeBox.getValue().equals("Inheritance")) {
-//              newEdge = new InheritanceEdge(edge.getStartNode(), edge.getEndNode());
-//            }
-//            else if (typeBox.getValue().equals("Association") || typeBox.getValue() == null) {
-//              newEdge = new AssociationEdge(edge.getStartNode(), edge.getEndNode());
-//            }
-//            else if (typeBox.getValue().equals("Aggregation")) {
-//              newEdge = new AggregationEdge(edge.getStartNode(), edge.getEndNode());
-//            }
-//            else if (typeBox.getValue().equals("Composition")) {
-//              newEdge = new CompositionEdge(edge.getStartNode(), edge.getEndNode());
-//            }
-//            newEdge.setDirection(AbstractEdge.Direction.valueOf(directionBox.getValue().toString()));
-//            newEdge.setStartMultiplicity(controller.getStartMultiplicity());
-//            newEdge.setEndMultiplicity(controller.getEndMultiplicity());
-//            newEdge.setLabel(controller.getLabel());
-//            replaceEdge(edge, newEdge);
-            
             aDrawPane.getChildren().remove(dialog);
             diagramController.removeDialog(dialog);
           }
@@ -375,7 +331,7 @@ public class EdgeControllerMonti extends EdgeController {
     }
     diagramController.deleteEdgeView(oldEdgeView, null, true, false);
     
-    AbstractEdgeView newEdgeView = diagramController.createEdgeView(newEdge, oldEdgeView.getStartNode(), oldEdgeView.getEndNode());
+    AbstractEdgeView newEdgeView = ((MontiArcController)diagramController).createEdgeView(newEdge, (PortNodeView)oldEdgeView.getStartNode(), (PortNodeView)oldEdgeView.getEndNode());
     
     diagramController.getUndoManager().add(new ReplaceEdgeCommand(oldEdge, newEdge, oldEdgeView, newEdgeView, diagramController, diagramController.getGraphModel()));
     

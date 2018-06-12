@@ -31,7 +31,7 @@ import java.util.List;
 /**
  * Used by MainController for handling the recognition of drawn shapes and transforming them in to UML-notations.
  */
-public class MontiRecognizeController extends RecognizeController{
+public class MontiRecognizeController{
   private Pane aDrawPane;
   private MontiArcController diagramController;
   private PaleoSketchRecognizer recognizer;
@@ -40,7 +40,7 @@ public class MontiRecognizeController extends RecognizeController{
   
 
   public MontiRecognizeController(Pane pDrawPane, MontiArcController pController) {
-    super(pDrawPane, pController);
+//    super(pDrawPane, pController);
     aDrawPane = pDrawPane;
     diagramController = pController;
     graph = diagramController.getGraphModel();
@@ -61,20 +61,15 @@ public class MontiRecognizeController extends RecognizeController{
     ArrayList<BoundingBox> boxes = new ArrayList();
     CompoundCommand recognizeCompoundCommand = new CompoundCommand();
     
-    System.out.println("Sketches" + sketches);
     for (Sketch s : sketches) {
       if (s.getStroke() != null && s.getStroke().getPoints() != null && !s.getStroke().getPoints().isEmpty()) {
-        // //TODO This sometimes throws IndexOutOfBoundsException...
-        System.out.println("Sketch " + s);
         recognizer.setStroke(s.getStroke());
         Shape bestMatch = recognizer.recognize().getBestShape();
         String bestMatchString = bestMatch.getInterpretation().label;
         if (bestMatchString.equals("Square") || bestMatchString.equals("Rectangle")) {
           BoundingBox box = s.getStroke().getBoundingBox();
           if( !boxes.contains(box)) {
-            // just boxes that are not recognized need to be modeled
             boxes.add(box);
-            System.out.println("Box " + box );
             sketchMap.put(box, s);    
           }
         }
@@ -86,7 +81,6 @@ public class MontiRecognizeController extends RecognizeController{
         }
       }
     }    
-    System.out.println("Boex: "+ boxes);
             
  // Now, we recognized the sketches and want to create/modify the model
     for (BoundingBox b: boxes) {
@@ -110,14 +104,6 @@ public class MontiRecognizeController extends RecognizeController{
                 y = bb.getY();
                 direction = "in";
               }
-//              else if (bb.getY() < b.getY()) {
-//                // top
-//                System.out.println("We are in top");
-//                xDraw = bb.getX();
-//                x = (bb.getX());
-//                yDraw = (b.getY() - 0.5*tmpPort.getHeight());
-//                y = (bb.getY());
-//              }
               else if (Math.abs(b.getX() - bb.getX()) > Math.abs(b.getX() + b.getWidth() - bb.getX()) && (bb.getY() + bb.getHeight() < b.getY() + b.getHeight()) ) {
 //              right
                 System.out.println("righttttttttt");
@@ -128,24 +114,19 @@ public class MontiRecognizeController extends RecognizeController{
                 direction = "out";
               }
               else {
-  //            bottom
-//                System.out.println("We are in bottom");
-//                xDraw = (bb.getX());
-//                x = (bb.getX());
-//                yDraw = (b.getY() + b.getHeight() - 0.5*tmpPort.getHeight());
-//                y = (bb.getY());
                 System.out.println("Some Ports are not at the right or left");
-                // Hier Ausgabe auf dem Screen
                 break;
               }
-              PortNode port = new PortNode(x,y,bb.getHeight(), bb.getWidth());
-              port.setXDraw(xDraw);
-              port.setYDraw(yDraw);
+              PortNode port = new PortNode(xDraw,yDraw,bb.getHeight(), bb.getWidth());
+              // contains the sketch values
+              port.createPortNodeSketch(x, y, bb.getHeight(), bb.getHeight());
+//              port.setXDraw(xDraw);
+//              port.setYDraw(yDraw);
               if (!graph.getAllNodes().contains(port)) {
                 graph.addNode(port, false);
               }  
               Point2D tmpPoint = new Point2D(b.getX(),b.getY());
-              if(graph.findNode(tmpPoint) == null) {
+              if(findNode(graph,tmpPoint) == null) {
                 ArrayList<PortNode> ports = new ArrayList<>();
                 ports.add(port);
                 ComponentNode node = new ComponentNode(b.getX(), b.getY(), b.getHeight(), b.getWidth(), ports);
@@ -170,18 +151,14 @@ public class MontiRecognizeController extends RecognizeController{
                 
               }
               else {
-                ((ComponentNode)graph.findNode(tmpPoint)).addPort(port);
-                port.setComponentNode((ComponentNode)graph.findNode(tmpPoint));
+                ((ComponentNode)findNode(graph, tmpPoint)).addPort(port);
+                port.setComponentNode((ComponentNode)findNode(graph,tmpPoint));
                 if(!recognizedNodes.contains(port)) {
                   recognizedNodes.add(port);
                 }
-//                Sketch s1 = sketchMap.get(b);
+
                 Sketch s2 = sketchMap.get(bb);
-                
-//                s1.setRecognizedElement((ComponentNode)graph.findNode(tmpPoint));
                 s2.setRecognizedElement(port);
-                
-//                sketchesToBeRemoved.add(s1);
                 sketchesToBeRemoved.add(s2);
               }
               
@@ -201,8 +178,6 @@ public class MontiRecognizeController extends RecognizeController{
           recognizedNodes.add(node);  
         }
         sketchesToBeRemoved.add(s);
-        //System.out.println("Node" + node);
-
       }        
     }    
      
@@ -215,84 +190,52 @@ public class MontiRecognizeController extends RecognizeController{
           bestMatchString.equals("Curve") || bestMatchString.equals("Arrow")){
           Point2D startPoint = new Point2D(s.getStroke().getFirstPoint().getX(), s.getStroke().getFirstPoint().getY());
           Point2D endPoint = new Point2D(s.getStroke().getLastPoint().getX(), s.getStroke().getLastPoint().getY());
-          System.out.println("We have found a start and end point" + startPoint + endPoint);
           if (Math.abs(startPoint.getX() - endPoint.getX()) < 20) {
-//            Pfeilspitzen
             sketchesToBeRemoved.add(s);
-            System.out.println("Detected Pfeilspitzen");
-            
           }
           else {
-            
-            
             PortNode startNode = new PortNode(); 
-            Node tmpNode = graph.findNode(startPoint);
+            
+            Node tmpNode = findNode(graph,startPoint);
+            System.out.println("TmpNode " + tmpNode.toString());
             if (tmpNode instanceof ComponentNode) {
-  //            graph.removeNode(tmpNode, false);
               Graph tmpStart = new Graph();
               tmpStart = graph;
               tmpStart.removeNode(tmpNode, false);
-              Node secTmpNode = tmpStart.findNode(startPoint);
+              Node secTmpNode = findNode(tmpStart, startPoint);
               startNode = (PortNode) secTmpNode;
-              System.out.println("startNode Component looks as follows " + startNode.getXDraw() + " " + startNode.getYDraw());
-  //            graph.addNode((AbstractNode) tmpNode, false);
+              System.out.println("StartNode " + startNode.toString());
             }
             else if (tmpNode instanceof PortNode){
               startNode = (PortNode) tmpNode;
-              System.out.println("startNode Port looks as follows " + startNode.getXDraw() + " " + startNode.getYDraw());
+              System.out.println("We are here");
             }
             else {
+              System.out.println("Havent found a startnode yet");
               // if we do not find a startpoint, to the left needs to be one
-  //            Point2D startPointTmp = new Point2D(startPoint.getX() - 30, startPoint.getY());
-              System.out.println("TMPNOde is null");
               for (AbstractNode n : graph.getAllNodes()) {
                 if (n instanceof PortNode) {
-                  System.out.println("We are looking at node " + ((PortNode) n).getXDraw() + ((PortNode) n).getYDraw() 
-                      + " " + ((PortNode) n).getPortHeight() + " " + ((PortNode) n).getPortWidth());
-                  if(((PortNode) n).getXDraw() + ((PortNode) n).getPortHeight() + 50 > startPoint.getX() 
-                      && ((PortNode) n).getXDraw() < startPoint.getX() 
-                      && ((PortNode) n).getYDraw() < startPoint.getY() 
-                      && ((PortNode) n).getYDraw() + ((PortNode) n).getPortWidth() > startPoint.getY()) {
+                  if(((PortNode) n).getX() + ((PortNode) n).getPortHeight() + 50 > startPoint.getX() 
+                      && ((PortNode) n).getX() < startPoint.getX() 
+                      && ((PortNode) n).getY() < startPoint.getY() 
+                      && ((PortNode) n).getY() + ((PortNode) n).getPortWidth() > startPoint.getY()) {
                     startNode = (PortNode) n;
-                    System.out.println("startNode WithOUT looks as follows " + startNode.getXDraw() + " " + startNode.getYDraw());
-                    System.out.println("StartPort direction  " + startNode.getPortDirection());
                   }
                 }
               }
-  //            tmpNode = graph.findNode(startPointTmp);
-  //            startNode = (PortNode) tmpNode;
-              }
+            }
             if(startNode.getPortDirection() != "out") {
               System.out.println("You tried to start an edge from an ingoing Port");
-              // hier muss dann auch eine Fehlerausgabe hin
-  //            break;  
             }
             
-            System.out.println("startNode" + startNode);
-  //          graph.removeNode(startNode, false);
-  //          startNode.setPortDirection("in");
-  //          graph.addNode(startNode, false);
-            // nun muessen wir auch im zugehoerigen ComponentNode den Port setzen denke ich
             ComponentNode nodeIn = startNode.getComponentNode();
-  //          graph.removeNode(nodeIn, false);
-  //          graph.addNode(nodeIn, false);
-            
-            
-            
             PortNode endNode = new PortNode(); 
-            Node tmpOutNode = graph.findNode(endPoint);
-            System.out.println("Graph" + graph.getAllNodes());
+            Node tmpOutNode = findNode(graph,endPoint);
             if (tmpOutNode instanceof ComponentNode) {
               Graph tmp = new Graph();
               tmp = graph;
               tmp.removeNode(tmpOutNode, false);
-              Node secTmpOutNode = tmp.findNode(endPoint);
-  //            while (secTmpOutNode instanceof ComponentNode) {
-  //              tmp.removeNode(secTmpOutNode, false);
-  //              secTmpOutNode = tmp.findNode(endPoint);
-  //            }
-              System.out.println("Hab EndNode gefunden" + secTmpOutNode);
-  //            graph.get
+              Node secTmpOutNode = findNode(tmp,endPoint);
               endNode = (PortNode) secTmpOutNode;
             }
             else {
@@ -303,61 +246,19 @@ public class MontiRecognizeController extends RecognizeController{
             List<Point> points = s.getStroke().getPoints();
             for (int i = points.size()-1; i > points.size()/2; i--) {
               Point2D point = new Point2D(points.get(i).getX(), points.get(i).getY());
-              if (graph.findNode(point) != null) {
-                endNode = (PortNode) graph.findNode(point);
+              if (findNode(graph, point) != null) {
+                endNode = (PortNode)findNode(graph, point);
                 break;
               }
             }
-  //          graph.removeNode(endNode, false);
+            System.out.println("EndNode " + endNode);
             if(endNode.getPortDirection() != "in") {
               System.out.println("You tried to end an edge from an outgoing Port");
-              // hier muss dann auch eine Fehlerausgabe hin
               break;  
             }
-            //          graph.addNode(endNode, false);
-            // nun muessen wir auch im zugehoerigen ComponentNode den Port setzen denke ich
-            ComponentNode nodeOut = endNode.getComponentNode();
-  //          graph.removeNode(nodeOut, false);
-  //          graph.addNode(nodeOut, false);
             
-            
-            
-            
-  //          PortNode endPort = new PortNode();
-  //          PortNode endNode = (PortNode) graph.findNode(endPoint);
-  //          System.out.println("We are in Arrows");
-  //          //For arrows, which don't have an endpoint
-  //          List<Point> points = s.getStroke().getPoints();
-  //          for (int i = points.size()-1; i > points.size()/2; i--) {
-  //            Point2D point = new Point2D(points.get(i).getX(), points.get(i).getY());
-  //            if (graph.findNode(point) != null) {
-  //              Node endTmp = graph.findNode(point);
-  //              if(endTmp instanceof ComponentNode) {
-  //                
-  //                
-  //              }
-  //              else if (endTmp instanceof PortNode) {
-  //                
-  //              }
-  //              for (PortNode p : ((ComponentNode)graph.findNode(point)).getPorts()) {
-  //                if(p.getBounds().contains(point)) {
-  //                  p.setPortType("in");
-  //                  System.out.println("Port recognized as ingoing Port");
-  //                  endPort = p;
-  //                  break;  
-  //                }
-  //              }
-  //              endNode = (ComponentNode) graph.findNode(point);
-  //              System.out.println("Found a end node " + endNode);
-  //              break;
-  //            }
-  //          }
-  
             if (startNode != null && endNode != null && !startNode.equals(endNode)) {
-              System.out.println("We are going to create a ConnectorEdge");
               ConnectorEdge newEdge = new ConnectorEdge(startNode, endNode);
-              System.out.println("Could draw an Arrow");
-              System.out.println("ConnectorEdge looks as follows " + newEdge.getStartNode() + newEdge.getStartPort() + newEdge.getEndNode() + newEdge.getEndPort());
               newEdge.setDirection(AbstractEdge.Direction.START_TO_END);
               s.setRecognizedElement(newEdge);
               sketchesToBeRemoved.add(s);
@@ -375,9 +276,6 @@ public class MontiRecognizeController extends RecognizeController{
     
     for(AbstractEdge edge : recognizedEdges){
       AbstractEdgeView edgeView = diagramController.addEdgeView(edge, false);
-      System.out.println("Edge looks as follows" + edge.getStartNode().toString() + " " + edge.getEndNode().toString() );
-      System.out.println("EdgeView looks as follows" + edgeView.getStartX() + " " + edgeView.getStartY() + edgeView.getEndX() + edgeView.getEndY() );
-      
       if (edgeView != null) {
         recognizeCompoundCommand.add(new AddDeleteEdgeCommand(diagramController, edgeView, edge, true));
       }
@@ -394,9 +292,22 @@ public class MontiRecognizeController extends RecognizeController{
     }
     
     if(recognizeCompoundCommand.size() > 0){
-      System.out.println("This should be added: " + recognizeCompoundCommand.getCommands());
       diagramController.getUndoManager().add(recognizeCompoundCommand);
     }        
+  }
+  
+  public Node findNode(Graph g, Point2D point) {
+    for (AbstractNode node : g.getAllNodes()) {
+      if (node instanceof ComponentNode) {
+        return g.findNode(point);
+      }
+      else if (node instanceof PortNode) {
+        if (((PortNode) node).getPortNodeSketch().getBounds().contains(point.getX(),point.getY())) {
+          return node;
+        }
+      }
+    }
+    return null;
   }
 }
     

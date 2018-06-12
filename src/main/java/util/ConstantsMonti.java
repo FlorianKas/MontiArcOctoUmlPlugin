@@ -27,6 +27,8 @@ public class ConstantsMonti extends Constants{
   public static String changeNodeHeight = "NodeHeight";
   public static String changeNodeTranslateX = "NodeTranslateX";
   public static String changeNodeTranslateY = "NodeTranslateY";
+  public static String changePortNodeTranslateX = "PortNodeTranslateX";
+  public static String changePortNodeTranslateY = "PortNodeTranslateY";
   public static String changeNodeScaleX = "NodeScaleX";
   public static String changeNodeScaleY = "NodeScaleY";
   public static String changeNodeTitle = "NodeTitle";

@@ -3,44 +3,58 @@ package model.nodes;
 import util.ConstantsMonti;
 
 public class PortNode extends AbstractNode {
-  
+//  values of the PortNode
   private static final String TYPE = "PORT";
   private String portType = "";
   private String portDirection = "";
   private ComponentNode node;
-  private double PORT_WIDTH = 40; 
-  private double PORT_HEIGHT = 40;
-  private double xDraw;
-  private double yDraw;
+  private static double PORT_WIDTH = 40; 
+  private static double PORT_HEIGHT = 40;
+//  private double xDraw;
+//  private double yDraw;
+//  private double xDiff;
+//  private double yDiff;
+  private PortNodeSketch pNodeSketch;
   
   public PortNode(double x, double y, double height, double width) {
-    super(x, y, width, height);
+    super(x, y, PORT_HEIGHT, PORT_WIDTH);
     // Don't accept nodes with size less than minWidth * minHeight.
 //    this.width = PORT_WIDTH;
 //    this.height = PORT_HEIGHT;
-    this.width = width;
-    this.height = height;
   }
   
   public PortNode() {
     super();
   }
   
-  public void setXDraw(double pXDraw) {
-    xDraw = pXDraw;
+  public void createPortNodeSketch(double x, double y, double height, double width) {
+    // sketch x, y, height and width
+    pNodeSketch = new PortNodeSketch(x,y,height, width);
   }
   
-  public void setYDraw(double pYDraw) {
-    yDraw = pYDraw;
+  public PortNodeSketch getPortNodeSketch() {
+    return pNodeSketch;
   }
   
-  public double getXDraw() {
-    return xDraw;
-  }
+//  public void setXDraw(double pXDraw) {
+//    xDraw = pXDraw;
+//    this.translateX = xDraw;
+//    
+//  }
   
-  public double getYDraw() {
-    return yDraw;
-  }
+//  public void setYDraw(double pYDraw) {
+//    yDraw = pYDraw;
+//    this.translateY = yDraw;
+//    
+//  }
+  
+//  public double getXDraw() {
+//    return xDraw;
+//  }
+  
+//  public double getYDraw() {
+//    return yDraw;
+//  }
   
   public void setComponentNode(ComponentNode pComponentNode) {
     this.node = pComponentNode;

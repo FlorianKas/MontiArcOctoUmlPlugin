@@ -162,7 +162,18 @@ public class NodeControllerMonti extends NodeController {
     for (AbstractNode n : toBeMoved) {
       Double x = initTranslateMap.get(n).getX() + offsetX;
       Double y = initTranslateMap.get(n).getY() + offsetY;
+      System.out.println("PortNode x val" + ((ComponentNode)n).getPorts().get(0).getX());
+//      System.out.println("PortNode x val " + ((ComponentNode)n).getPorts().get(0).getXDraw());
+      System.out.println("PortNode x val " + ((ComponentNode)n).getPorts().get(0).getTranslateX());
+      System.out.println("ComponentNode x val" + ((ComponentNode)n).getX());
+
+      System.out.println("We are dragging node " + n + "that is instance of " + (n instanceof ComponentNode));
+      System.out.println("We are dragging node " + n + "that is instance of " + (n instanceof PortNode));
       n.setTranslateX(x);
+      System.out.println("PortNode x val after " + ((ComponentNode)n).getPorts().get(0).getX());
+//      System.out.println("PortNode x val after " + ((ComponentNode)n).getPorts().get(0).getXDraw());
+      System.out.println("PortNode x val after " + ((ComponentNode)n).getPorts().get(0).getTranslateX());
+      System.out.println("ComponentNode x val after " + ((ComponentNode)n).getX());
       n.setTranslateY(y);
       n.setX(x);
       n.setY(y);
@@ -348,7 +359,7 @@ public class NodeControllerMonti extends NodeController {
       ArrayList<PortNodeView> portViewsRight = new ArrayList<>();
       
       for (PortNodeView p : portViews) {
-        if(p.getPortX() < nodeView.getX()) {
+        if(p.getX() < nodeView.getX()) {
           portViewsLeft.add(p);
         }
         else {

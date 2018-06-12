@@ -1,5 +1,6 @@
 package model.nodes;
 
+import util.Constants;
 import util.ConstantsMonti;
 import view.nodes.AbstractNodeView;
 
@@ -92,6 +93,32 @@ public class ComponentNode extends AbstractNode implements Serializable {
     this.Ports.add(node);
   }
   
+  @Override
+  public void setTranslateX(double x) {
+    double pDx = x - this.getTranslateX();
+    translateX = x;
+    for (PortNode p: this.getPorts()) {
+      p.setTranslateX(p.getTranslateX()+pDx);
+      p.getPortNodeSketch().setTranslateX(p.getPortNodeSketch().getTranslateX()+pDx);
+    }
+    changes.firePropertyChange(Constants.changeNodeTranslateX, null, translateX);
+    remoteChanges.firePropertyChange(Constants.changeNodeTranslateX, null, translateX);
+  }
+  
+  @Override
+  public void setTranslateY(double y) {
+    double pDy = x - this.getTranslateY();
+    translateY = y;
+    for (PortNode p: this.getPorts()) {
+      p.setTranslateY(p.getTranslateY()+pDy);
+      p.getPortNodeSketch().setTranslateY(p.getPortNodeSketch().getTranslateY()+pDy);
+    }
+    changes.firePropertyChange(Constants.changeNodeTranslateY, null, translateY);
+    remoteChanges.firePropertyChange(Constants.changeNodeTranslateY, null, translateY);
+  }
+  
+  
+  
   
   public void setStereotype(String pStereotype) {
     stereotype = pStereotype;
@@ -138,5 +165,6 @@ public class ComponentNode extends AbstractNode implements Serializable {
   public String getComponentType() {
     return componentType;  
   }
+  
   
 }

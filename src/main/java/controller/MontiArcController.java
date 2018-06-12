@@ -37,14 +37,17 @@ import javafx.stage.Stage;
 import model.Sketch;
 import model.edges.AbstractEdge;
 import model.edges.ConnectorEdge;
+import model.edges.Edge;
 import model.nodes.AbstractNode;
 import model.nodes.ComponentNode;
 import model.nodes.Infos;
 import model.nodes.PortNode;
 import plugin.MontiArcPlugin;
 import plugin.MontiCoreException;
+import util.ConstantsMonti;
 import util.commands.AddDeleteNodeCommand;
 import util.commands.CompoundCommand;
+import util.commands.MoveCompViewCommand;
 import util.commands.MoveGraphElementCommand;
 import util.commands.SetInfoArcParamCommand;
 import util.commands.SetInfoGenericCommand;
@@ -60,7 +63,7 @@ import view.edges.ConnectorEdgeView;
 import view.nodes.AbstractNodeView;
 import view.nodes.ComponentNodeView;
 import view.nodes.PackageNodeView;
-import controller.SketchController;
+import view.nodes.PortNodeView;
 
 public class MontiArcController extends AbstractDiagramController {
   
@@ -68,13 +71,13 @@ public class MontiArcController extends AbstractDiagramController {
 
   NodeControllerMonti nodeController;
   MontiRecognizeController recognizeController;
-  TabControllerMonti tabController;
+//  TabControllerMonti tabController;
   EdgeControllerMonti edgeController;
   SelectControllerMonti selectController;
   MontiArcPlugin plugin;
   Infos in;
   MontiInitDialogController controller;
-  SketchController sketchController;
+  SketchControllerMonti sketchController;
   
   private AnchorPane dialog;
   private ArrayList<MontiCoreException> errorList = new ArrayList<MontiCoreException>();
@@ -96,7 +99,7 @@ public class MontiArcController extends AbstractDiagramController {
     initToolBarActions();
     initDrawPaneActions();  
     
-    sketchController = new SketchController(drawPane, this);
+    sketchController = new SketchControllerMonti(drawPane, this);
     nodeController = new NodeControllerMonti(drawPane, this);
     recognizeController = new MontiRecognizeController(drawPane, this);
     edgeController = new EdgeControllerMonti(drawPane,this);
@@ -750,7 +753,13 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
                                                                             // moved
           CompoundCommand compoundCommand = new CompoundCommand();
           for (AbstractNodeView movedView : selectedNodes) {
-            compoundCommand.add(new MoveGraphElementCommand(nodeMap.get(movedView), deltaTranslateVector[0], deltaTranslateVector[1]));
+            if (movedView instanceof ComponentNodeView) {
+              System.out.println("We are in moving");
+              compoundCommand.add(new MoveCompViewCommand((ComponentNode)nodeMap.get(movedView), deltaTranslateVector[0], deltaTranslateVector[1]));
+            } 
+            else {
+              compoundCommand.add(new MoveGraphElementCommand(nodeMap.get(movedView), deltaTranslateVector[0], deltaTranslateVector[1]));
+            }
           }
           for (Sketch sketch : selectedSketches) {
             compoundCommand.add(new MoveGraphElementCommand(sketch, deltaTranslateVector[0], deltaTranslateVector[1]));
@@ -982,7 +991,6 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
     });
   }
   
-  
   public AbstractNodeView createNodeView(AbstractNode node, boolean remote) {
     AbstractNodeView newView = null;
     if (node instanceof ComponentNode) {
@@ -1009,28 +1017,31 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
   }
   
   
-  public ConnectorEdgeView addEdgeView(AbstractEdge edge, boolean remote) {
-    AbstractNodeView startNodeView = null;
-    AbstractNodeView endNodeView = null;
+  public AbstractEdgeView addEdgeView(AbstractEdge edge, boolean remote) {
+    PortNodeView startNodeView = null;
+    PortNodeView endNodeView = null;
     AbstractNode tempNode;
 
-    System.out.println("We are in MONTIARCCONTROLLER BY ADDING EDGEVIEW");
+//    System.out.println("We are in MONTIARCCONTROLLER BY ADDING EDGEVIEW");
     for (AbstractNodeView nodeView : allNodeViews) {
       tempNode = nodeMap.get(nodeView);
-      System.out.println("TempNode " + tempNode);
+//      System.out.println("TempNode " + tempNode);
       if (edge.getStartNode().getId().equals(tempNode.getId())) {
         edge.setStartNode(tempNode);
-        startNodeView = nodeView;
+        System.out.println("Is nodeView instance of ComponentNodeView : " + (nodeView instanceof ComponentNodeView));
+        System.out.println("Is nodeView instance of PortNodeView : " + (nodeView instanceof PortNodeView));
+        startNodeView = (PortNodeView) nodeView;
       }
       else if (edge.getEndNode().getId().equals(tempNode.getId())) {
         edge.setEndNode(tempNode);
-        endNodeView = nodeView;
+        endNodeView = (PortNodeView) nodeView;
       }  
     }    
-    System.out.println("We are in ConnectorEdge case");
-    System.out.println("StartNodeView "+ startNodeView);
-    System.out.println("EndNodeView "+ endNodeView);
-    ConnectorEdgeView edgeView = new ConnectorEdgeView((ConnectorEdge)edge, startNodeView, endNodeView);
+//    System.out.println("We are in ConnectorEdge case");
+//    System.out.println("StartNodeView "+ startNodeView);
+//    System.out.println("EndNodeView "+ endNodeView);
+    AbstractEdgeView edgeView;
+    edgeView = new ConnectorEdgeView((ConnectorEdge)edge, startNodeView, endNodeView);
     
     allEdgeViews.add(edgeView);
     drawPane.getChildren().add(edgeView);
@@ -1040,18 +1051,18 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
     return edgeView;
   }
   
-  public AbstractEdgeView createEdgeView(AbstractEdge edge, AbstractNodeView startNodeView, AbstractNodeView endNodeView) {
+  public AbstractEdgeView createEdgeView(AbstractEdge edge, PortNodeView startNodeView, PortNodeView endNodeView) {
     AbstractEdgeView edgeView;
 
-    System.out.println("We are in MONTIARCCONTROLLER BY CREATING EDGEVIEW");
+//    System.out.println("We are in MONTIARCCONTROLLER BY CREATING EDGEVIEW");
     if (edge instanceof ConnectorEdge) {
-      System.out.println("Detected a ConnectorEdge");
+//      System.out.println("Detected a ConnectorEdge");
       edgeView = new ConnectorEdgeView((ConnectorEdge)edge, startNodeView, endNodeView);
     }
     else {
       edgeView = null;
     }
-    System.out.println("EdgeView" + edgeView.getStartX() + edgeView.getStartY() + edgeView.getEndX() + edgeView.getEndY());
+//    System.out.println("EdgeView" + edgeView.getStartX() + edgeView.getStartY() + edgeView.getEndX() + edgeView.getEndY());
     return addEdgeView(edgeView);
   }
 
@@ -1107,5 +1118,7 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
       }
     }
   }
+  
+  
   
 }

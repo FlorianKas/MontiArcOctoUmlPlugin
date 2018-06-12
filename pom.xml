@@ -175,11 +175,12 @@
   <artifactId>maa2java</artifactId>
   <version>4.3.4-SNAPSHOT</version>
 </dependency>
-<dependency>
+<!-- <dependency>
   <groupId>OctoUML</groupId>
   <artifactId>OctoUML</artifactId>
   <version>0.0.1-SNAPSHOT</version>
 </dependency>
+ -->
 <dependency>
   <groupId>octouml</groupId>
   <artifactId>diagram-control</artifactId>

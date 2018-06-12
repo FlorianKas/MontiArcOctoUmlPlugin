@@ -5,6 +5,7 @@ import model.nodes.ClassNode;
 import model.nodes.ComponentNode;
 import model.nodes.PortNode;
 import model.nodes.AbstractNode;
+import util.Constants;
 import util.ConstantsMonti;
 
 import java.beans.PropertyChangeEvent;
@@ -143,28 +144,28 @@ public class ComponentNodeView extends AbstractNodeView {
       
       for (PortNode p : Ports) {
         PortNodeView portView = new PortNodeView(p);
-        System.out.println("Port: " + p.getXDraw() + " " + p.getYDraw());
+        System.out.println("Port: " + p.getX() + " " + p.getY());
         System.out.println("Vergleich");
-        System.out.println(p.getXDraw() + p.getWidth());
-        System.out.println(p.getYDraw() + p.getHeight());
+        System.out.println(p.getX() + p.getWidth());
+        System.out.println(p.getY() + p.getHeight());
         System.out.println(node.getX() + 3 / 5 * node.getWidth());
         System.out.println(node.getY() + 3 / 5 * node.getHeight());
-        System.out.println(p.getYDraw());
+        System.out.println(p.getY());
         System.out.println(node.getY());
         
 //        if (p.getX() + p.getWidth() < node.getX() + node.getWidth() && p.getX() < node.getX()) {
         if (Math.abs(node.getX() - p.getX()) < Math.abs(node.getX() + node.getWidth() - p.getX())) {
 //          PortNodeView portView = new PortNodeView(p);
           System.out.println("LeftPane");
-          System.out.println("yDraw" + p.getYDraw());
-          Pane portPane = portView.createPortPane(0, p.getYDraw() - node.getY(), PORT_HEIGHT, PORT_WIDTH);
+          System.out.println("yDraw" + p.getY());
+          Pane portPane = portView.createPortPane(0, p.getY() - node.getY(), PORT_HEIGHT, PORT_WIDTH);
           PortLeft.getChildren().add(portPane);
           
           // set PortName
-          titlePort = portView.setPortTitle(p.getTitle(), 2, p.getYDraw() - node.getY() +10);
+          titlePort = portView.setPortTitle(p.getTitle(), 2, p.getY() - node.getY() +10);
           PortLeft.getChildren().add(titlePort);
           // set PortDataType
-          DataTypePort = portView.setPortDataType(p.getPortType(), 2, p.getYDraw() - node.getY()-12);
+          DataTypePort = portView.setPortDataType(p.getPortType(), 2, p.getY() - node.getY()-12);
           PortLeft.getChildren().add(DataTypePort);
         }
         /*else if (p.getY() < node.getY()) {
@@ -184,31 +185,17 @@ public class ComponentNodeView extends AbstractNodeView {
 //          PortNodeView portView = new PortNodeView(p);
         else {  
           portView.setX(portView.getX());
-          Pane portPane = portView.createPortPane(0 , p.getYDraw() - node.getY(), PORT_HEIGHT, PORT_WIDTH);
+          Pane portPane = portView.createPortPane(0 , p.getY() - node.getY(), PORT_HEIGHT, PORT_WIDTH);
           System.out.println("PortPane " + portPane.getBoundsInParent());
           PortRight.getChildren().add(portPane);
           // set PortName
-          titlePort = portView.setPortTitle(p.getTitle(),2,p.getYDraw() - node.getY() +10 );
+          titlePort = portView.setPortTitle(p.getTitle(),2,p.getY() - node.getY() +10 );
           PortRight.getChildren().add(titlePort);
           // set PortDataType
-          DataTypePort = portView.setPortDataType(p.getPortType(), 2, p.getYDraw() - node.getY()-12);
+          DataTypePort = portView.setPortDataType(p.getPortType(), 2, p.getY() - node.getY()-12);
           PortRight.getChildren().add(DataTypePort);
           
         }
-        /*else {
-//          PortNodeView portView = new PortNodeView(p);
-          System.out.println("ComponentNodeView Bottom");
-          Pane portPane = portView.createPortPane(p.getXDraw() - node.getX(), 0, PORT_HEIGHT, PORT_WIDTH);
-          PortBottom.getChildren().add(portPane);
-          
-          // set PortName
-          titlePort = portView.setPortTitle(p.getTitle(), p.getXDraw() - node.getX() + 2, 10);
-          PortBottom.getChildren().add(titlePort);
-          // set PortDataType
-          DataTypePort = portView.setPortDataType(p.getPortType(), p.getXDraw() - node.getX() + 2, -12);
-          PortBottom.getChildren().add(DataTypePort);
-          
-        }*/
         nodeCompMap.put(portView, p);
         nodeToViewMap.put(p, portView);
         portViews.add(portView);
@@ -216,19 +203,7 @@ public class ComponentNodeView extends AbstractNodeView {
     }
   }
   
-//  private Label setPortAttr(String attr, double PositionX, double PositionY) {
-//    Label portLabel = new Label();
-//    portLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 12));
-//    System.out.println("We are going to set a title" + attr);
-//    if(attr != null) {
-//      portLabel.setText(attr);
-//    }
-//    portLabel.setAlignment(Pos.TOP_CENTER);
-//    portLabel.setTranslateX(PositionX);
-//    portLabel.setTranslateY(PositionY);
-//    portLabel.setFont(new Font("Arial", 10));
-//    return portLabel;
-//  }
+
   
   private void changeHeight(double height) {
     setHeight(height);
@@ -318,7 +293,7 @@ public class ComponentNodeView extends AbstractNodeView {
   public void setSelected(boolean selected) {
     if (selected) {
       rectangle.setStrokeWidth(2);
-      setStroke(ConstantsMonti.selected_color);
+      setStroke(Constants.selected_color);
     }
     else {
       rectangle.setStrokeWidth(1);
@@ -373,19 +348,19 @@ public class ComponentNodeView extends AbstractNodeView {
   public void propertyChange(PropertyChangeEvent evt) {
     
     super.propertyChange(evt);
-    if (evt.getPropertyName().equals(ConstantsMonti.changeNodeX)) {
+    if (evt.getPropertyName().equals(Constants.changeNodeX)) {
       setX((double) evt.getNewValue());
     }
-    else if (evt.getPropertyName().equals(ConstantsMonti.changeNodeY)) {
+    else if (evt.getPropertyName().equals(Constants.changeNodeY)) {
       setY((double) evt.getNewValue());
     }
-    else if (evt.getPropertyName().equals(ConstantsMonti.changeNodeWidth)) {
+    else if (evt.getPropertyName().equals(Constants.changeNodeWidth)) {
       changeWidth((double) evt.getNewValue());
     }
-    else if (evt.getPropertyName().equals(ConstantsMonti.changeNodeHeight)) {
+    else if (evt.getPropertyName().equals(Constants.changeNodeHeight)) {
       changeHeight((double) evt.getNewValue());
     }
-    else if (evt.getPropertyName().equals(ConstantsMonti.changeNodeTitle)) {
+    else if (evt.getPropertyName().equals(Constants.changeNodeTitle)) {
       name.setText((String) evt.getNewValue());
     }
     else if (evt.getPropertyName().equals(ConstantsMonti.changeComponentNodeDataType)) {

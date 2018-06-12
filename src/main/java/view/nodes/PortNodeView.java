@@ -183,6 +183,12 @@ public class PortNodeView extends AbstractNodeView {
     else if (evt.getPropertyName().equals(ConstantsMonti.changePortNodeDataType)) {
       dataType.setText((String) evt.getNewValue());
     }
+    else if (evt.getPropertyName().equals(ConstantsMonti.changePortNodeTranslateX)) {
+      setTranslateX((double) evt.getNewValue());
+    }
+    else if (evt.getPropertyName().equals(ConstantsMonti.changePortNodeTranslateY)) {
+      setTranslateY((double )evt.getNewValue());
+    }
       // } else if
       // (evt.getPropertyName().equals(Constants.changeClassNodeAttributes)) {
       // attributes.setText((String) evt.getNewValue());

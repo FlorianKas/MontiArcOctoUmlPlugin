@@ -78,21 +78,6 @@ public class EdgeControllerMonti extends EdgeController {
     aDrawPane.getChildren().add(dragLine);
   }
   
-//  public void onMousePressedOnCanvas(MouseEvent event) {
-//    dragStartX = event.getX();
-//    dragStartY = event.getY();
-//    if (diagramController instanceof SequenceDiagramController) {
-//      for (AbstractNodeView node : diagramController.getAllNodeViews()) {
-//        if (node instanceof PortNodeView) {
-//          double middleOfNode = (node.getX() + (node.getX() + node.getWidth())) / 2;
-//          if (event.getX() > middleOfNode - 20 && event.getX() < middleOfNode + 20 && event.getY() > node.getY()) {
-//            startNodeView = node;
-//          }
-//        }
-//      }
-//    }
-//    aDrawPane.getChildren().add(dragLine);
-//  }
     
   public void onMouseDragged(MouseEvent event) {
     dragLine.setStartX(dragStartX);

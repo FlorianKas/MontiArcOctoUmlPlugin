@@ -103,10 +103,16 @@ public class ConnectorEdgeView extends AbstractEdgeView{
 //    StereoType.toFront();
 //    this.getChildren().add(StereoType);
     getChildren().clear();
+    System.out.println("StartNode Translate X " + startNode.getTranslateX() );
+    System.out.println("StartNode Translate X " + ((PortNode)startNode.getRefNode()).getTranslateX());
+
+    System.out.println("StartNode Translate Y " + startNode.getTranslateY() );
+    System.out.println("StartNode Translate Y " + ((PortNode)startNode.getRefNode()).getTranslateY());
     getStartLine().setStartX(getStartLine().getStartX()+20);
     getEndLine().setEndX(getEndLine().getEndX()+20);
     getChildren().add(getStartLine());
     System.out.println("getStartLine " + getStartLine().getStartX());
+    System.out.println("getStartLine Y" + getStartLine().getStartY());
     getChildren().add(getMiddleLine());
     getChildren().add(getEndLine());
     super.draw();
@@ -215,7 +221,9 @@ public class ConnectorEdgeView extends AbstractEdgeView{
     
     super.propertyChange(evt);
     if(evt.getPropertyName().equals(Constants.changeNodeTranslateX) || evt.getPropertyName().equals(Constants.changeNodeTranslateY) ||
-      evt.getPropertyName().equals(Constants.changeEdgeDirection)) {
+      evt.getPropertyName().equals(Constants.changeEdgeDirection) || evt.getPropertyName().equals(ConstantsMonti.changePortNodeTranslateX)
+    || evt.getPropertyName().equals(ConstantsMonti.changePortNodeTranslateY)){
+      setPosition();
       draw();
     }
   }

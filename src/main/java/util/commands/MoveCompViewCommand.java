@@ -46,6 +46,7 @@ public class MoveCompViewCommand implements Command
     aGraphElement = pNode;
     aDX = pDX;
     aDY = pDY;
+    System.out.println("After construction the move");
   }
   
   /**
@@ -57,7 +58,7 @@ public class MoveCompViewCommand implements Command
     aGraphElement.setTranslateY(aGraphElement.getTranslateY()-aDY);
     for (PortNode p: aGraphElement.getPorts()) {
       p.setTranslateX(p.getTranslateX()-aDX);
-      p.setTranslateY(p.getTranslateY()-aDX);
+      p.setTranslateY(p.getTranslateY()-aDY);
     }
   }
 
@@ -72,7 +73,7 @@ public class MoveCompViewCommand implements Command
       System.out.println("p TranslateX" + p.getTranslateX());
       p.setTranslateX(p.getTranslateX()+aDX);
       System.out.println("p TranslateX after" + p.getTranslateX());
-      p.setTranslateY(p.getTranslateY()+aDX);
+      p.setTranslateY(p.getTranslateY()+aDY);
     }
     
   }

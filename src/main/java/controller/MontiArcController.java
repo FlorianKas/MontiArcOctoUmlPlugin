@@ -753,9 +753,14 @@ FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view
                                                                             // moved
           CompoundCommand compoundCommand = new CompoundCommand();
           for (AbstractNodeView movedView : selectedNodes) {
+            System.out.println("Selected Nodes " + selectedNodes);
             if (movedView instanceof ComponentNodeView) {
+              for (PortNodeView p : ((ComponentNodeView)movedView).getPortNodeViews()) {
+                compoundCommand.add(new MoveGraphElementCommand(nodeMap.get(p), deltaTranslateVector[0], deltaTranslateVector[1]));
+              }
               System.out.println("We are in moving");
-              compoundCommand.add(new MoveCompViewCommand((ComponentNode)nodeMap.get(movedView), deltaTranslateVector[0], deltaTranslateVector[1]));
+              compoundCommand.add(new MoveGraphElementCommand(nodeMap.get(movedView), deltaTranslateVector[0], deltaTranslateVector[1]));
+              System.out.println("We are after compound");
             } 
             else {
               compoundCommand.add(new MoveGraphElementCommand(nodeMap.get(movedView), deltaTranslateVector[0], deltaTranslateVector[1]));

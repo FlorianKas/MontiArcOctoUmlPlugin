@@ -135,6 +135,23 @@ public class NodeControllerMonti extends NodeController {
     // children)
     for (AbstractNode n : diagramController.getGraphModel().getAllNodes()) {
       if (selectedNodes.contains(n)) {
+        if (n instanceof ComponentNode) {
+
+          initTranslate = new Point2D.Double(n.getTranslateX(), n.getTranslateY());
+          initTranslateMap.put(n, initTranslate);
+          toBeMoved.add(n);
+          if (snapIndicators) {
+            createSnapIndicators(n);
+          }
+          for (PortNode p : ((ComponentNode)n).getPorts()) {
+            initTranslate = new Point2D.Double(p.getTranslateX(), p.getTranslateY());
+            initTranslateMap.put(p, initTranslate);
+            toBeMoved.add(p);
+            if (snapIndicators) {
+              createSnapIndicators(p);
+            }
+          }
+        }
         initTranslate = new Point2D.Double(n.getTranslateX(), n.getTranslateY());
         initTranslateMap.put(n, initTranslate);
         toBeMoved.add(n);
@@ -160,48 +177,88 @@ public class NodeControllerMonti extends NodeController {
     
     // Drag all selected nodes and their children
     for (AbstractNode n : toBeMoved) {
-      Double x = initTranslateMap.get(n).getX() + offsetX;
-      Double y = initTranslateMap.get(n).getY() + offsetY;
-      System.out.println("PortNode x val" + ((ComponentNode)n).getPorts().get(0).getX());
-//      System.out.println("PortNode x val " + ((ComponentNode)n).getPorts().get(0).getXDraw());
-      System.out.println("PortNode x val " + ((ComponentNode)n).getPorts().get(0).getTranslateX());
-      System.out.println("ComponentNode x val" + ((ComponentNode)n).getX());
-
-      System.out.println("We are dragging node " + n + "that is instance of " + (n instanceof ComponentNode));
-      System.out.println("We are dragging node " + n + "that is instance of " + (n instanceof PortNode));
-      n.setTranslateX(x);
-      System.out.println("PortNode x val after " + ((ComponentNode)n).getPorts().get(0).getX());
-//      System.out.println("PortNode x val after " + ((ComponentNode)n).getPorts().get(0).getXDraw());
-      System.out.println("PortNode x val after " + ((ComponentNode)n).getPorts().get(0).getTranslateX());
-      System.out.println("ComponentNode x val after " + ((ComponentNode)n).getX());
-      n.setTranslateY(y);
-      n.setX(x);
-      n.setY(y);
-      if (snapIndicators) {
-        setSnapIndicators(closestInteger(x.intValue(), Constants.GRID_DISTANCE), closestInteger(y.intValue(), Constants.GRID_DISTANCE), n, true);
+      if (n instanceof ComponentNode) {
+        Double x = initTranslateMap.get(n).getX() + offsetX;
+        Double y = initTranslateMap.get(n).getY() + offsetY;
+        n.setTranslateX(x);
+        n.setTranslateY(y);
+        n.setX(x);
+        n.setY(y);
+        if (snapIndicators) {
+          setSnapIndicators(closestInteger(x.intValue(), Constants.GRID_DISTANCE), closestInteger(y.intValue(), Constants.GRID_DISTANCE), n, true);
+        }
+        for (PortNode p : ((ComponentNode)n).getPorts()) {
+          x = initTranslateMap.get(p).getX() + offsetX;
+          y = initTranslateMap.get(p).getY() + offsetY;
+          p.setTranslateX(x);
+          p.setTranslateY(y);
+          p.setX(x);
+          p.setY(y);
+          if (snapIndicators) {
+            setSnapIndicators(closestInteger(x.intValue(), Constants.GRID_DISTANCE), closestInteger(y.intValue(), Constants.GRID_DISTANCE), p, true);
+          }
+        }
+      }
+      else {
+        Double x = initTranslateMap.get(n).getX() + offsetX;
+        Double y = initTranslateMap.get(n).getY() + offsetY;
+        n.setTranslateX(x);
+        n.setTranslateY(y);
+        n.setX(x);
+        n.setY(y);
+        if (snapIndicators) {
+          setSnapIndicators(closestInteger(x.intValue(), Constants.GRID_DISTANCE), closestInteger(y.intValue(), Constants.GRID_DISTANCE), n, true);
+        }
       }
     }
   }
   
   public double[] moveNodesFinished(MouseEvent event) {
+    double offsetX = (event.getSceneX() - initMoveX) * (1 / diagramController.drawPane.getScaleX());
+    double offsetY = (event.getSceneY() - initMoveY) * (1 / diagramController.drawPane.getScaleY());
+    
     for (AbstractNode n : toBeMoved) {
-      Double x = n.getTranslateX();
-      Double y = n.getTranslateY();
-      if (snapToGrid) {
-        int xSnap = closestInteger(x.intValue(), 20); // Snap to grid
-        int ySnap = closestInteger(y.intValue(), 20);
-        n.setTranslateX(xSnap);
-        n.setTranslateY(ySnap);
-        n.setX(xSnap);
-        n.setY(ySnap);
+      if (n instanceof PortNode) {
+        System.out.println("This is a PortNode");
       }
-      else {
-        n.setTranslateX(x);
-        n.setTranslateY(y);
-        n.setX(x);
-        n.setY(y);
+      if (n instanceof ComponentNode) {
+        Double x = n.getTranslateX();
+        Double y = n.getTranslateY();
+        if (snapToGrid) {
+          int xSnap = closestInteger(x.intValue(), 20); // Snap to grid
+          int ySnap = closestInteger(y.intValue(), 20);
+          n.setTranslateX(xSnap);
+          n.setTranslateY(ySnap);
+          n.setX(xSnap);
+          n.setY(ySnap);
+        }
+        else {
+          n.setTranslateX(x);
+          n.setTranslateY(y);
+          n.setX(x);
+          n.setY(y);
+        }
+        for (PortNode p : ((ComponentNode) n).getPorts()) {
+          Double x1 = initTranslateMap.get(p).getX() + offsetX;
+          Double y1 = initTranslateMap.get(p).getY() + offsetY;
+          if (snapToGrid) {
+            int xSnap1 = closestInteger(x1.intValue(), 20); // Snap to grid
+            int ySnap1 = closestInteger(y1.intValue(), 20);
+            p.setTranslateX(xSnap1);
+            p.setTranslateY(ySnap1);
+            System.out.println("Here it is");
+            p.setX(xSnap1);
+            p.setY(ySnap1);
+          }
+          else {
+            p.setTranslateX(x1);
+            p.setTranslateY(y1);
+            System.out.println("Or here?");
+            p.setX(x1);
+            p.setY(y1);
+          }
+        }
       }
-      
     }
     
     toBeMoved.clear();

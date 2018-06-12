@@ -135,6 +135,7 @@ public class SelectControllerMonti extends SelectController{
   }
   
   void onMouseDragged(MouseEvent event) {
+    System.out.println("On mousse Dragged");
     selectRectangle.setX(Math.min(selectStartX, event.getX()));
     selectRectangle.setY(Math.min(selectStartY, event.getY()));
     selectRectangle.setWidth(Math.abs(selectStartX - event.getX()));
@@ -143,6 +144,7 @@ public class SelectControllerMonti extends SelectController{
   }
   
   void onMouseReleased() {
+    System.out.println("On mousse Released");
     for (AbstractNodeView nodeView : diagramController.allNodeViews) {
       if (selectRectangle.getBoundsInParent().contains(nodeView.getBoundsInParent())) {
         diagramController.selected = true;

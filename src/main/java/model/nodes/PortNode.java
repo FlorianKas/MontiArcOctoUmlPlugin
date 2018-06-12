@@ -1,8 +1,11 @@
 package model.nodes;
 
+import java.io.Serializable;
+
+import util.Constants;
 import util.ConstantsMonti;
 
-public class PortNode extends AbstractNode {
+public class PortNode extends AbstractNode implements Serializable{
 //  values of the PortNode
   private static final String TYPE = "PORT";
   private String portType = "";
@@ -55,6 +58,19 @@ public class PortNode extends AbstractNode {
 //  public double getYDraw() {
 //    return yDraw;
 //  }
+  
+  public void setTranslateX(double x) {
+    translateX = x;
+    changes.firePropertyChange(ConstantsMonti.changePortNodeTranslateX, null, translateX);
+    remoteChanges.firePropertyChange(ConstantsMonti.changePortNodeTranslateX, null, translateX);
+  }
+  
+  public void setTranslateY(double y) {
+    translateY = y;
+    changes.firePropertyChange(ConstantsMonti.changePortNodeTranslateY, null, translateY);
+    remoteChanges.firePropertyChange(ConstantsMonti.changePortNodeTranslateY, null, translateY);
+  }
+  
   
   public void setComponentNode(ComponentNode pComponentNode) {
     this.node = pComponentNode;

@@ -185,8 +185,8 @@
   <groupId>octouml</groupId>
   <artifactId>diagram-control</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-</dependency>
-		<dependency>
+ </dependency>
+<!-- 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 			<version>${guava.version}</version>
@@ -197,6 +197,8 @@
     <version>1.8.0-alpha0</version>
     <scope>test</scope>
 </dependency>
+		-->
+
 	<dependency>
   <groupId>de.monticore.lang</groupId>
   <artifactId>montiarc</artifactId>
@@ -210,6 +212,7 @@
 			<artifactId>montiarc-fe</artifactId>
 			<version>4.2.0</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
 			<artifactId>jsr305</artifactId>
@@ -309,7 +312,7 @@
 			<scope>system</scope>
 			<systemPath>${project.basedir}/src/main/resources/lib/jxgrabkey-1.0.jar</systemPath>
 		</dependency>
--->		
+		
 		<dependency>
 			<groupId>com.sikulix</groupId>
 			<artifactId>sikulixapi</artifactId>
@@ -361,6 +364,7 @@
 			<artifactId>kryo</artifactId>
 			<version>4.0.0</version>
 		</dependency>
+		-->
 
 		<dependency>
 			<groupId>log4j</groupId>
@@ -381,7 +385,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-
+<!-- 
 		<dependency>
 			<groupId>com.esotericsoftware</groupId>
 			<artifactId>minlog</artifactId>
@@ -400,7 +404,7 @@
 			<artifactId>reflectasm</artifactId>
 			<version>1.11.3</version>
 		</dependency>
-
+ 
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-math3</artifactId>
@@ -455,7 +459,7 @@
         <artifactId>maven-core</artifactId>
         <version>3.0.3</version>
     </dependency>
-
+-->
 
 
 	</dependencies>

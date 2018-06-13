@@ -10,8 +10,8 @@ import controller.dialog.MontiInitDialogController;
 import controller.dialog.NodeEditDialogControllerMonti;
 import de.monticore.ast.ASTNode;
 import groovyjarjarantlr.collections.List;
-import controller.dialog.AddGenericsController;
-import controller.dialog.AddTypesController;
+//import controller.dialog.AddGenericsController;
+//import controller.dialog.AddTypesController;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -73,11 +73,11 @@ public class MontiArcController extends AbstractDiagramController {
   MontiRecognizeController recognizeController;
 //  TabControllerMonti tabController;
   EdgeControllerMonti edgeController;
-  SelectControllerMonti selectController;
+//  SelectControllerMonti selectController;
   MontiArcPlugin plugin;
   Infos in;
   MontiInitDialogController controller;
-  SketchControllerMonti sketchController;
+//  SketchControllerMonti sketchController;
   
   private AnchorPane dialog;
   private ArrayList<MontiCoreException> errorList = new ArrayList<MontiCoreException>();
@@ -99,11 +99,11 @@ public class MontiArcController extends AbstractDiagramController {
     initToolBarActions();
     initDrawPaneActions();  
     
-    sketchController = new SketchControllerMonti(drawPane, this);
+//    sketchController = new SketchControllerMonti(drawPane, this);
     nodeController = new NodeControllerMonti(drawPane, this);
     recognizeController = new MontiRecognizeController(drawPane, this);
     edgeController = new EdgeControllerMonti(drawPane,this);
-    selectController = new SelectControllerMonti(drawPane, this);
+//    selectController = new SelectControllerMonti(drawPane, this);
     in = new Infos();
 //    String tmp = new String();
 //    ArrayList<String> tmp1 = new ArrayList<String>();
@@ -394,83 +394,83 @@ public class MontiArcController extends AbstractDiagramController {
     
   }
   
-  void addGenerics() {
-    AddGenericsController controller = showGenericsDialog();
-    String[] tmp = controller.genericsTextField.getText().split("\\;");
-    for (String g: tmp) {
-      genericsArray.add(g);
-    }  
-    showOutput();
-  }
-  
-  
-  public AddGenericsController showGenericsDialog() {
-    AddGenericsController controllerGenerics = null; 
-    
-    try {
-      System.out.println("We are in showgenericsDIalog");
-      System.out.println(getClass().getClassLoader().getResource("view/fxml/addGenerics.fxml"));
-      FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view/fxml/addGenerics.fxml"));
-      System.out.println("Loader load " + loader.getLocation());
-      AnchorPane dialog = loader.load();
-      System.out.println("Loader Controller " + loader.getController());
-      controllerGenerics = loader.getController();
-      Stage dialogStage = new Stage();
-      dialogStage.initModality(Modality.WINDOW_MODAL);
-      dialogStage.setScene(new Scene(dialog));
-      
-      controllerGenerics.setDialogStage(dialogStage);
-      dialogStage.showAndWait();
-    
-      
-    }
-    
-    
-    catch (IOException e) {
-      e.printStackTrace();
-      return null;
-    }
-    
-    return controllerGenerics;
-  }
-  
-  
-  void addTypes() {
-    AddTypesController controller = showTypesDialog();
-    String[] tmp = controller.arcParameterTextField.getText().split("\\;");
-    for (String g: tmp) {
-      types.add(g);
-    }  
-    showOutput();
-
-  }
-  
-  public AddTypesController showTypesDialog() {
-    AddTypesController controllerTypes = null; 
-    
-    try {
-
-FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view/fxml/addTypes.fxml"));
-      System.out.println("Loader load " + loader.getLocation());
-      AnchorPane dialog = loader.load();
-      
-      controllerTypes = loader.getController();
-      Stage dialogStage = new Stage();
-      dialogStage.initModality(Modality.WINDOW_MODAL);
-      dialogStage.setScene(new Scene(dialog));
-      
-      controllerTypes = loader.getController();
-      controllerTypes.setDialogStage(dialogStage);
-      dialogStage.showAndWait();
-    }
-
-    catch (IOException e) {
-      e.printStackTrace();
-      return null;
-    }
-    
-    return controllerTypes;
-  }
+//  void addGenerics() {
+//    AddGenericsController controller = showGenericsDialog();
+//    String[] tmp = controller.genericsTextField.getText().split("\\;");
+//    for (String g: tmp) {
+//      genericsArray.add(g);
+//    }  
+//    showOutput();
+//  }
+//  
+//  
+//  public AddGenericsController showGenericsDialog() {
+//    AddGenericsController controllerGenerics = null; 
+//    
+//    try {
+//      System.out.println("We are in showgenericsDIalog");
+//      System.out.println(getClass().getClassLoader().getResource("view/fxml/addGenerics.fxml"));
+//      FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view/fxml/addGenerics.fxml"));
+//      System.out.println("Loader load " + loader.getLocation());
+//      AnchorPane dialog = loader.load();
+//      System.out.println("Loader Controller " + loader.getController());
+//      controllerGenerics = loader.getController();
+//      Stage dialogStage = new Stage();
+//      dialogStage.initModality(Modality.WINDOW_MODAL);
+//      dialogStage.setScene(new Scene(dialog));
+//      
+//      controllerGenerics.setDialogStage(dialogStage);
+//      dialogStage.showAndWait();
+//    
+//      
+//    }
+//    
+//    
+//    catch (IOException e) {
+//      e.printStackTrace();
+//      return null;
+//    }
+//    
+//    return controllerGenerics;
+//  }
+//  
+//  
+//  void addTypes() {
+//    AddTypesController controller = showTypesDialog();
+//    String[] tmp = controller.arcParameterTextField.getText().split("\\;");
+//    for (String g: tmp) {
+//      types.add(g);
+//    }  
+//    showOutput();
+//
+//  }
+//  
+//  public AddTypesController showTypesDialog() {
+//    AddTypesController controllerTypes = null; 
+//    
+//    try {
+//
+//FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view/fxml/addTypes.fxml"));
+//      System.out.println("Loader load " + loader.getLocation());
+//      AnchorPane dialog = loader.load();
+//      
+//      controllerTypes = loader.getController();
+//      Stage dialogStage = new Stage();
+//      dialogStage.initModality(Modality.WINDOW_MODAL);
+//      dialogStage.setScene(new Scene(dialog));
+//      
+//      controllerTypes = loader.getController();
+//      controllerTypes.setDialogStage(dialogStage);
+//      dialogStage.showAndWait();
+//    }
+//
+//    catch (IOException e) {
+//      e.printStackTrace();
+//      return null;
+//    }
+//    
+//    return controllerTypes;
+//  }
   
   
   void initDrawPaneActions() {

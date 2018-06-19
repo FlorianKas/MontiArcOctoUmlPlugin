@@ -8,7 +8,6 @@ public class MontiArcPlugInErrors {
   
   private static final MontiArcPlugInErrors singleError = new MontiArcPlugInErrors();
   private ArrayList<MontiCoreException> allErrors = new ArrayList();
- 
   
   public static MontiArcPlugInErrors getInstance()
   {

@@ -1,34 +1,51 @@
 package controller;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
+import java.util.Optional;
 
-import de.monticore.lang.montiarc.montiarc._ast.ASTComponentHead;
+import de.monticore.literals.literals._ast.ASTIntLiteral;
+import de.monticore.literals.literals._ast.ASTLiteral;
+//import ASTComponent;
+//import ASTComponentHead;
+//import de.monticore.lang.montiarc.montiarc._symboltable.MontiArcLanguage;
 import de.monticore.prettyprint.IndentPrinter;
 import de.monticore.types.prettyprint.TypesPrettyPrinterConcreteVisitor;
+import de.monticore.types.types._ast.ASTComplexReferenceType;
+import de.monticore.types.types._ast.ASTPrimitiveType;
+import de.monticore.types.types._ast.ASTSimpleReferenceType;
 import de.monticore.types.types._ast.TypesNodeFactory;
+import montiarc._ast.*;
+import montiarc._ast.ASTComponentBody;
+import montiarc._ast.ASTComponentHead;
+import montiarc._ast.ASTParameter;
+import montiarc._ast.ASTPort;
+import montiarc._parser.MontiArcParserTOP;
+import plugin.MontiArcPlugin;
 
 public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
   
-  
+  public boolean stereo = false;
   public MAPrettyPrinter(IndentPrinter printer) {
     super(printer);
     // TODO Auto-generated constructor stub
   }
   
   public void printImport(ArrayList<de.monticore.types.types._ast.ASTImportStatement> importDec) {
-    if (importDec.isEmpty()) {
-      System.out.println("ImportDec " + importDec.toString() + importDec.isEmpty());
-      for (de.monticore.types.types._ast.ASTImportStatement imp : importDec) {
-        de.monticore.types.types._ast.ASTQualifiedName imported =  TypesNodeFactory.createASTQualifiedName(imp.getImportList());
-        getPrinter().print("import ");
-        handle(imported);
-        if (imp.isStar()) {
-          getPrinter().print("*");
-        }
-        getPrinter().print(";");
-        getPrinter().println("");
+    for (de.monticore.types.types._ast.ASTImportStatement imp : importDec) {
+      de.monticore.types.types._ast.ASTQualifiedName imported =  TypesNodeFactory.createASTQualifiedName(imp.getImportList());
+      getPrinter().print("import ");
+      handle(imported);
+      if (imp.isStar()) {
+        getPrinter().print("*");
       }
-    }
+      getPrinter().print(";");
+      getPrinter().println("");
+    }  
   }
   
   public void printPackageName(ArrayList<String> packageDeclaration) {
@@ -39,43 +56,40 @@ public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
     getPrinter().addLine("");
   }
   
-  public void printComponent(de.monticore.lang.montiarc.montiarc._ast.ASTComponent astComp) {
+  public void printComponent(ASTComponent astComp) {
     if (astComp.getStereotype().isPresent()) {
-      getPrinter().print(" " + astComp.getStereotype().get().getValues().get(0).getName() + " ");
+      if (!astComp.getStereotype().get().getValues().get(0).getName().isEmpty()) {
+        getPrinter().print(" " + astComp.getStereotype().get().getValues().get(0).getName() + " ");
+        stereo = false;
+      }
+      else {
+        stereo = true;
+      }
     }
     getPrinter().print("component ");
     getPrinter().print(astComp.getName() + " ");
     printComponentHead(astComp.getHead());
-//    if (astComp.getInstanceName().isPresent()) {
-//      getPrinter().print(astComp.getInstanceName() + " ");
-//      if (astComp.getActualTypeArgument().isPresent()) {
-//        handle(astComp.getActualTypeArgument().get()); 
-//      }
-//    }
     printComponentBody(astComp.getBody());
-//    getPrinter().flushBuffer();
-//    System.out.println("Test "+ getPrinter().getContent());
   }
   
-  public void printComponentOuter(de.monticore.lang.montiarc.montiarc._ast.ASTComponent astComp) {
-    if (astComp.getStereotype().isPresent()) {
-      getPrinter().print(" " + astComp.getStereotype().get().getValues().get(0).getName() + " ");
+  public void printComponentOuter(ASTComponent astComp) {
+    if(astComp.getStereotype().isPresent()) {
+      if (!astComp.getStereotype().get().getValues().get(0).getName().isEmpty()) {
+        getPrinter().print(" " + astComp.getStereotype().get().getValues().get(0).getName() + " ");
+        stereo = false;
+      }
+    }
+    else {
+      stereo = true;
     }
     getPrinter().print("component ");
     getPrinter().print(astComp.getName() + " ");
     printComponentHead(astComp.getHead());
-//    if (astComp.getInstanceName().isPresent()) {
-//      getPrinter().print(astComp.getInstanceName() + " ");
-//      if (astComp.getActualTypeArgument().isPresent()) {
-//        handle(astComp.getActualTypeArgument().get()); 
-//      }
-//    }
     printComponentBodyOuter(astComp.getBody());
-//    getPrinter().flushBuffer();
-//    System.out.println("Test "+ getPrinter().getContent());
+//    printConnector(astComp.getBody());
   }
   
-  public void printComponentHead(de.monticore.lang.montiarc.montiarc._ast.ASTComponentHead astHead) {
+  public void printComponentHead(ASTComponentHead astHead) {
     System.out.println("generics empty? " + astHead.getGenericTypeParameters().isPresent());
     if (astHead.getGenericTypeParameters().isPresent() && astHead.getGenericTypeParameters().get().getTypeVariableDeclarations() != null
         && !astHead.getGenericTypeParameters().get().getTypeVariableDeclarations().isEmpty()
@@ -89,10 +103,22 @@ public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
     if(!astHead.getParameters().isEmpty() && astHead.getParameters() != null) {
       System.out.println("params " + astHead.getParameters().toString());
       getPrinter().print("(");
-      for (de.monticore.lang.montiarc.common._ast.ASTParameter param : astHead.getParameters()) {
+      for (ASTParameter param : astHead.getParameters()) {
         // TODO build optional
         if (param != null) {
-          handle((de.monticore.types.types._ast.ASTSimpleReferenceType)param.getType());
+          if (param.getType() instanceof ASTPrimitiveType) {
+            handle((ASTPrimitiveType)param.getType());
+          }
+          else if(param.getType() instanceof ASTSimpleReferenceType) {
+            handle((ASTSimpleReferenceType)param.getType());
+          }
+          else if(param.getType() instanceof ASTComplexReferenceType){
+            handle((ASTComplexReferenceType)param.getType());
+          }
+          else {
+            handle(param.getType());
+          }
+          System.out.println("NAME OF PARAM IS " + param.getName());
           getPrinter().print(" " + param.getName());
         }
         if (k != paramSize) {
@@ -110,115 +136,144 @@ public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
 //    System.out.println("Test "+ getPrinter().getContent());
   }
   
-  public void printComponentBody(de.monticore.lang.montiarc.montiarc._ast.ASTComponentBody astBody) {
+  public void printComponentBody(ASTComponentBody astBody) {
     getPrinter().println("{");
-    ArrayList<de.monticore.lang.montiarc.montiarc._ast.ASTPort> ports = 
-        new ArrayList<de.monticore.lang.montiarc.montiarc._ast.ASTPort>();
-    ArrayList<de.monticore.lang.montiarc.montiarc._ast.ASTConnector> connectors = 
-        new ArrayList<de.monticore.lang.montiarc.montiarc._ast.ASTConnector>();
-    
-    for (de.monticore.lang.montiarc.montiarc._ast.ASTElement e : astBody.getElements()) {
-      if (e instanceof de.monticore.lang.montiarc.montiarc._ast.ASTInterface) {
-        for (de.monticore.lang.montiarc.montiarc._ast.ASTPort p : ((de.monticore.lang.montiarc.montiarc._ast.ASTInterface) e).getPorts()) {
-          ports.add((de.monticore.lang.montiarc.montiarc._ast.ASTPort)p);
+    ArrayList<ASTPort> ports = 
+        new ArrayList<ASTPort>();
+    for (ASTElement e : astBody.getElements()) {
+      if (e instanceof ASTInterface) {
+        for (ASTPort p : ((ASTInterface) e).getPorts()) {
+          ports.add((ASTPort)p);
         }
       }
-      if (e instanceof de.monticore.lang.montiarc.montiarc._ast.ASTConnector) {
-        System.out.println("e is a connector ");
-        connectors.add((de.monticore.lang.montiarc.montiarc._ast.ASTConnector)e);
-      }
-      if (e instanceof de.monticore.lang.montiarc.montiarc._ast.ASTComponent) {
+      if (e instanceof ASTComponent) {
         getPrinter().print("");
-        printComponent((de.monticore.lang.montiarc.montiarc._ast.ASTComponent)e);
+        printComponent((ASTComponent)e);
       }
       
     }
     System.out.println("Ports " + ports.toString());
     printPorts(ports);
-    System.out.println("Connectors " + connectors);
     
-    if (connectors != null ) {
-      System.out.println("Connectors " + connectors);
-    
-      for (de.monticore.lang.montiarc.montiarc._ast.ASTConnector connector : connectors) {
-        printConnector(connector);
-      }
-    }
-
     getPrinter().println("  }");
 //    getPrinter().flushBuffer();
 //    System.out.println("Test "+ getPrinter().getContent());
   }
   
-  public void printComponentBodyOuter(de.monticore.lang.montiarc.montiarc._ast.ASTComponentBody astBody) {
+  public void printComponentBodyOuter(ASTComponentBody astBody) {
+    ArrayList<ASTConnector> connectors = 
+        new ArrayList<ASTConnector>();
+    ArrayList<ASTComponent> comps = 
+        new ArrayList<ASTComponent>();
     getPrinter().println("{");
-    ArrayList<de.monticore.lang.montiarc.montiarc._ast.ASTPort> ports = 
-        new ArrayList<de.monticore.lang.montiarc.montiarc._ast.ASTPort>();
-    ArrayList<de.monticore.lang.montiarc.montiarc._ast.ASTConnector> connectors = 
-        new ArrayList<de.monticore.lang.montiarc.montiarc._ast.ASTConnector>();
-    
-    for (de.monticore.lang.montiarc.montiarc._ast.ASTElement e : astBody.getElements()) {
-      if (e instanceof de.monticore.lang.montiarc.montiarc._ast.ASTInterface) {
-        for (de.monticore.lang.montiarc.montiarc._ast.ASTPort p : ((de.monticore.lang.montiarc.montiarc._ast.ASTInterface) e).getPorts()) {
-          ports.add((de.monticore.lang.montiarc.montiarc._ast.ASTPort)p);
-        }
-      }
-      if (e instanceof de.monticore.lang.montiarc.montiarc._ast.ASTConnector) {
-        System.out.println("e is a connector ");
-        connectors.add((de.monticore.lang.montiarc.montiarc._ast.ASTConnector)e);
-      }
-      if (e instanceof de.monticore.lang.montiarc.montiarc._ast.ASTComponent) {
+    for (ASTElement e : astBody.getElements()) {
+      if (e instanceof ASTComponent) {
         getPrinter().print("");
-        printComponent((de.monticore.lang.montiarc.montiarc._ast.ASTComponent)e);
-      }
-      
+        getPrinter().print("  component " + ((ASTComponent)e).getName());
+        int i = 0;
+        for (ASTParameter p : ((ASTComponent)e).getHead().getParameters()) {
+          if(p.getDefaultValue().isPresent()) {
+            i = i + 1;
+          }
+        }
+        int j = 0;
+        if (i != j) {
+          for (ASTParameter p : ((ASTComponent)e).getHead().getParameters()) {
+            if (p.getDefaultValue().isPresent()) {
+              ASTLiteral temp = p.getDefaultValue().get().getExpression().getPrimaryExpression().get().getLiteral().get();
+              String mom = temp.toString();
+              mom = mom.split("\\Source: ")[1];
+              System.out.println("MOM " + mom);
+              j = j + 1;
+              if (j == 1 && j == i) {
+                getPrinter().print("(" + mom + ")");
+                break;
+              } 
+              else if (j == 1) {
+                getPrinter().print("(" + mom + ",");
+              }
+              else if (i == j) {
+                getPrinter().print(mom + ")");
+              }
+              else {
+                getPrinter().print(mom + ",");
+              }
+            }
+          }
+        }
+        String compName = ((ASTComponent)e).getName();
+        if(Character.isUpperCase(compName.charAt(0))) {
+          compName = compName.substring(0, 1).toLowerCase() + compName.substring(1);
+        }
+        getPrinter().print(" " +compName);
+        getPrinter().println(";");
+        comps.add((ASTComponent) e);
+      }      
     }
-    System.out.println("Ports " + ports.toString());
-    printPorts(ports);
-    getPrinter().println();
-    System.out.println("Connectors " + connectors);
-    
+    for (ASTComponent c : comps) {
+      connectors.addAll(c.getConnectors());
+    }
     if (connectors != null ) {
       System.out.println("Connectors " + connectors);
     
-      for (de.monticore.lang.montiarc.montiarc._ast.ASTConnector connector : connectors) {
+      for (ASTConnector connector : connectors) {
         printConnector(connector);
       }
     }
-
     getPrinter().println("}");
 //    getPrinter().flushBuffer();
 //    System.out.println("Test "+ getPrinter().getContent());
   }
   
-  public void printPorts(ArrayList<de.monticore.lang.montiarc.montiarc._ast.ASTPort> astPorts) {
-    if (astPorts.size() == 1) {
-      getPrinter().println("    port");
-    }
-    else if(astPorts.size() > 1){
-//      getPrinter().indent();
-      getPrinter().println("    ports");
-    }
+  public void printPorts(ArrayList<ASTPort> astPorts) {
     int numPorts = astPorts.size();
     int k = 1;
     if (numPorts > 0) {
-      for (de.monticore.lang.montiarc.montiarc._ast.ASTPort port: astPorts) {
+      if (stereo == true) {
+        getPrinter().println("    port");
+      }
+      else {
+        getPrinter().println("  port");
+      }
+      for (ASTPort port: astPorts) {
         // TODO needs to be changed to optionals
 //        getPrinter().indent();
-        if (port.getStereotype().isPresent()) {
-          getPrinter().print("<<" + port.getStereotype() + ">>");
+        System.out.println("port STEREOTYPE " + port.getStereotype().get().getValues().get(0).getName().isEmpty());
+        if (port.getStereotype().get().getValues().get(0).getName().isEmpty()) {
+          getPrinter().print(port.getStereotype().get().getValues().get(0).getName());
         }
         if (port.isIncoming()) {
-          getPrinter().print("      in ");
+          if (stereo == true) {
+            getPrinter().print("      in ");
+          }
+          else {
+            getPrinter().print("    in ");
+          }
         }
         else {
-          getPrinter().print("      out ");
+          if (stereo == true) {
+            getPrinter().print("      out ");
+          }
+          else {
+            getPrinter().print("    out ");
+          }
         }
-        handle((de.monticore.types.types._ast.ASTSimpleReferenceType)port.getType());
+        
+        if (port.getType() instanceof ASTPrimitiveType) {
+          handle((ASTPrimitiveType)port.getType());
+        }
+        else if(port.getType() instanceof ASTSimpleReferenceType) {
+          handle((ASTSimpleReferenceType)port.getType());
+        }
+        else if(port.getType() instanceof ASTComplexReferenceType){
+          handle((ASTComplexReferenceType)port.getType());
+        }
+        else {
+          handle(port.getType());
+        }
         getPrinter().print(" ");
-        //TODO optional
-        if (port.getName().isPresent()) {
-          getPrinter().print(port.getName().get());
+        if (!port.getNames().isEmpty()) {
+          getPrinter().print(port.getNames().get(0));
         }
         if (k == numPorts) {
           getPrinter().println(";");
@@ -235,8 +290,8 @@ public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
 //    System.out.println("Test "+ getPrinter().getContent());
   }
   
-  public void printConnector(de.monticore.lang.montiarc.montiarc._ast.ASTConnector astConnector) {
-    getPrinter().print("    ");
+  public void printConnector(ASTConnector astConnector) {
+    getPrinter().print("  ");
     if (astConnector.getStereotype().isPresent()) {
       getPrinter().print(astConnector.getStereotype());
     }

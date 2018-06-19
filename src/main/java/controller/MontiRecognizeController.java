@@ -92,7 +92,7 @@ public class MontiRecognizeController{
               // bb ist Port von b
               String direction = "";
               PortNode tmpPort = new PortNode();
-              double x,y,xDraw,yDraw = 0;
+              double x = 0,y = 0,xDraw = 0,yDraw = 0;
               System.out.println("Bounding Box of Node has position x " + bb.getX() + " " + bb.getY() + " " + bb.getHeight() + " " + bb.getWidth());
               System.out.println("Bounding Box of Port has position x " + b.getX() + " " + b.getY() + " " + b.getHeight() + " " + b.getWidth());
               if(Math.abs(b.getX() - bb.getX()) < Math.abs(b.getX() + b.getWidth() - bb.getX()) && (bb.getY() + bb.getHeight() < b.getY() + b.getHeight())) {
@@ -113,10 +113,10 @@ public class MontiRecognizeController{
                 y = (bb.getY());
                 direction = "out";
               }
-              else {
-                System.out.println("Some Ports are not at the right or left");
-                break;
-              }
+//              else {
+//                System.out.println("Some Ports are not at the right or left");
+//                break;
+//              }
               PortNode port = new PortNode(xDraw,yDraw,bb.getHeight(), bb.getWidth());
               // contains the sketch values
               port.createPortNodeSketch(x, y, bb.getHeight(), bb.getHeight());
@@ -215,6 +215,12 @@ public class MontiRecognizeController{
               // if we do not find a startpoint, to the left needs to be one
               for (AbstractNode n : graph.getAllNodes()) {
                 if (n instanceof PortNode) {
+//                  This should be the correct version
+//                  if(((PortNode) n).getPortNodeSketch().getX() + ((PortNode) n).getPortNodeSketch().getWidth() + 50 > startPoint.getX() 
+//                      && ((PortNode) n).getPortNodeSketch().getX() < startPoint.getX() 
+//                      && ((PortNode) n).getPortNodeSketch().getY() < startPoint.getY() 
+//                      && ((PortNode) n).getPortNodeSketch().getY() + ((PortNode) n).getPortNodeSketch().getHeight() > startPoint.getY())
+                  
                   if(((PortNode) n).getX() + ((PortNode) n).getPortHeight() + 50 > startPoint.getX() 
                       && ((PortNode) n).getX() < startPoint.getX() 
                       && ((PortNode) n).getY() < startPoint.getY() 

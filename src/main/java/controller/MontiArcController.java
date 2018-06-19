@@ -992,7 +992,7 @@ public class MontiArcController extends AbstractDiagramController {
     generateBtn.setOnAction(event -> {
       System.out.println("In generate Btn");
       MontiArcPlugin plug = plugin.getInstance();
-      plug.generateCode(null, null);
+      plug.generateCode(null, null, null);
     });
   }
   

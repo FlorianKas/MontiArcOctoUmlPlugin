@@ -200,19 +200,19 @@
 		-->
 
 	<dependency>
-  <groupId>de.monticore.lang</groupId>
-  <artifactId>montiarc</artifactId>
-  <version>4.1.2-SNAPSHOT</version>
+  <groupId>montiarc.languages</groupId>
+  <artifactId>montiarc-fe</artifactId>
+  <version>4.3.4-SNAPSHOT</version>
 </dependency>
 	
 
-
+<!-- 
 		<dependency>
 			<groupId>montiarc.languages</groupId>
 			<artifactId>montiarc-fe</artifactId>
 			<version>4.2.0</version>
 		</dependency>
-		
+	 -->	
 		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
 			<artifactId>jsr305</artifactId>
@@ -262,13 +262,7 @@
 			<scope>test</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-			<version>${logback.version}</version>
-			<scope>test</scope>
-		</dependency>
-
+		
 		<dependency>
   			<groupId>octouml.paleo</groupId>
   			<artifactId>paleo</artifactId>

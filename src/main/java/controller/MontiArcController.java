@@ -65,22 +65,22 @@ import view.nodes.ComponentNodeView;
 import view.nodes.PackageNodeView;
 import view.nodes.PortNodeView;
 
-public class MontiArcController extends AbstractDiagramController {
+public class MontiArcController extends AbstractDiagramController { 
   
   
 
   NodeControllerMonti nodeController;
-  MontiRecognizeController recognizeController;
+  MontiRecognizeController recognizeController; 
 //  TabControllerMonti tabController;
   EdgeControllerMonti edgeController;
 //  SelectControllerMonti selectController;
   MontiArcPlugin plugin;
   Infos in;
-  MontiInitDialogController controller;
+  MontiInitDialogController controller; 
 //  SketchControllerMonti sketchController;
   
-  private AnchorPane dialog;
-  private ArrayList<MontiCoreException> errorList = new ArrayList<MontiCoreException>();
+  private AnchorPane dialog; 
+  private ArrayList<MontiCoreException> errorList1 = new ArrayList<MontiCoreException>();
   public static ArrayList<String> genericsArray = new ArrayList<String>();
   public static ArrayList<String> types = new ArrayList<String>();
   String modelName = "";
@@ -152,63 +152,8 @@ public class MontiArcController extends AbstractDiagramController {
       dialogStage.setScene(new Scene(dialog));
       controller.setDialogStage(dialogStage);
       dialogStage.showAndWait();
-    
-      System.out.println("controller " +controller.toString());
-     
-//      controller.getOkButton().setOnAction(new EventHandler<ActionEvent>() {
-//        @Override
-//        public void handle(ActionEvent event) {
-//          CompoundCommand command = new CompoundCommand();
-//          if (controller.hasNameChanged()) {
-//            command.add(new SetInfoNameCommand(in, controller.getName(), in.getName()));
-//            in.setName(controller.getName());
-//          }
-//          if (controller.hasPackageChanged()) {
-//            command.add(new SetInfoPackageCommand(in, controller.getPackageName(), in.getPackageName()));
-//            in.setPackageName(controller.getPackageName());
-//          }
-//          if (controller.hasImportChanged()) {
-//            command.add(new SetInfoImportCommand(in, controller.getImport(), in.getImports()));
-//            in.setImports(controller.getImport());
-//          }
-//          if (controller.hasGenericChanged()) {
-//            command.add(new SetInfoGenericCommand(in, controller.getGeneric(), in.getGenerics()));
-//            in.setGenerics(controller.getGeneric());
-//          }
-//          if (controller.hasArcParamChanged()) {
-//            command.add(new SetInfoArcParamCommand(in, controller.getArcParam(), in.getArcParam()));
-//            in.setArcParam(controller.getArcParam());
-//          }
-//          if (command.size() > 0) {
-//            getUndoManager().add(command);
-//          }
-//          drawPane.getChildren().remove(dialog);
-//          removeDialog(dialog);
-//        }
-//      });
-      
-//      controller.getCancelButton().setOnAction(new EventHandler<ActionEvent>() {
-//        @Override
-//        public void handle(ActionEvent event) {
-//          drawPane.getChildren().remove(dialog);
-//          removeDialog(dialog);
-//        }
-//      });
-//      drawPane.getChildren().add(dialog);
-//      addDialog(dialog);
-//      System.out.println("End of Function");
-//      System.out.println("isOkClicked " + controller.isOkClicked());
       return controller.isOkClicked();
-    
-      
-      
-      
-      
-      
-      
     }
-    
-    
     catch (IOException e) {
       // Exception gets thrown if the classDiagramView.fxml file could not be
       // loaded
@@ -228,11 +173,12 @@ public class MontiArcController extends AbstractDiagramController {
   }
   
   public void showConfiguration() {
-    System.out.println("Before ok is clicked question");
     if(controller.isOkClicked()) {
-      System.out.println("Ok is clicked");
       modelName = controller.nameTextField.getText();  
       packageName = controller.packageTextField.getText();
+      if (packageName.contains("\\;")) {
+        packageName = packageName.split("\\;")[0];
+      }
       String importStates = controller.importTextField.getText();
       in.setName(controller.nameTextField.getText());
       in.setPackageName(controller.packageTextField.getText());
@@ -240,24 +186,24 @@ public class MontiArcController extends AbstractDiagramController {
       String[] importTmp = importStates.split("\\;");
       importStatements.clear();
       for (String i: importTmp) {
-        importStatements.add(i);
+        importStatements.add(i.trim());
       }
       String genericsString = controller.genericsTextField.getText();
       in.setGenerics(controller.genericsTextField.getText());
       String[] genericsTmp = genericsString.split("\\;");
       genericsArray.clear();
       for (String g: genericsTmp) {
-        genericsArray.add(g);
+        genericsArray.add(g.trim());
       }
       String typeParam = controller.arcParameterTextField.getText();
       in.setArcParam(controller.arcParameterTextField.getText());
       types.clear();
-      String[] typesTmp = typeParam.split("\\;");
+      String[] typesTmp = typeParam.split("\\,");
       for (String t : typesTmp) {
-        if (t.contains(";")) {
-          t = t.replace(";", "");
+        if (t.contains(",")) {
+          t = t.replace(",", "");
         }
-        types.add(t);
+        types.add(t.trim());
       }
       
       System.out.println("modelName "+ modelName );
@@ -851,11 +797,12 @@ public class MontiArcController extends AbstractDiagramController {
   }
   
   private void setErrors(ArrayList<MontiCoreException> errors) {
-    errorList = errors;
+    errorList1.clear();
+    errorList1 = errors;
   }
   
   public ArrayList<MontiCoreException> getErrors(){
-    return errorList;
+    return errorList1;
   }
   // ------------ Init Buttons -------------------------------------------
   private void initToolBarActions() {
@@ -985,7 +932,7 @@ public class MontiArcController extends AbstractDiagramController {
       showSomething();
     });
     showErrorLogBtn.setOnAction(event -> {
-      showErrorLog(errorList);
+      showErrorLog(errorList1);
     });
     
     topBox.setOnMouseClicked(event -> this.showSomething());

@@ -9,11 +9,12 @@
 		<!-- .. Libraries ..................................................... -->
 
 		<monticore.version>4.5.3</monticore.version>
+		
 
 		<guava.version>18.0</guava.version>
 		<jsr305.version>3.0.0</jsr305.version>
 		<junit.version>4.12</junit.version>
-		<antlr.version>4.5</antlr.version>
+		<antlr.version>4.5.1</antlr.version>
 		<logback.version>1.1.2</logback.version>
 		<emf.common.version>2.5.0</emf.common.version>
 		<emf.ecore.version>2.5.0</emf.ecore.version>
@@ -161,58 +162,24 @@
 
 
 	<dependencies>
-		<!-- EMF dependencies -->
-		<!-- <dependency> <groupId>org.mod4j.org.eclipse.emf</groupId> <artifactId>ecore</artifactId> 
-			<version>${emf.ecore.version}</version> </dependency> <dependency> <groupId>org.mod4j.org.eclipse.emf.ecore</groupId> 
-			<artifactId>xmi</artifactId> <version>${emf.ecore.xmi.version}</version> 
-			</dependency> <dependency> <groupId>org.mod4j.org.eclipse.emf</groupId> <artifactId>common</artifactId> 
-			<version>${emf.common.version}</version> </dependency> <dependency> <groupId>de.monticore</groupId> 
-			<artifactId>monticore-emf-runtime</artifactId> <version>${monticore.version}</version> 
-			</dependency> -->
 		 
 <dependency>
   <groupId>montiarc.generators</groupId>
   <artifactId>maa2java</artifactId>
   <version>4.3.4-SNAPSHOT</version>
 </dependency>
-<!-- <dependency>
-  <groupId>OctoUML</groupId>
-  <artifactId>OctoUML</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
-</dependency>
- -->
 <dependency>
   <groupId>octouml</groupId>
   <artifactId>diagram-control</artifactId>
   <version>0.0.1-SNAPSHOT</version>
  </dependency>
-<!-- 		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>${guava.version}</version>
-		</dependency>
-<dependency>
-    <groupId>org.slf4j</groupId>
-    <artifactId>slf4j-nop</artifactId>
-    <version>1.8.0-alpha0</version>
-    <scope>test</scope>
-</dependency>
-		-->
-
 	<dependency>
   <groupId>montiarc.languages</groupId>
   <artifactId>montiarc-fe</artifactId>
   <version>4.3.4-SNAPSHOT</version>
 </dependency>
 	
-
 <!-- 
-		<dependency>
-			<groupId>montiarc.languages</groupId>
-			<artifactId>montiarc-fe</artifactId>
-			<version>4.2.0</version>
-		</dependency>
-	 -->	
 		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
 			<artifactId>jsr305</artifactId>
@@ -224,8 +191,9 @@
 			<artifactId>antlr4-runtime</artifactId>
 			<version>${antlr.version}</version>
 		</dependency>
-
+ -->
 		<!-- MontiCore Dependencies -->
+		<!-- 
 		<dependency>
 			<groupId>de.monticore</groupId>
 			<artifactId>monticore-runtime</artifactId>
@@ -237,23 +205,17 @@
 			<artifactId>monticore-grammar</artifactId>
 			<version>${monticore.version}</version>
 		</dependency>
-
-		<dependency>
-			<groupId>de.monticore</groupId>
-			<artifactId>monticore-grammar</artifactId>
-			<version>${monticore.version}</version>
-			<classifier>${grammars.classifier}</classifier>
-			<scope>provided</scope>
-		</dependency>
-
+ -->
 		<!-- .. Test Libraries ............................................... -->
+		
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
-
+ 
+ <!-- 
 		<dependency>
 			<groupId>de.monticore</groupId>
 			<artifactId>monticore-runtime</artifactId>
@@ -261,8 +223,8 @@
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
-
-		
+ -->
+		<!-- 
 		<dependency>
   			<groupId>octouml.paleo</groupId>
   			<artifactId>paleo</artifactId>
@@ -298,68 +260,6 @@
   			<artifactId>sphinx4-data-5prealpha-20160628.232535-10</artifactId>
   			<version>1.0</version>
 		</dependency>
-<!--
-		<dependency>
-			<groupId>octouml.jxgrabkey</groupId>
-			<artifactId>jxgrabkey</artifactId>
-			<version>1.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/jxgrabkey-1.0.jar</systemPath>
-		</dependency>
-		
-		<dependency>
-			<groupId>com.sikulix</groupId>
-			<artifactId>sikulixapi</artifactId>
-			<version>1.1.1</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.github.vidstige</groupId>
-                    <artifactId>jadb</artifactId>
-                </exclusion>
-            </exclusions>
-		</dependency>
-		
-	
-
-
-		<dependency>
-			<groupId>org.ow2.asm</groupId>
-			<artifactId>asm</artifactId>
-			<version>5.0.4</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.controlsfx</groupId>
-			<artifactId>controlsfx</artifactId>
-			<version>8.40.11</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-			<version>2.7</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest-core</artifactId>
-			<version>1.3</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>gov.nist.math</groupId>
-			<artifactId>jama</artifactId>
-			<version>1.0.2</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.esotericsoftware</groupId>
-			<artifactId>kryo</artifactId>
-			<version>4.0.0</version>
-		</dependency>
-		-->
-
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
@@ -379,105 +279,11 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-<!-- 
-		<dependency>
-			<groupId>com.esotericsoftware</groupId>
-			<artifactId>minlog</artifactId>
-			<version>1.3.0</version>
-		</dependency>
 
-		<dependency>
-			<groupId>org.objenesis</groupId>
-			<artifactId>objenesis</artifactId>
-			<version>2.2</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>com.esotericsoftware</groupId>
-			<artifactId>reflectasm</artifactId>
-			<version>1.11.3</version>
-		</dependency>
- 
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-math3</artifactId>
-			<version>3.6.1</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.jcraft</groupId>
-			<artifactId>jsch</artifactId>
-			<version>0.1.46</version>
-		</dependency>
-
-		
-
-		<dependency>
-			<groupId>org.eclipse.jgit</groupId>
-			<artifactId>org.eclipse.jgit</artifactId>
-			<version>4.4.1.201607150455-r</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.7.25</version>
-		</dependency>
-		
-		<dependency>
-    		<groupId>org.apache.maven.shared</groupId>
-    		<artifactId>maven-invoker</artifactId>
-   			<version>3.0.0</version>
-		</dependency>
-		<dependency>
-    		<groupId>org.eclipse.core</groupId>
-    		<artifactId>org.eclipse.core.resources</artifactId>
-   			<version>3.7.100</version>
-		</dependency>
-		<dependency>
-    		<groupId>com.jcabi</groupId>
-    		<artifactId>jcabi-aether</artifactId>
-    		<version>0.10.1</version>
-		</dependency>
-		
-		<dependency>
-        	<groupId>org.sonatype.aether</groupId>
-        	<artifactId>aether-api</artifactId>
-        	<version>1.13.1</version>
-    	</dependency>
-
-
-    <dependency>
-        <groupId>org.apache.maven</groupId>
-        <artifactId>maven-core</artifactId>
-        <version>3.0.3</version>
-    </dependency>
--->
-
-
+ -->
 	</dependencies>
 
 	<repositories>
-	<!--
-		
-		<repository>
-			<id>repository.jboss.org-public</id>
-			<name>JBoss.org Maven repository</name>
-			<url>https://repository.jboss.org/nexus/content/groups</url>
-		</repository>-->
-		<!--  <repository>
-			<id>se-nexus</id>
-			<name>yf</name>
-			<url>https://nexus.se.rwth-aachen.de/content/groups/public</url>
-		</repository>
-		<repository>
-			<id>se-nexus-1</id>
-			<name>yft</name>
-			<url>https://nexus.se.rwth-aachen.de/content/groups/octouml</url>
-		</repository>
-		-->
- 		
 	</repositories>
 
 

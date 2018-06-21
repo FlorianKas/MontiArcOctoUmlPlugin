@@ -14,28 +14,37 @@ import view.nodes.AbstractNodeView;
 import view.nodes.ComponentNodeView;
 
 
-public class InnerNameMissingException implements MontiCoreException {
+public class genTypeWrongOuter implements MontiCoreException {
   private Pane tmpPane; 
-  private MontiArcPlugInErrors.ExceptionType type = MontiArcPlugInErrors.ExceptionType.OUTER_COMPONENT_NAME_MISSING;
+  private MontiArcPlugInErrors.ExceptionType type = MontiArcPlugInErrors.ExceptionType.OUTER_COMPONENT_GEN_WRONG;
   private AbstractNode tmpNode;
   private AbstractNodeView tmpNodeView;
+  private String msg;
   
-  public InnerNameMissingException(AbstractNode node, AbstractNodeView nodeView)
+  public genTypeWrongOuter(String pMsg, AbstractNode node, AbstractNodeView nodeView)
   {
     this.tmpNode = node;
     this.tmpNodeView = nodeView;
+    this.msg = pMsg;
     setPane();
   }
   @Override
   public String getContentMessage() {
-    return "Name of inner Component is missing";
-  } 
+    return "Generics " + msg;
+  }
 
   @Override
   public Pane getContentPane() {
     return this.tmpPane;
   }
+  
+  public void setNodeView(AbstractNodeView nodeView) {
+    tmpNodeView = nodeView;
+  }
 
+  public void setMsg(String pMsg) {
+    this.msg = pMsg;
+  }
   @Override
   public AbstractNode getNode() {
     return this.tmpNode;
@@ -64,7 +73,7 @@ public class InnerNameMissingException implements MontiCoreException {
     this.tmpPane.setOnMouseClicked(new EventHandler() {
       @Override
       public void handle(Event arg0) {
-        InnerNameMissingException.this.handleActionClickOnPane();
+        genTypeWrongOuter.this.handleActionClickOnPane();
       }
     });
   }

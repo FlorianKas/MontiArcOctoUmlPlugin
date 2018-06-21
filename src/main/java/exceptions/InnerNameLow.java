@@ -14,13 +14,13 @@ import view.nodes.AbstractNodeView;
 import view.nodes.ComponentNodeView;
 
 
-public class InnerNameMissingException implements MontiCoreException {
+public class InnerNameLow implements MontiCoreException {
   private Pane tmpPane; 
-  private MontiArcPlugInErrors.ExceptionType type = MontiArcPlugInErrors.ExceptionType.OUTER_COMPONENT_NAME_MISSING;
+  private MontiArcPlugInErrors.ExceptionType type = MontiArcPlugInErrors.ExceptionType.INNER_COMPONENT_LOW;
   private AbstractNode tmpNode;
   private AbstractNodeView tmpNodeView;
   
-  public InnerNameMissingException(AbstractNode node, AbstractNodeView nodeView)
+  public InnerNameLow(AbstractNode node, AbstractNodeView nodeView)
   {
     this.tmpNode = node;
     this.tmpNodeView = nodeView;
@@ -28,8 +28,8 @@ public class InnerNameMissingException implements MontiCoreException {
   }
   @Override
   public String getContentMessage() {
-    return "Name of inner Component is missing";
-  } 
+    return "Name of inner Component must start with capital letter";
+  }
 
   @Override
   public Pane getContentPane() {
@@ -43,6 +43,10 @@ public class InnerNameMissingException implements MontiCoreException {
   
   public void setNode(AbstractNode pTmpNode) {
     this.tmpNode = pTmpNode;
+  }
+  
+  public void setNodeView(AbstractNodeView pTmpNodeView) {
+    this.tmpNodeView = pTmpNodeView;
   }
   
 
@@ -64,7 +68,7 @@ public class InnerNameMissingException implements MontiCoreException {
     this.tmpPane.setOnMouseClicked(new EventHandler() {
       @Override
       public void handle(Event arg0) {
-        InnerNameMissingException.this.handleActionClickOnPane();
+        InnerNameLow.this.handleActionClickOnPane();
       }
     });
   }

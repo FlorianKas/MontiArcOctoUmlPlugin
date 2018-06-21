@@ -1,5 +1,6 @@
 package exceptions;
 
+import de.se_rwth.commons.logging.Finding;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -7,29 +8,27 @@ import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import model.nodes.AbstractNode;
-import model.nodes.ComponentNode;
 import model.nodes.Node;
 import plugin.MontiCoreException;
 import view.nodes.AbstractNodeView;
-import view.nodes.ComponentNodeView;
 
 
-public class InnerNameMissingException implements MontiCoreException {
+public class genTypeWrongParam implements MontiCoreException {
   private Pane tmpPane; 
-  private MontiArcPlugInErrors.ExceptionType type = MontiArcPlugInErrors.ExceptionType.OUTER_COMPONENT_NAME_MISSING;
-  private AbstractNode tmpNode;
-  private AbstractNodeView tmpNodeView;
+  private MontiArcPlugInErrors.ExceptionType type = MontiArcPlugInErrors.ExceptionType.GEN_TYPE_WRONG_PARAM_EXCEPTION;
+  private String content ="";
+  private String contentMessage;
   
-  public InnerNameMissingException(AbstractNode node, AbstractNodeView nodeView)
+  public genTypeWrongParam(String string)
   {
-    this.tmpNode = node;
-    this.tmpNodeView = nodeView;
+    this.content = string;
+    this.contentMessage =string;
     setPane();
   }
   @Override
   public String getContentMessage() {
-    return "Name of inner Component is missing";
-  } 
+    return "Param " + contentMessage;
+  }
 
   @Override
   public Pane getContentPane() {
@@ -38,17 +37,14 @@ public class InnerNameMissingException implements MontiCoreException {
 
   @Override
   public AbstractNode getNode() {
-    return this.tmpNode;
+    // TODO Auto-generated method stub
+    return null;
   }
-  
-  public void setNode(AbstractNode pTmpNode) {
-    this.tmpNode = pTmpNode;
-  }
-  
 
   @Override
   public void handleActionClickOnPane() {
-    this.tmpNodeView.setSelected(true);
+    // TODO Auto-generated method stub
+    
   }
   public MontiArcPlugInErrors.ExceptionType getType() {
     return type;
@@ -59,12 +55,12 @@ public class InnerNameMissingException implements MontiCoreException {
   
   private void setPane() {
     this.tmpPane = new Pane();
-    Label label = new Label(getContentMessage());
+    Label label = new Label(this.getContentMessage());
     this.tmpPane.getChildren().add(label);
     this.tmpPane.setOnMouseClicked(new EventHandler() {
       @Override
       public void handle(Event arg0) {
-        InnerNameMissingException.this.handleActionClickOnPane();
+        genTypeWrongParam.this.handleActionClickOnPane();
       }
     });
   }

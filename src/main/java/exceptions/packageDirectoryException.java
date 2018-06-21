@@ -7,29 +7,23 @@ import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import model.nodes.AbstractNode;
-import model.nodes.ComponentNode;
 import model.nodes.Node;
 import plugin.MontiCoreException;
 import view.nodes.AbstractNodeView;
-import view.nodes.ComponentNodeView;
 
 
-public class InnerNameMissingException implements MontiCoreException {
+public class packageDirectoryException implements MontiCoreException {
   private Pane tmpPane; 
-  private MontiArcPlugInErrors.ExceptionType type = MontiArcPlugInErrors.ExceptionType.OUTER_COMPONENT_NAME_MISSING;
-  private AbstractNode tmpNode;
-  private AbstractNodeView tmpNodeView;
+  private MontiArcPlugInErrors.ExceptionType type = MontiArcPlugInErrors.ExceptionType.PACKAGE_DIRECTORY_WRONG;
   
-  public InnerNameMissingException(AbstractNode node, AbstractNodeView nodeView)
+  public packageDirectoryException()
   {
-    this.tmpNode = node;
-    this.tmpNodeView = nodeView;
     setPane();
   }
   @Override
   public String getContentMessage() {
-    return "Name of inner Component is missing";
-  } 
+    return "Directory for the package does not exist -> create a folder for this";
+  }
 
   @Override
   public Pane getContentPane() {
@@ -38,17 +32,14 @@ public class InnerNameMissingException implements MontiCoreException {
 
   @Override
   public AbstractNode getNode() {
-    return this.tmpNode;
+    // TODO Auto-generated method stub
+    return null;
   }
-  
-  public void setNode(AbstractNode pTmpNode) {
-    this.tmpNode = pTmpNode;
-  }
-  
 
   @Override
   public void handleActionClickOnPane() {
-    this.tmpNodeView.setSelected(true);
+    // TODO Auto-generated method stub
+    
   }
   public MontiArcPlugInErrors.ExceptionType getType() {
     return type;
@@ -64,7 +55,7 @@ public class InnerNameMissingException implements MontiCoreException {
     this.tmpPane.setOnMouseClicked(new EventHandler() {
       @Override
       public void handle(Event arg0) {
-        InnerNameMissingException.this.handleActionClickOnPane();
+        packageDirectoryException.this.handleActionClickOnPane();
       }
     });
   }

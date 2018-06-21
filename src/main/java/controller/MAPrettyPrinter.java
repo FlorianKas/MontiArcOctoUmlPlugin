@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import de.monticore.literals.literals._ast.ASTIntLiteral;
@@ -41,7 +42,7 @@ public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
       getPrinter().print("import ");
       handle(imported);
       if (imp.isStar()) {
-        getPrinter().print("*");
+        getPrinter().print(".*");
       }
       getPrinter().print(";");
       getPrinter().println("");
@@ -85,7 +86,8 @@ public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
     getPrinter().print("component ");
     getPrinter().print(astComp.getName() + " ");
     printComponentHead(astComp.getHead());
-    printComponentBodyOuter(astComp.getBody());
+    List<ASTParameter> params = astComp.getHead().getParameters();
+    printComponentBodyOuter(astComp.getBody(),params);
 //    printConnector(astComp.getBody());
   }
   
@@ -160,7 +162,8 @@ public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
 //    System.out.println("Test "+ getPrinter().getContent());
   }
   
-  public void printComponentBodyOuter(ASTComponentBody astBody) {
+  public void printComponentBodyOuter(ASTComponentBody astBody, List<ASTParameter> params) {
+    System.out.println("params " + params.toString());
     ArrayList<ASTConnector> connectors = 
         new ArrayList<ASTConnector>();
     ArrayList<ASTComponent> comps = 
@@ -171,14 +174,20 @@ public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
         getPrinter().print("");
         getPrinter().print("  component " + ((ASTComponent)e).getName());
         int i = 0;
+        ArrayList<ASTParameter> allParams = new ArrayList<ASTParameter>();
+        allParams.addAll(params);
+        allParams.addAll(((ASTComponent)e).getHead().getParameters());
+        System.out.println("allParams " + allParams.toString());
         for (ASTParameter p : ((ASTComponent)e).getHead().getParameters()) {
           if(p.getDefaultValue().isPresent()) {
             i = i + 1;
           }
         }
+        i = i + params.size();
         int j = 0;
         if (i != j) {
-          for (ASTParameter p : ((ASTComponent)e).getHead().getParameters()) {
+          for (ASTParameter p : allParams) {
+            System.out.println("Parameter p " + p.toString());
             if (p.getDefaultValue().isPresent()) {
               ASTLiteral temp = p.getDefaultValue().get().getExpression().getPrimaryExpression().get().getLiteral().get();
               String mom = temp.toString();
@@ -197,6 +206,25 @@ public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
               }
               else {
                 getPrinter().print(mom + ",");
+              }
+            }
+            else {
+              if (params.contains(p)) {
+                System.out.println("We detected contains");
+                j = j + 1;
+                if (j == 1 && j == i) {
+                  getPrinter().print("(" + p.getName() + ")");
+                  break;
+                } 
+                else if (j == 1) {
+                  getPrinter().print("(" + p.getName() + ",");
+                }
+                else if (i == j) {
+                  getPrinter().print(p.getName() + ")");
+                }
+                else {
+                  getPrinter().print(p.getName() + ",");
+                }
               }
             }
           }

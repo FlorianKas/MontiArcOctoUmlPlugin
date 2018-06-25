@@ -38,6 +38,7 @@ import exceptions.OuterComponentGenericsException;
 import exceptions.OuterNameMissingException;
 import exceptions.PortDirectionException;
 import exceptions.PortTypeException;
+import exceptions.cocoError;
 import exceptions.genOuterExtendException;
 import exceptions.genOuterVarWrong;
 import exceptions.genSplitException;
@@ -86,6 +87,7 @@ public class MontiArcPlugin implements MontiCorePlugIn {
   private List<String> astPack = new ArrayList<String>();
   private List errorList = new ArrayList();
   private List<Finding> oldFindings = new ArrayList<Finding>();
+  private List genErrorList = new ArrayList();
   
   public static MontiArcPlugin getInstance() {
     return plugIn;
@@ -250,12 +252,33 @@ public class MontiArcPlugin implements MontiCorePlugIn {
     return null;
   }
   
+  public List getGenErrorList() {
+    return genErrorList;
+  }
+  
+  public void clearGenErrorList() {
+    genErrorList.clear();
+  }
+  
   public boolean generateCode(ASTNode arg0, String arg1, String arg2) {
     // TODO Auto-generated method stub
     MontiArcGeneratorTool gen = new MontiArcGeneratorTool();
     String targetFolderPath = "C:\\\\Users\\\\Flo\\\\Desktop\\result\\";
     String hwcFolderPath = "C:\\\\Users\\\\Flo\\\\Desktop\\hwc\\";
+//    String targetFolderPath = usageFolderPath;
+//    String hwcFolderPath = usageFolderPath;
+    Log.enableFailQuick(false);
     gen.generate(Paths.get(usageFolderPath).toFile(), Paths.get(targetFolderPath).toFile(), Paths.get(hwcFolderPath).toFile());
+    List<Finding> findings = Log.getFindings();
+    findings = findings.subList(oldFindings.size(), findings.size());
+    System.out.println("Findings " + findings);
+    for (Finding f: findings) {
+      if (f.isError()) {
+        genErrorList.add(new cocoError(f.getMsg()));
+      }
+    }
+    oldFindings.addAll(findings);
+ 
     System.out.println("After generation");
     return false;
   }

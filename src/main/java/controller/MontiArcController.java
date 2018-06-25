@@ -9,6 +9,7 @@ import org.controlsfx.control.Notifications;
 import controller.dialog.MontiInitDialogController;
 import controller.dialog.NodeEditDialogControllerMonti;
 import de.monticore.ast.ASTNode;
+import exceptions.allFine;
 import groovyjarjarantlr.collections.List;
 //import controller.dialog.AddGenericsController;
 //import controller.dialog.AddTypesController;
@@ -932,7 +933,14 @@ public class MontiArcController extends AbstractDiagramController {
       showSomething();
     });
     showErrorLogBtn.setOnAction(event -> {
-      showErrorLog(errorList1);
+      if (errorList1.isEmpty()) {
+        ArrayList<MontiCoreException> tmp = new ArrayList<MontiCoreException>();
+        tmp.add(new allFine());
+        showErrorLog(tmp);
+      }
+      else {
+        showErrorLog(errorList1);
+      }
     });
     
     topBox.setOnMouseClicked(event -> this.showSomething());
@@ -940,6 +948,10 @@ public class MontiArcController extends AbstractDiagramController {
       System.out.println("In generate Btn");
       MontiArcPlugin plug = plugin.getInstance();
       plug.generateCode(null, null, null);
+      showErrorLog(plug.getGenErrorList());
+      
+      System.out.println("Gen Error List " + plug.getGenErrorList());
+      plug.clearGenErrorList();
     });
   }
   

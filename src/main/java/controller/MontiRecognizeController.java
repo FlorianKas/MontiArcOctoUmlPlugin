@@ -75,9 +75,6 @@ public class MontiRecognizeController{
         }
         else {
           System.out.println("Sketch " + s + " could not be recogniezd as a box");
-          // here, we could add some error Messages and a call of coloring the not recognized elements in red
-          // here, we first need to check for arrows and if the sketch is not recognized as arrow as well,
-          // then we need to do some error message as described above
         }
       }
     }    
@@ -166,30 +163,49 @@ public class MontiRecognizeController{
           }   
         }
       } 
-      else {
-        ArrayList<PortNode> ports = new ArrayList<>();
-        ComponentNode node = new ComponentNode(b.getX(), b.getY(), b.getHeight(), b.getWidth(), ports);
-        if (!graph.getAllNodes().contains(node)) {
-          graph.addNode(node, false);
-        }
-        Sketch s = sketchMap.get(b);
-        s.setRecognizedElement(node);
-        if (!recognizedNodes.contains(node)) {
-          recognizedNodes.add(node);  
-        }
-        sketchesToBeRemoved.add(s);
-      }        
+//      else {
+//        ArrayList<PortNode> ports = new ArrayList<>();
+//        ComponentNode node = new ComponentNode(b.getX(), b.getY(), b.getHeight(), b.getWidth(), ports);
+//        if (!graph.getAllNodes().contains(node)) {
+//          graph.addNode(node, false);
+//        }
+//        Sketch s = sketchMap.get(b);
+//        s.setRecognizedElement(node);
+//        if (!recognizedNodes.contains(node)) {
+//          recognizedNodes.add(node);  
+//        }
+//        sketchesToBeRemoved.add(s);
+//      }        
     }    
      
 //    recognize edges
     for (Sketch s : sketches) {
       if (s.getStroke() != null) {
         recognizer.setStroke(s.getStroke());
+        boolean found = false;
         String bestMatchString = recognizer.recognize().getBestShape().getInterpretation().label;
         if (bestMatchString.equals("Line") || bestMatchString.startsWith("Polyline") || bestMatchString.equals("Arc") ||
-          bestMatchString.equals("Curve") || bestMatchString.equals("Arrow")){
+          bestMatchString.equals("Curve") || bestMatchString.equals("Arrow")) {
           Point2D startPoint = new Point2D(s.getStroke().getFirstPoint().getX(), s.getStroke().getFirstPoint().getY());
           Point2D endPoint = new Point2D(s.getStroke().getLastPoint().getX(), s.getStroke().getLastPoint().getY());
+          System.out.println("endpoint " + endPoint);
+          System.out.println("Graph looks as follows " + graph.getAllGraphElements().toString());
+          PortNode endNode = new PortNode();
+          for (AbstractNode n : graph.getAllNodes()) {
+            if (n instanceof PortNode) {
+              System.out.println("PortNodeSketch Pos " + ((PortNode)n).getPortNodeSketch().getX()
+                  + ((PortNode)n).getPortNodeSketch().getY()
+                  + ((PortNode)n).getPortNodeSketch().getWidth()
+                  + ((PortNode)n).getPortNodeSketch().getHeight());
+              if(((PortNode) n).getPortNodeSketch().getX() + ((PortNode) n).getPortNodeSketch().getWidth() + 50 > endPoint.getX() 
+                  && ((PortNode) n).getPortNodeSketch().getX() < endPoint.getX() 
+                  && ((PortNode) n).getPortNodeSketch().getY() < endPoint.getY() 
+                  && ((PortNode) n).getPortNodeSketch().getY() + ((PortNode) n).getPortNodeSketch().getHeight() > endPoint.getY()) {
+                System.out.println("One Port is found as endPort");
+                endNode = (PortNode) n;
+              }
+            }
+          }
           if (Math.abs(startPoint.getX() - endPoint.getX()) < 20) {
             sketchesToBeRemoved.add(s);
           }
@@ -197,18 +213,18 @@ public class MontiRecognizeController{
             PortNode startNode = new PortNode(); 
             
             Node tmpNode = findNode(graph,startPoint);
-            System.out.println("TmpNode " + tmpNode.toString());
+            System.out.println("Potential startNode " + tmpNode);
             if (tmpNode instanceof ComponentNode) {
               Graph tmpStart = new Graph();
               tmpStart = graph;
               tmpStart.removeNode(tmpNode, false);
               Node secTmpNode = findNode(tmpStart, startPoint);
               startNode = (PortNode) secTmpNode;
-              System.out.println("StartNode " + startNode.toString());
+              System.out.println("StartNode found was CompNode and now we select corr. port " + startNode);
             }
             else if (tmpNode instanceof PortNode){
               startNode = (PortNode) tmpNode;
-              System.out.println("We are here");
+              System.out.println("StartNode is portNode");
             }
             else {
               System.out.println("Havent found a startnode yet");
@@ -216,16 +232,19 @@ public class MontiRecognizeController{
               for (AbstractNode n : graph.getAllNodes()) {
                 if (n instanceof PortNode) {
 //                  This should be the correct version
-//                  if(((PortNode) n).getPortNodeSketch().getX() + ((PortNode) n).getPortNodeSketch().getWidth() + 50 > startPoint.getX() 
-//                      && ((PortNode) n).getPortNodeSketch().getX() < startPoint.getX() 
-//                      && ((PortNode) n).getPortNodeSketch().getY() < startPoint.getY() 
-//                      && ((PortNode) n).getPortNodeSketch().getY() + ((PortNode) n).getPortNodeSketch().getHeight() > startPoint.getY())
+                  if(((PortNode) n).getPortNodeSketch().getX() + ((PortNode) n).getPortNodeSketch().getWidth() + 50 > startPoint.getX() 
+                      && ((PortNode) n).getPortNodeSketch().getX() < startPoint.getX() 
+                      && ((PortNode) n).getPortNodeSketch().getY() < startPoint.getY() 
+                      && ((PortNode) n).getPortNodeSketch().getY() + ((PortNode) n).getPortNodeSketch().getHeight() > startPoint.getY()) {
                   
-                  if(((PortNode) n).getX() + ((PortNode) n).getPortHeight() + 50 > startPoint.getX() 
-                      && ((PortNode) n).getX() < startPoint.getX() 
-                      && ((PortNode) n).getY() < startPoint.getY() 
-                      && ((PortNode) n).getY() + ((PortNode) n).getPortWidth() > startPoint.getY()) {
+//                  if(((PortNode) n).getX() + ((PortNode) n).getPortHeight() + 50 > startPoint.getX() 
+//                      && ((PortNode) n).getX() < startPoint.getX() 
+//                      && ((PortNode) n).getY() < startPoint.getY() 
+//                      && ((PortNode) n).getY() + ((PortNode) n).getPortWidth() > startPoint.getY()) {
+//                    startNode = (PortNode) n;
+//                  }
                     startNode = (PortNode) n;
+                    found = true;
                   }
                 }
               }
@@ -235,34 +254,35 @@ public class MontiRecognizeController{
             }
             
             ComponentNode nodeIn = startNode.getComponentNode();
-            PortNode endNode = new PortNode(); 
-            Node tmpOutNode = findNode(graph,endPoint);
-            if (tmpOutNode instanceof ComponentNode) {
-              Graph tmp = new Graph();
-              tmp = graph;
-              tmp.removeNode(tmpOutNode, false);
-              Node secTmpOutNode = findNode(tmp,endPoint);
-              endNode = (PortNode) secTmpOutNode;
-            }
-            else {
-              endNode = (PortNode) tmpOutNode; 
-            }
-            
-          //For arrows, which don't have an endpoint
-            List<Point> points = s.getStroke().getPoints();
-            for (int i = points.size()-1; i > points.size()/2; i--) {
-              Point2D point = new Point2D(points.get(i).getX(), points.get(i).getY());
-              if (findNode(graph, point) != null) {
-                endNode = (PortNode)findNode(graph, point);
-                break;
+  //            PortNode endNode = new PortNode(); 
+            if (found == false) {
+              Node tmpOutNode = findNode(graph,endPoint);
+              System.out.println("TmpOutNode " + tmpOutNode);
+              if (tmpOutNode instanceof ComponentNode) {
+                Graph tmp = graph;
+                tmp.removeNode(tmpOutNode, false);
+                Node secTmpOutNode = findNode(tmp,endPoint);
+                endNode = (PortNode) secTmpOutNode;
+              }
+              else {
+                endNode = (PortNode) tmpOutNode; 
+              }
+              
+            //For arrows, which don't have an endpoint
+              List<Point> points = s.getStroke().getPoints();
+              for (int i = points.size()-1; i > points.size()/2; i--) {
+                Point2D point = new Point2D(points.get(i).getX(), points.get(i).getY());
+                if (findNode(graph, point) != null) {
+                  endNode = (PortNode)findNode(graph, point);
+                  break;
+                }
+              }
+              System.out.println("EndNode " + endNode);
+              if(endNode.getPortDirection() != "in") {
+                System.out.println("You tried to end an edge from an outgoing Port");
+                break;  
               }
             }
-            System.out.println("EndNode " + endNode);
-            if(endNode.getPortDirection() != "in") {
-              System.out.println("You tried to end an edge from an outgoing Port");
-              break;  
-            }
-            
             if (startNode != null && endNode != null && !startNode.equals(endNode)) {
               ConnectorEdge newEdge = new ConnectorEdge(startNode, endNode);
               newEdge.setDirection(AbstractEdge.Direction.START_TO_END);
@@ -293,7 +313,7 @@ public class MontiRecognizeController{
     
     for (Sketch s : sketches) {
       if(!(sketchesToBeRemoved.contains(s))) {
-        diagramController.deleteSketch(s, null, false);
+        diagramController.deleteSketch(s, recognizeCompoundCommand, false);
       }
     }
     

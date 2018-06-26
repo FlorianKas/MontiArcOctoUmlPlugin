@@ -293,7 +293,7 @@ public class ComponentNodeView extends AbstractNodeView {
   public void setSelected(boolean selected) {
     if (selected) {
       rectangle.setStrokeWidth(2);
-      setStroke(Constants.selected_color);
+      setStroke(ConstantsMonti.selected_color);
     }
     else {
       rectangle.setStrokeWidth(1);

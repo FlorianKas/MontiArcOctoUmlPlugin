@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-// hier muessen weitere Anpassungen fuer MontiArc Controller vorgenommen werden
 
 /**
  * Used by MainController for handling moving and resizing Nodes, among other
@@ -46,7 +45,8 @@ public class NodeControllerMonti extends NodeController {
   private AbstractDiagramController diagramController;
   private boolean snapToGrid = true, snapIndicators = false;
   private AbstractNode currentResizeNode;
-  
+  private HashMap<PortNode, Double> diffX = new HashMap<>();
+  private HashMap<PortNode, Double> diffY = new HashMap<>();
   // For drag-moving nodes
   private double initMoveX, initMoveY;
   private HashMap<AbstractNode, Point2D.Double> initTranslateMap = new HashMap<>();
@@ -90,12 +90,7 @@ public class NodeControllerMonti extends NodeController {
     }
     
     ArrayList<AbstractNodeView> selectedNodes = diagramController.getAllNodeViews();
-    for (AbstractNodeView n : selectedNodes) {
-      if (n instanceof PackageNodeView) {
-        checkChildren((PackageNodeView) n);
-      }
-      putNodeInPackage(n);
-    }
+    
   }
   
   public void resizeFinished(AbstractNode node) {
@@ -126,44 +121,31 @@ public class NodeControllerMonti extends NodeController {
     initMoveY = event.getSceneY();
     
     Point2D.Double initTranslate;
+    Point2D.Double initTranslate1;
     ArrayList<AbstractNode> selectedNodes = new ArrayList<>();
     for (AbstractNodeView nodeView : diagramController.getSelectedNodes()) {
       selectedNodes.add(diagramController.getNodeMap().get(nodeView));
     }
     
-    // Move all selected nodes and their children. (Only package nodes can have
-    // children)
     for (AbstractNode n : diagramController.getGraphModel().getAllNodes()) {
       if (selectedNodes.contains(n)) {
         if (n instanceof ComponentNode) {
-
           initTranslate = new Point2D.Double(n.getTranslateX(), n.getTranslateY());
+          System.out.println("ComponentNode " + n.getX() + " " + n.getY() + "initTranslate " + initTranslate.toString());
           initTranslateMap.put(n, initTranslate);
           toBeMoved.add(n);
           if (snapIndicators) {
             createSnapIndicators(n);
           }
           for (PortNode p : ((ComponentNode)n).getPorts()) {
-            initTranslate = new Point2D.Double(p.getTranslateX(), p.getTranslateY());
-            initTranslateMap.put(p, initTranslate);
+            initTranslate1 = new Point2D.Double(p.getTranslateX(), p.getTranslateY());
+            System.out.println("PortNode " + p.getX() + " " + p.getY() + "initTranslate " + initTranslate1.toString());
+            initTranslateMap.put(p, initTranslate1);
             toBeMoved.add(p);
+            diffX.put(p, n.getX()-p.getX());
+            diffY.put(p, n.getY()-p.getY());
             if (snapIndicators) {
               createSnapIndicators(p);
-            }
-          }
-        }
-        initTranslate = new Point2D.Double(n.getTranslateX(), n.getTranslateY());
-        initTranslateMap.put(n, initTranslate);
-        toBeMoved.add(n);
-        if (snapIndicators) {
-          createSnapIndicators(n);
-        }
-        if (n instanceof PackageNode) {
-          for (AbstractNode child : ((PackageNode) n).getChildNodes()) {
-            if (!selectedNodes.contains(child)) {
-              initTranslate = new Point2D.Double(child.getTranslateX(), child.getTranslateY());
-              initTranslateMap.put(child, initTranslate);
-              toBeMoved.add(child);
             }
           }
         }
@@ -188,27 +170,27 @@ public class NodeControllerMonti extends NodeController {
           setSnapIndicators(closestInteger(x.intValue(), Constants.GRID_DISTANCE), closestInteger(y.intValue(), Constants.GRID_DISTANCE), n, true);
         }
         for (PortNode p : ((ComponentNode)n).getPorts()) {
-          x = initTranslateMap.get(p).getX() + offsetX;
-          y = initTranslateMap.get(p).getY() + offsetY;
-          p.setTranslateX(x);
-          p.setTranslateY(y);
-          p.setX(x);
-          p.setY(y);
+          Double x1 = initTranslateMap.get(p).getX() + offsetX;
+          Double y1 = initTranslateMap.get(p).getY() + offsetY;
+          p.setTranslateX(x1);
+          p.setTranslateY(y1);
+          p.setX(x1);
+          p.setY(y1);
           if (snapIndicators) {
-            setSnapIndicators(closestInteger(x.intValue(), Constants.GRID_DISTANCE), closestInteger(y.intValue(), Constants.GRID_DISTANCE), p, true);
+            setSnapIndicators(closestInteger(x1.intValue(), Constants.GRID_DISTANCE), closestInteger(y1.intValue(), Constants.GRID_DISTANCE), p, true);
           }
         }
       }
       else {
-        Double x = initTranslateMap.get(n).getX() + offsetX;
-        Double y = initTranslateMap.get(n).getY() + offsetY;
-        n.setTranslateX(x);
-        n.setTranslateY(y);
-        n.setX(x);
-        n.setY(y);
-        if (snapIndicators) {
-          setSnapIndicators(closestInteger(x.intValue(), Constants.GRID_DISTANCE), closestInteger(y.intValue(), Constants.GRID_DISTANCE), n, true);
-        }
+//        Double x = initTranslateMap.get(n).getX() + offsetX;
+//        Double y = initTranslateMap.get(n).getY() + offsetY;
+//        n.setTranslateX(x);
+//        n.setTranslateY(y);
+//        n.setX(x);
+//        n.setY(y);
+//        if (snapIndicators) {
+//          setSnapIndicators(closestInteger(x.intValue(), Constants.GRID_DISTANCE), closestInteger(y.intValue(), Constants.GRID_DISTANCE), n, true);
+//        }
       }
     }
   }
@@ -216,51 +198,74 @@ public class NodeControllerMonti extends NodeController {
   public double[] moveNodesFinished(MouseEvent event) {
     double offsetX = (event.getSceneX() - initMoveX) * (1 / diagramController.drawPane.getScaleX());
     double offsetY = (event.getSceneY() - initMoveY) * (1 / diagramController.drawPane.getScaleY());
-    
+    System.out.println("OffsetX " + offsetX + "OffsetY " + offsetY);
     for (AbstractNode n : toBeMoved) {
-      if (n instanceof PortNode) {
-        System.out.println("This is a PortNode");
-      }
       if (n instanceof ComponentNode) {
         Double x = n.getTranslateX();
         Double y = n.getTranslateY();
         if (snapToGrid) {
+          System.out.println("SnapToGrid");
           int xSnap = closestInteger(x.intValue(), 20); // Snap to grid
           int ySnap = closestInteger(y.intValue(), 20);
           n.setTranslateX(xSnap);
           n.setTranslateY(ySnap);
           n.setX(xSnap);
           n.setY(ySnap);
+          for (PortNode p : ((ComponentNode) n).getPorts()) {
+            p.setTranslateX(n.getTranslateX()-diffX.get(p));
+            p.setTranslateY(n.getTranslateY()-diffY.get(p));
+            p.setX(n.getX()-diffX.get(p));
+            p.setY(n.getY()-diffY.get(p));
+          }
         }
         else {
+          System.out.println("NOOOO SNAP");
           n.setTranslateX(x);
           n.setTranslateY(y);
           n.setX(x);
           n.setY(y);
+          for (PortNode p : ((ComponentNode) n).getPorts()) {
+            p.setTranslateX(n.getTranslateX()-diffX.get(p));
+            p.setTranslateY(n.getTranslateY()-diffY.get(p));
+            p.setX(n.getX()-diffX.get(p));
+            p.setY(n.getY()-diffY.get(p));
+          }
         }
+//        for (PortNode p : ((ComponentNode) n).getPorts()) {
+//          Double x1 = initTranslateMap.get(p).getX() + offsetX;
+//          Double y1 = initTranslateMap.get(p).getY() + offsetY;
+//          if (snapToGrid) {
+//            int xSnap1 = closestInteger(x1.intValue(), 20); // Snap to grid
+//            int ySnap1 = closestInteger(y1.intValue(), 20);
+//            p.setTranslateX(xSnap1);
+//            p.setTranslateY(ySnap1);
+//            p.setX(xSnap1);
+//            p.setY(ySnap1);
+//            p.setTranslateX(n.getTranslateX()+diffX.get(p));
+//            p.setTranslateY(n.getTranslateY()+diffY.get(p));
+//            p.setX(n.getX()+diffX.get(p));
+//            p.setY(n.getY()+diffY.get(p));
+//          }
+//          else {
+//            p.setTranslateX(x1);
+//            p.setTranslateY(y1);
+//            p.setX(x1);
+//            p.setY(y1);
+//            p.setTranslateX(n.getTranslateX()+diffX.get(p));
+//            p.setTranslateY(n.getTranslateY()+diffY.get(p));
+//            p.setX(n.getX()+diffX.get(p));
+//            p.setY(n.getY()+diffY.get(p));
+//          
+//          }
+//        }
+        System.out.println("ComponentNode Afterwards" + n.getX() + " " + n.getY());
         for (PortNode p : ((ComponentNode) n).getPorts()) {
-          Double x1 = initTranslateMap.get(p).getX() + offsetX;
-          Double y1 = initTranslateMap.get(p).getY() + offsetY;
-          if (snapToGrid) {
-            int xSnap1 = closestInteger(x1.intValue(), 20); // Snap to grid
-            int ySnap1 = closestInteger(y1.intValue(), 20);
-            p.setTranslateX(xSnap1);
-            p.setTranslateY(ySnap1);
-            System.out.println("Here it is");
-            p.setX(xSnap1);
-            p.setY(ySnap1);
-          }
-          else {
-            p.setTranslateX(x1);
-            p.setTranslateY(y1);
-            System.out.println("Or here?");
-            p.setX(x1);
-            p.setY(y1);
-          }
+          System.out.println("PortNode afterwards " + p.getX() + " " + p.getY());
         }
+        
       }
     }
-    
+
     toBeMoved.clear();
     initTranslateMap.clear();
     if (snapIndicators) {
@@ -272,13 +277,6 @@ public class NodeControllerMonti extends NodeController {
     deltaTranslateVector[1] = event.getSceneY() - initMoveY;
     
     ArrayList<AbstractNodeView> selectedNodes = diagramController.getSelectedNodes();
-    
-    for (AbstractNodeView n : selectedNodes) {
-      if (n instanceof PackageNodeView) {
-        checkChildren((PackageNodeView) n);
-      }
-      putNodeInPackage(n);
-    }
     return deltaTranslateVector;
   }
   
@@ -298,54 +296,7 @@ public class NodeControllerMonti extends NodeController {
     }
   }
   
-  /**
-   * If potentialChild is graphically inside a package view it will be added as
-   * a child to that package node.
-   * 
-   * @param potentialChild
-   * @return
-   */
-  private boolean putNodeInPackage(AbstractNodeView potentialChild) {
-    boolean childMovedInside = false;
-    Map<AbstractNodeView, AbstractNode> nodeMap = diagramController.getNodeMap();
-    for (AbstractNodeView potentialParent : diagramController.getAllNodeViews()) {
-      if (potentialParent instanceof PackageNodeView && potentialParent != potentialChild) {
-        if (potentialParent.getBoundsInParent().contains(potentialChild.getBoundsInParent())) {
-          if (!((PackageNode) nodeMap.get(potentialParent)).getChildNodes().contains(nodeMap.get(potentialChild))) {
-            ((PackageNode) nodeMap.get(potentialParent)).addChild(nodeMap.get(potentialChild));
-          }
-          childMovedInside = true;
-        }
-        else {
-          // Remove child if it is moved out of the package
-          ((PackageNode) nodeMap.get(potentialParent)).getChildNodes().remove(nodeMap.get(potentialChild));
-          
-        }
-      }
-    }
-    return childMovedInside;
-  }
-  
-  /**
-   * Checks whether a packageNode contains any children.
-   */
-  private void checkChildren(PackageNodeView packageNodeView) {
-    Map<AbstractNodeView, AbstractNode> nodeMap = diagramController.getNodeMap();
-    PackageNode packageNodeModel = (PackageNode) nodeMap.get(packageNodeView);
-    AbstractNode potentialChildModel;
-    for (AbstractNodeView potentialChild : diagramController.getAllNodeViews()) {
-      potentialChildModel = nodeMap.get(potentialChild);
-      if (packageNodeView != potentialChild && packageNodeView.getBoundsInParent().contains(potentialChild.getBoundsInParent())) {
-        if (!packageNodeModel.getChildNodes().contains(potentialChildModel)) {
-          packageNodeModel.addChild(potentialChildModel);
-        }
-      }
-      else {
-        packageNodeModel.getChildNodes().remove(potentialChildModel);
-      }
-    }
-  }
-  
+ 
   /**
    * Initializes snap inidicators for AbstractNode.
    * 
@@ -665,80 +616,6 @@ public class NodeControllerMonti extends NodeController {
     }
   }
   
-//  public boolean showComponentNodeEditDialog(ComponentNode node) {
-//    if (diagramController.voiceController.voiceEnabled) {
-//      // Change variable testing in VoiceController to 1(true)
-//      diagramController.voiceController.testing = 1;
-//      
-//      String title2 = "";
-//      int time = 0;
-//      // Looking for a name you want to add to the package or until 5 seconds
-//      // have passed
-//      while ((title2.equals("") || title2 == null) && time < 500) {
-//        try {
-//          TimeUnit.MILLISECONDS.sleep(10);
-//        }
-//        catch (InterruptedException e) {
-//          e.printStackTrace();
-//        }
-//        // Check if a name has been recognised
-//        title2 = diagramController.voiceController.titleName;
-//        time++;
-//      }
-//      
-//      // Change variable testing in VoiceController to 0(false)
-//      diagramController.voiceController.testing = 0;
-//      
-//      // If name found in less then 5 seconds it sets the name to the package
-//      if (time < 500) {
-//        diagramController.voiceController.titleName = "";
-//        node.setTitle(title2);
-//      }
-//      // Else the name is not changed to a new name
-//      else {
-//        diagramController.voiceController.titleName = "";
-//      }
-//      
-//      node.setTitle(title2);
-//    }
-//    
-//    VBox group = new VBox();
-//    TextField input = new TextField();
-//    input.setText(node.getTitle());
-//    Button okButton = new Button("Ok");
-//    okButton.setOnAction(new EventHandler<ActionEvent>() {
-//      @Override
-//      public void handle(ActionEvent event) {
-//        node.setTitle(input.getText());
-//        System.out.println("New title ist" + node.getTitle());
-//        aDrawPane.getChildren().remove(group);
-//      }
-//    });
-//    
-//    Button cancelButton = new Button("Cancel");
-//    cancelButton.setOnAction(new EventHandler<ActionEvent>() {
-//      @Override
-//      public void handle(ActionEvent event) {
-//        aDrawPane.getChildren().remove(group);
-//      }
-//    });
-//    
-//    Label label = new Label("Choose title");
-//    group.getChildren().add(label);
-//    group.getChildren().add(input);
-//    HBox buttons = new HBox();
-//    buttons.getChildren().add(okButton);
-//    buttons.getChildren().add(cancelButton);
-//    buttons.setPadding(new Insets(15, 0, 0, 0));
-//    group.getChildren().add(buttons);
-//    group.setLayoutX(node.getX() + 5);
-//    group.setLayoutY(node.getY() + 5);
-//    group.setBackground(new Background(new BackgroundFill(Color.WHITESMOKE, new CornerRadii(1), null)));
-//    group.setStyle("-fx-border-color: black");
-//    group.setPadding(new Insets(15, 12, 15, 12));
-//    aDrawPane.getChildren().add(group);
-//    return true; 
-//  }
   
   public boolean showPortNodeEditDialog(PortNode node) {
     System.out.println("We are in Edit");
@@ -803,14 +680,6 @@ public class NodeControllerMonti extends NodeController {
             command.add(new SetNodeTitleCommand(node, controller.getTitle(), node.getTitle()));
             node.setTitle(controller.getTitle());
           }
-//          if (controller.hasAttributesChanged()) {
-//            command.add(new SetNodeAttributeCommand(node, controller.getAttributes(), node.getAttributes()));
-//            node.setAttributes(controller.getAttributes());
-//          }
-//          if (controller.hasOperationsChanged()) {
-//            command.add(new SetNodeOperationsCommand(node, controller.getOperations(), node.getOperations()));
-//            node.setOperations(controller.getOperations());
-//          }
           if (controller.hasDataTypeChanged()) {
             command.add(new SetNodeDataTypeCommand(node, controller.getDataType(), node.getPortType()));
             

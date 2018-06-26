@@ -41,12 +41,11 @@ public class MoveCompViewCommand implements Command
    * @param pDX The amount moved horizontally
    * @param pDY The amount moved vertically
    */
-  public MoveCompViewCommand(ComponentNode pNode, double pDX, double pDY)
+  public MoveCompViewCommand(GraphElement pNode, double pDX, double pDY)
   {
-    aGraphElement = pNode;
+    aGraphElement = (ComponentNode) pNode;
     aDX = pDX;
     aDY = pDY;
-    System.out.println("After construction the move");
   }
   
   /**

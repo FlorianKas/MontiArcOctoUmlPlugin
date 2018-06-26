@@ -47,9 +47,10 @@ import plugin.MontiArcPlugin;
 import plugin.MontiCoreException;
 import util.ConstantsMonti;
 import util.commands.AddDeleteNodeCommand;
+import util.commands.Command;
 import util.commands.CompoundCommand;
 import util.commands.MoveCompViewCommand;
-import util.commands.MoveGraphElementCommand;
+//import util.commands.MoveGraphElementCommand;
 import util.commands.SetInfoArcParamCommand;
 import util.commands.SetInfoGenericCommand;
 import util.commands.SetInfoImportCommand;
@@ -72,13 +73,11 @@ public class MontiArcController extends AbstractDiagramController {
 
   NodeControllerMonti nodeController;
   MontiRecognizeController recognizeController; 
-//  TabControllerMonti tabController;
   EdgeControllerMonti edgeController;
-//  SelectControllerMonti selectController;
   MontiArcPlugin plugin;
   Infos in;
   MontiInitDialogController controller; 
-//  SketchControllerMonti sketchController;
+  SelectControllerMonti selectController;
   
   private AnchorPane dialog; 
   private ArrayList<MontiCoreException> errorList1 = new ArrayList<MontiCoreException>();
@@ -100,36 +99,16 @@ public class MontiArcController extends AbstractDiagramController {
     initToolBarActions();
     initDrawPaneActions();  
     
-//    sketchController = new SketchControllerMonti(drawPane, this);
     nodeController = new NodeControllerMonti(drawPane, this);
     recognizeController = new MontiRecognizeController(drawPane, this);
     edgeController = new EdgeControllerMonti(drawPane,this);
-//    selectController = new SelectControllerMonti(drawPane, this);
+    selectController = new SelectControllerMonti(drawPane, this);
     in = new Infos();
-//    String tmp = new String();
-//    ArrayList<String> tmp1 = new ArrayList<String>();
-//    inView = new InfoView(in, tmp1, tmp1, tmp, tmp1, tmp);
   }
   
   public void showSomething() {
     String name = "";
-    System.out.println("Here we are " + name);
     boolean bla = showMontiInitDialog();
-//    while(name.isEmpty()) {
-//      boolean bla = showMontiInitDialog();
-//      System.out.println("After ShowMonti");
-//      name = controller.nameTextField.getText();
-//      controller.nameTextField.setText(name);
-//      
-//      System.out.println("Name " + name);
-//      if (name.isEmpty()) {
-//        Alert alert = new Alert(Alert.AlertType.ERROR);
-//        alert.setTitle("Error");
-//        alert.setHeaderText("No diagram name");
-//        alert.setContentText("You have to add a diagram name.");
-//        alert.showAndWait();
-//      }
-//    }
     showConfiguration();
   }
   
@@ -340,85 +319,6 @@ public class MontiArcController extends AbstractDiagramController {
     this.config.setSpacing(5);
     
   }
-  
-//  void addGenerics() {
-//    AddGenericsController controller = showGenericsDialog();
-//    String[] tmp = controller.genericsTextField.getText().split("\\;");
-//    for (String g: tmp) {
-//      genericsArray.add(g);
-//    }  
-//    showOutput();
-//  }
-//  
-//  
-//  public AddGenericsController showGenericsDialog() {
-//    AddGenericsController controllerGenerics = null; 
-//    
-//    try {
-//      System.out.println("We are in showgenericsDIalog");
-//      System.out.println(getClass().getClassLoader().getResource("view/fxml/addGenerics.fxml"));
-//      FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view/fxml/addGenerics.fxml"));
-//      System.out.println("Loader load " + loader.getLocation());
-//      AnchorPane dialog = loader.load();
-//      System.out.println("Loader Controller " + loader.getController());
-//      controllerGenerics = loader.getController();
-//      Stage dialogStage = new Stage();
-//      dialogStage.initModality(Modality.WINDOW_MODAL);
-//      dialogStage.setScene(new Scene(dialog));
-//      
-//      controllerGenerics.setDialogStage(dialogStage);
-//      dialogStage.showAndWait();
-//    
-//      
-//    }
-//    
-//    
-//    catch (IOException e) {
-//      e.printStackTrace();
-//      return null;
-//    }
-//    
-//    return controllerGenerics;
-//  }
-//  
-//  
-//  void addTypes() {
-//    AddTypesController controller = showTypesDialog();
-//    String[] tmp = controller.arcParameterTextField.getText().split("\\;");
-//    for (String g: tmp) {
-//      types.add(g);
-//    }  
-//    showOutput();
-//
-//  }
-//  
-//  public AddTypesController showTypesDialog() {
-//    AddTypesController controllerTypes = null; 
-//    
-//    try {
-//
-//FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view/fxml/addTypes.fxml"));
-//      System.out.println("Loader load " + loader.getLocation());
-//      AnchorPane dialog = loader.load();
-//      
-//      controllerTypes = loader.getController();
-//      Stage dialogStage = new Stage();
-//      dialogStage.initModality(Modality.WINDOW_MODAL);
-//      dialogStage.setScene(new Scene(dialog));
-//      
-//      controllerTypes = loader.getController();
-//      controllerTypes.setDialogStage(dialogStage);
-//      dialogStage.showAndWait();
-//    }
-//
-//    catch (IOException e) {
-//      e.printStackTrace();
-//      return null;
-//    }
-//    
-//    return controllerTypes;
-//  }
-  
   
   void initDrawPaneActions() {
     drawPane.setOnMousePressed(event -> {
@@ -702,20 +602,21 @@ public class MontiArcController extends AbstractDiagramController {
           for (AbstractNodeView movedView : selectedNodes) {
             System.out.println("Selected Nodes " + selectedNodes);
             if (movedView instanceof ComponentNodeView) {
-              for (PortNodeView p : ((ComponentNodeView)movedView).getPortNodeViews()) {
-                compoundCommand.add(new MoveGraphElementCommand(nodeMap.get(p), deltaTranslateVector[0], deltaTranslateVector[1]));
-              }
-              System.out.println("We are in moving");
-              compoundCommand.add(new MoveGraphElementCommand(nodeMap.get(movedView), deltaTranslateVector[0], deltaTranslateVector[1]));
+              System.out.println("We are in moving and deltaTranslateVector looks as follows " + deltaTranslateVector[0] + deltaTranslateVector[1]);
+              compoundCommand.add(new MoveCompViewCommand(nodeMap.get(movedView), deltaTranslateVector[0], deltaTranslateVector[1]));
               System.out.println("We are after compound");
             } 
             else {
-              compoundCommand.add(new MoveGraphElementCommand(nodeMap.get(movedView), deltaTranslateVector[0], deltaTranslateVector[1]));
+              compoundCommand.add(new MoveCompViewCommand(nodeMap.get(movedView), deltaTranslateVector[0], deltaTranslateVector[1]));
             }
           }
           for (Sketch sketch : selectedSketches) {
-            compoundCommand.add(new MoveGraphElementCommand(sketch, deltaTranslateVector[0], deltaTranslateVector[1]));
+            compoundCommand.add(new MoveCompViewCommand(sketch, deltaTranslateVector[0], deltaTranslateVector[1]));
           }
+          for (Command c : compoundCommand.getCommands()) {
+            System.out.println("Command looks as follows " + c.toString());
+          }
+          System.out.println("CompoundCommand  " + compoundCommand.getCommands());
           undoManager.add(compoundCommand);
         }
         else {
@@ -893,10 +794,14 @@ public class MontiArcController extends AbstractDiagramController {
     });
     
     undoBtn.setOnAction(event -> { 
+      System.out.println("Before undo");
       undoManager.undoCommand();
       });
     
-    redoBtn.setOnAction(event -> undoManager.redoCommand());
+    redoBtn.setOnAction(event -> {
+      undoManager.redoCommand();
+      
+    });
     
     deleteBtn.setOnAction(event -> deleteSelected());
     
@@ -1018,15 +923,13 @@ public class MontiArcController extends AbstractDiagramController {
   public AbstractEdgeView createEdgeView(AbstractEdge edge, PortNodeView startNodeView, PortNodeView endNodeView) {
     AbstractEdgeView edgeView;
 
-//    System.out.println("We are in MONTIARCCONTROLLER BY CREATING EDGEVIEW");
     if (edge instanceof ConnectorEdge) {
-//      System.out.println("Detected a ConnectorEdge");
       edgeView = new ConnectorEdgeView((ConnectorEdge)edge, startNodeView, endNodeView);
     }
     else {
       edgeView = null;
     }
-//    System.out.println("EdgeView" + edgeView.getStartX() + edgeView.getStartY() + edgeView.getEndX() + edgeView.getEndY());
+    System.out.println("Edge View get Ref Edge " + edgeView.getRefEdge());
     return addEdgeView(edgeView);
   }
 

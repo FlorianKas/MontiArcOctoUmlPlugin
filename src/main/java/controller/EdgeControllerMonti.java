@@ -86,8 +86,6 @@ public class EdgeControllerMonti extends EdgeController {
     if (event.getSource() instanceof AbstractNodeView) {
       dragLine.setEndX(event.getX() + ((AbstractNodeView) event.getSource()).getTranslateX());
       dragLine.setEndY(event.getY() + ((AbstractNodeView) event.getSource()).getTranslateY());
-      System.out.println("dargLine X " + dragLine.getEndX());
-      System.out.println("dargLine Y " + dragLine.getEndY());
     }
     else {
       dragLine.setEndX(event.getX());
@@ -105,8 +103,6 @@ public class EdgeControllerMonti extends EdgeController {
       System.out.println("nodeView " + nodeView.getTranslateX() + nodeView.getTranslateY());
       if(nodeView.contains(getEndPoint())){
         endNodeView = nodeView;
-        System.out.println("Found a nodeView");
-        System.out.println("endNodeView " + endNodeView.getTranslateX() + endNodeView.getTranslateY());
       }
     }
     PortNode endNode = new PortNode();
@@ -115,22 +111,16 @@ public class EdgeControllerMonti extends EdgeController {
       endNode = (PortNode) diagramController.getNodeMap().get(endNodeView);
       startNode = (PortNode) diagramController.getNodeMap().get(startNodeView);
       ConnectorEdge edge = new ConnectorEdge(startNode, endNode);
-      System.out.println("Edge " + edge.toString());
       ((MontiArcController)diagramController).createEdgeView(edge, (PortNodeView)startNodeView, (PortNodeView)endNodeView);
     } 
     else if (endNodeView != null) {
-      System.out.println("We have a ComponentNodeView as recognized");
-      System.out.println("endNodeView " + endNodeView.getX() + endNodeView.getY() + endNodeView.getWidth() + endNodeView.getHeight());
       for (PortNodeView pView: ((ComponentNodeView) endNodeView).getPortNodeViews()) {
-        System.out.println("pView " + pView.getX() + pView.getY() + pView.getWidth() + pView.getHeight());
-        
         if(pView.getX() <= getEndPoint().getX() && pView.getX() + pView.getPortWidth() >= getEndPoint().getX()
             && pView.getY() <= getEndPoint().getY() && pView.getY() + pView.getPortHeight() >= getEndPoint().getY()) {
           endNode = (PortNode)diagramController.getNodeMap().get(pView);
           startNode = (PortNode) diagramController.getNodeMap().get(startNodeView);
           ConnectorEdge edge = new ConnectorEdge(startNode, endNode);
           ((MontiArcController)diagramController).createEdgeView(edge, (PortNodeView)startNodeView, (PortNodeView)endNodeView);
-          System.out.println("Found a endNode");
         }
       }
     }
@@ -174,14 +164,7 @@ public class EdgeControllerMonti extends EdgeController {
     diagramController.mode = AbstractDiagramController.Mode.NO_MODE;
     for (AbstractEdgeView edgeView : diagramController.selectedEdges) {
       if (edgeView instanceof ConnectorEdgeView) {
-        System.out.println("EdgeView " + edgeView.getId() + edgeView.getRefEdge());
-        System.out.println("Moving Edges in onMouseRelaseDragEdge");
-//        diagramController.undoManager.add(new MoveMessageCommand((MessageEdge) tmp, 0, edgeView.getStartY() - dragStartY));
-      
-        ConnectorEdge con = (ConnectorEdge) ((ConnectorEdgeView) edgeView).getRefEdge();
-        AbstractEdge tmp = (AbstractEdge) con;
-        diagramController.undoManager.add(new MoveMessageCommand((MessageEdge) tmp, 0, ((ConnectorEdgeView)edgeView).getStartY() - dragStartY));
-        
+        diagramController.undoManager.add(new MoveMessageCommand((MessageEdge) edgeView.getRefEdge(), 0, edgeView.getStartY() - dragStartY));
       }
     }
     previousEdgeStartY = 0;

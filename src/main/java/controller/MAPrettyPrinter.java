@@ -19,6 +19,8 @@ import de.monticore.types.prettyprint.TypesPrettyPrinterConcreteVisitor;
 import de.monticore.types.types._ast.ASTComplexReferenceType;
 import de.monticore.types.types._ast.ASTPrimitiveType;
 import de.monticore.types.types._ast.ASTSimpleReferenceType;
+import de.monticore.types.types._ast.ASTTypeParameters;
+import de.monticore.types.types._ast.ASTTypeVariableDeclaration;
 import de.monticore.types.types._ast.TypesNodeFactory;
 import montiarc._ast.*;
 import montiarc._ast.ASTComponentBody;
@@ -73,6 +75,22 @@ public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
     printComponentBody(astComp.getBody());
   }
   
+  public void printComponentInner(ASTComponent astComp, Optional<ASTTypeParameters> optional) {
+    if (astComp.getStereotype().isPresent()) {
+      if (!astComp.getStereotype().get().getValues().get(0).getName().isEmpty()) {
+        getPrinter().print(" " + astComp.getStereotype().get().getValues().get(0).getName() + " ");
+        stereo = false;
+      }
+      else {
+        stereo = true;
+      }
+    }
+    getPrinter().print("component ");
+    getPrinter().print(astComp.getName() + " ");
+    printComponentHeadInner(astComp.getHead(), optional);
+    printComponentBody(astComp.getBody());
+  }
+  
   public void printComponentOuter(ASTComponent astComp) {
     if(astComp.getStereotype().isPresent()) {
       if (!astComp.getStereotype().get().getValues().get(0).getName().isEmpty()) {
@@ -104,6 +122,58 @@ public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
     int k = 1;
     if(!astHead.getParameters().isEmpty() && astHead.getParameters() != null) {
       System.out.println("params " + astHead.getParameters().toString());
+      getPrinter().print("(");
+      for (ASTParameter param : astHead.getParameters()) {
+        // TODO build optional
+        if (param != null) {
+          if (param.getType() instanceof ASTPrimitiveType) {
+            handle((ASTPrimitiveType)param.getType());
+          }
+          else if(param.getType() instanceof ASTSimpleReferenceType) {
+            handle((ASTSimpleReferenceType)param.getType());
+          }
+          else if(param.getType() instanceof ASTComplexReferenceType){
+            handle((ASTComplexReferenceType)param.getType());
+          }
+          else {
+            handle(param.getType());
+          }
+          System.out.println("NAME OF PARAM IS " + param.getName());
+          getPrinter().print(" " + param.getName());
+        }
+        if (k != paramSize) {
+          getPrinter().print(", ");
+        }
+        k++;
+      }
+      getPrinter().print(") ");
+    }
+    if (astHead.getSuperComponent().isPresent()) {
+      getPrinter().print("extends");
+      handle(astHead.getSuperComponent().get());
+    } 
+//    getPrinter().flushBuffer();
+//    System.out.println("Test "+ getPrinter().getContent());
+  }
+  
+  
+  public void printComponentHeadInner(ASTComponentHead astHead, Optional<ASTTypeParameters> optional) {
+    List<ASTTypeVariableDeclaration> compGen = new ArrayList<ASTTypeVariableDeclaration>();
+    if (astHead.getGenericTypeParameters().isPresent() && astHead.getGenericTypeParameters().get().getTypeVariableDeclarations() != null
+        && !astHead.getGenericTypeParameters().get().getTypeVariableDeclarations().isEmpty()
+        ) {
+      compGen.addAll(astHead.getGenericTypeParameters().get().getTypeVariableDeclarations());
+    }
+    if (optional.isPresent()) {
+      compGen.addAll(optional.get().getTypeVariableDeclarations());
+    }
+    ASTTypeParameters tmp = TypesNodeFactory.createASTTypeParameters(compGen);
+    System.out.println("tmp " + tmp.toString());
+    handle(tmp);
+  
+    int paramSize = astHead.getParameters().size();
+    int k = 1;
+    if(!astHead.getParameters().isEmpty() && astHead.getParameters() != null) {
       getPrinter().print("(");
       for (ASTParameter param : astHead.getParameters()) {
         // TODO build optional

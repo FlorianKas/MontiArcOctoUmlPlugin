@@ -57,13 +57,13 @@ public class ConnectorEdgeView extends AbstractEdgeView{
   public void setSelected(boolean selected) {
     super.setSelected(selected);
     if(selected){
-        for(Line l : arrowHeadLines){
-            l.setStroke(Constants.selected_color);
-        }
+      for(Line l : arrowHeadLines){
+        l.setStroke(Constants.selected_color);
+      }
     } else {
-        for (Line l : arrowHeadLines) {
-            l.setStroke(Color.BLACK);
-        }
+      for (Line l : arrowHeadLines) {
+        l.setStroke(Color.BLACK);
+      }
     }
   }
   

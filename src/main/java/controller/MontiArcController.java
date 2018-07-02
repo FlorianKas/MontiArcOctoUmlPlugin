@@ -7,20 +7,13 @@ import java.util.ArrayList;
 import org.controlsfx.control.Notifications;
 
 import controller.dialog.MontiInitDialogController;
-import controller.dialog.NodeEditDialogControllerMonti;
 import de.monticore.ast.ASTNode;
-import exceptions.allFine;
 import groovyjarjarantlr.collections.List;
-//import controller.dialog.AddGenericsController;
-//import controller.dialog.AddTypesController;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -30,11 +23,10 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
+
 import model.Sketch;
 import model.edges.AbstractEdge;
 import model.edges.ConnectorEdge;
@@ -43,23 +35,16 @@ import model.nodes.AbstractNode;
 import model.nodes.ComponentNode;
 import model.nodes.Infos;
 import model.nodes.PortNode;
+
 import plugin.MontiArcPlugin;
 import plugin.MontiCoreException;
-import util.ConstantsMonti;
+import exceptions.ConnectorNotCompatibleException;
+import exceptions.allFine;
+
 import util.commands.AddDeleteNodeCommand;
 import util.commands.Command;
 import util.commands.CompoundCommand;
 import util.commands.MoveCompViewCommand;
-//import util.commands.MoveGraphElementCommand;
-import util.commands.SetInfoArcParamCommand;
-import util.commands.SetInfoGenericCommand;
-import util.commands.SetInfoImportCommand;
-import util.commands.SetInfoNameCommand;
-import util.commands.SetInfoPackageCommand;
-import util.commands.SetNodeComponentTypeCommand;
-import util.commands.SetNodeGenericsCommand;
-import util.commands.SetNodeNameCommand;
-import util.commands.SetNodeStereotypeCommand;
 import view.edges.AbstractEdgeView;
 import view.edges.ConnectorEdgeView;
 import view.nodes.AbstractNodeView;
@@ -334,15 +319,6 @@ public class MontiArcController extends AbstractDiagramController {
                                                                      // elements.
           selectController.onMousePressed(event);
         }
-        else if ((tool == ToolEnum.CREATE_CLASS || tool == ToolEnum.CREATE_PACKAGE) && mouseCreationActivated) { // Start
-                                                                                                                 // creation
-                                                                                                                 // of
-                                                                                                                 // package
-                                                                                                                 // or
-                                                                                                                 // class.
-          mode = Mode.CREATING;
-//          createNodeController.onMousePressed(event);
-        }
         else if (tool == ToolEnum.MOVE_SCENE) { // Start panning of graph.
           mode = Mode.MOVING;
           graphController.movePaneStart(event);
@@ -377,14 +353,6 @@ public class MontiArcController extends AbstractDiagramController {
                                                                                           // drawing.
         sketchController.onTouchMoved(event);
       }
-      else if ((tool == ToolEnum.CREATE_CLASS || tool == ToolEnum.CREATE_PACKAGE) && mode == Mode.CREATING && mouseCreationActivated) { // Continue
-                                                                                                                                        // creation
-                                                                                                                                        // of
-                                                                                                                                        // class
-                                                                                                                                        // or
-                                                                                                                                        // package.
-//        createNodeController.onMouseDragged(event);
-      }
       else if (mode == Mode.MOVING && tool == ToolEnum.MOVE_SCENE) { // Continue
                                                                      // panning
                                                                      // of
@@ -409,25 +377,6 @@ public class MontiArcController extends AbstractDiagramController {
           mode = Mode.NO_MODE;
         }
       }
-      else if (tool == ToolEnum.CREATE_CLASS && mode == Mode.CREATING && mouseCreationActivated) { // Finish
-                                                                                                   // creation
-                                                                                                   // of
-                                                                                                   // class.
-//        createNodeController.onMouseReleasedClass();
-        if (!createNodeController.currentlyCreating()) {
-          mode = Mode.NO_MODE;
-        }
-        
-      }
-      else if (tool == ToolEnum.CREATE_PACKAGE && mode == Mode.CREATING && mouseCreationActivated) { // Finish
-                                                                                                     // creation
-                                                                                                     // of
-                                                                                                     // package.
-//        createNodeController.onMouseReleasedPackage();
-        if (!createNodeController.currentlyCreating()) {
-          mode = Mode.NO_MODE;
-        }
-      }
       else if (mode == Mode.MOVING && tool == ToolEnum.MOVE_SCENE) { // Finish
                                                                      // panning
                                                                      // of
@@ -440,41 +389,21 @@ public class MontiArcController extends AbstractDiagramController {
     // There are specific events for touch when creating and drawing to utilize
     // multitouch. //TODO edge creation multi-user support.
     drawPane.setOnTouchPressed(event -> {
-      if ((tool == ToolEnum.CREATE_CLASS || tool == ToolEnum.CREATE_PACKAGE) && !mouseCreationActivated) {
-        mode = Mode.CREATING;
-//        createNodeController.onTouchPressed(event);
-      }
-      else if (tool == ToolEnum.DRAW && !mouseCreationActivated) {
+      if (tool == ToolEnum.DRAW && !mouseCreationActivated) {
         mode = Mode.DRAWING;
         sketchController.onTouchPressed(event);
       }
     });
     
     drawPane.setOnTouchMoved(event -> {
-      if ((tool == ToolEnum.CREATE_CLASS || tool == ToolEnum.CREATE_PACKAGE) && mode == Mode.CREATING && !mouseCreationActivated) {
-//        createNodeController.onTouchDragged(event);
-      }
-      else if (tool == ToolEnum.DRAW && mode == Mode.DRAWING && !mouseCreationActivated) {
+      if (tool == ToolEnum.DRAW && mode == Mode.DRAWING && !mouseCreationActivated) {
         sketchController.onTouchMoved(event);
       }
       event.consume();
     });
     
     drawPane.setOnTouchReleased(event -> {
-      if (tool == ToolEnum.CREATE_CLASS && mode == Mode.CREATING && !mouseCreationActivated) {
-//        createNodeController.onTouchReleasedClass(event);
-        if (!createNodeController.currentlyCreating()) {
-          mode = Mode.NO_MODE;
-        }
-        
-      }
-      else if (tool == ToolEnum.CREATE_PACKAGE && mode == Mode.CREATING && !mouseCreationActivated) {
-//        createNodeController.onTouchReleasedPackage(event);
-        if (!createNodeController.currentlyCreating()) {
-          mode = Mode.NO_MODE;
-        }
-      }
-      else if (tool == ToolEnum.DRAW && mode == Mode.DRAWING && !mouseCreationActivated) {
+      if (tool == ToolEnum.DRAW && mode == Mode.DRAWING && !mouseCreationActivated) {
         sketchController.onTouchReleased(event);
         if (!sketchController.currentlyDrawing()) {
           mode = Mode.NO_MODE;
@@ -506,7 +435,7 @@ public class MontiArcController extends AbstractDiagramController {
         copyPasteController.copyPasteCoords = new double[] { nodeView.getX() + event.getX(), nodeView.getY() + event.getY() };
         aContextMenu.show(nodeView, event.getScreenX(), event.getScreenY());
       }
-      else if (tool == ToolEnum.SELECT || tool == ToolEnum.CREATE_CLASS) { // Select
+      else if (tool == ToolEnum.SELECT) { // Select
                                                                            // node
         setTool(ToolEnum.SELECT);
         setButtonClicked(selectBtn);
@@ -539,10 +468,7 @@ public class MontiArcController extends AbstractDiagramController {
             }
             drawSelected();
             nodeController.moveNodesStart(event);
-            System.out.println("Before moving skectes");
             sketchController.moveSketchStart(event);
-
-            System.out.println("After moving skectes");
           }
         }
       }
@@ -554,21 +480,19 @@ public class MontiArcController extends AbstractDiagramController {
     });
     
     nodeView.setOnMouseDragged(event -> {
-      if ((tool == ToolEnum.SELECT || tool == ToolEnum.CREATE_CLASS) && mode == Mode.DRAGGING) { // Continue
+      if ((tool == ToolEnum.SELECT) && mode == Mode.DRAGGING) { // Continue
                                                                                                  // dragging
                                                                                                  // selected
-        System.out.println("Before moving nodes");                                                   // elements
+                                                                                                 // elements
         nodeController.moveNodes(event);
-        System.out.println("Before moving sketches");
         sketchController.moveSketches(event);
-        System.out.println("After moving skeches");
       }
       else if (mode == Mode.MOVING && tool == ToolEnum.MOVE_SCENE) { // Continue
                                                                      // panning
                                                                      // graph.
         graphController.movePane(event);
       }
-      else if ((tool == ToolEnum.SELECT || tool == ToolEnum.CREATE_CLASS) && mode == Mode.RESIZING) { // Continue
+      else if ((tool == ToolEnum.SELECT) && mode == Mode.RESIZING) { // Continue
                                                                                                       // resizing
                                                                                                       // node.
         nodeController.resize(event);
@@ -583,7 +507,7 @@ public class MontiArcController extends AbstractDiagramController {
     });
     
     nodeView.setOnMouseReleased(event -> {
-      if ((tool == ToolEnum.SELECT || tool == ToolEnum.CREATE_CLASS) && mode == Mode.DRAGGING) { // Finish
+      if ((tool == ToolEnum.SELECT) && mode == Mode.DRAGGING) { // Finish
                                                                                                  // dragging
                                                                                                  // nodes
                                                                                                  // and
@@ -633,7 +557,7 @@ public class MontiArcController extends AbstractDiagramController {
         graphController.movePaneFinished();
         mode = Mode.NO_MODE;
       }
-      else if ((tool == ToolEnum.SELECT || tool == ToolEnum.CREATE_CLASS) && mode == Mode.RESIZING) { // Finish
+      else if ((tool == ToolEnum.SELECT) && mode == Mode.RESIZING) { // Finish
                                                                                                       // resizing
                                                                                                       // node.
         nodeController.resizeFinished(nodeMap.get(nodeView));
@@ -647,23 +571,15 @@ public class MontiArcController extends AbstractDiagramController {
       event.consume();
     });
     nodeView.setOnTouchPressed(event -> {
-      if (nodeView instanceof PackageNodeView && (tool == ToolEnum.CREATE_CLASS || tool == ToolEnum.CREATE_PACKAGE)) {
-        mode = Mode.CREATING;
-//        createNodeController.onTouchPressed(event);
-      }
-      else if (tool == ToolEnum.DRAW) {
+      if (tool == ToolEnum.DRAW) {
         mode = Mode.DRAWING;
-        System.out.println("Event looks like " + event.toString());
         sketchController.onTouchPressed(event);
       }
       event.consume();
     });
     
     nodeView.setOnTouchMoved(event -> {
-      if (nodeView instanceof PackageNodeView && (tool == ToolEnum.CREATE_CLASS || tool == ToolEnum.CREATE_PACKAGE) && mode == Mode.CREATING) {
-//        createNodeController.onTouchDragged(event);
-      }
-      else if (tool == ToolEnum.DRAW && mode == Mode.DRAWING) {
+      if (tool == ToolEnum.DRAW && mode == Mode.DRAWING) {
         sketchController.onTouchMoved(event);
       }
       event.consume();
@@ -671,20 +587,7 @@ public class MontiArcController extends AbstractDiagramController {
     });
     
     nodeView.setOnTouchReleased(event -> {
-      if (nodeView instanceof PackageNodeView && tool == ToolEnum.CREATE_CLASS && mode == Mode.CREATING) {
-//        createNodeController.onTouchReleasedClass(event);
-        if (!createNodeController.currentlyCreating()) {
-          mode = Mode.NO_MODE;
-        }
-        
-      }
-      else if (nodeView instanceof PackageNodeView && tool == ToolEnum.CREATE_PACKAGE && mode == Mode.CREATING) {
-//        createNodeController.onTouchReleasedPackage(event);
-        if (!createNodeController.currentlyCreating()) {
-          mode = Mode.NO_MODE;
-        }
-      }
-      else if (tool == ToolEnum.DRAW && mode == Mode.DRAWING) {
+      if (tool == ToolEnum.DRAW && mode == Mode.DRAWING) {
         sketchController.onTouchReleased(event);
         if (!sketchController.currentlyDrawing()) {
           mode = Mode.NO_MODE;
@@ -820,23 +723,26 @@ public class MontiArcController extends AbstractDiagramController {
     
    
     checkValidityBtn.setOnAction(event -> {
-    
-      System.out.println("graph looks as follows " + graph.getAllNodes().toString() + graph.getAllEdges().toString());
-      System.out.println("modelName " + modelName);
-      
       checkPortNames();
-      ArrayList<String> arg = new ArrayList<String>();
-      arg.add(modelName);
-      MontiArcPlugin plug = plugin.getInstance();
-      ASTNode node = plug.shapeToAST(graph, arg);
-      ArrayList<MontiCoreException> errors = (ArrayList<MontiCoreException>) plug.check(node, getNodeMap());
-      setErrors(errors);
-      System.out.println("Errors " + errors);
-    
+      ArrayList errors1 = checkPortsCompatibility();
+      System.out.println("Errors1 " + errors1.toString());
+      if (!errors1.isEmpty()) {
+        setErrors(errors1);
+      }
+      else {
+        ArrayList<String> arg = new ArrayList<String>();
+        arg.add(modelName);
+        MontiArcPlugin plug = plugin.getInstance();
+        ASTNode node = plug.shapeToAST(graph, arg);
+        ArrayList<MontiCoreException> errors = (ArrayList<MontiCoreException>) plug.check(node, getNodeMap());
+        setErrors(errors);
+      }
     });
+    
     editInfoBtn.setOnAction(event -> {
       showSomething();
     });
+    
     showErrorLogBtn.setOnAction(event -> {
       if (errorList1.isEmpty()) {
         ArrayList<MontiCoreException> tmp = new ArrayList<MontiCoreException>();
@@ -849,27 +755,48 @@ public class MontiArcController extends AbstractDiagramController {
     });
     
     topBox.setOnMouseClicked(event -> this.showSomething());
+    
     generateBtn.setOnAction(event -> {
-      System.out.println("In generate Btn");
-      MontiArcPlugin plug = plugin.getInstance();
-      plug.generateCode(null, null, null);
-      showErrorLog(plug.getGenErrorList());
-      
-      System.out.println("Gen Error List " + plug.getGenErrorList());
-      plug.clearGenErrorList();
+      if (errorList1.isEmpty()) {
+        MontiArcPlugin plug = plugin.getInstance();
+        plug.generateCode(null, null, null);
+        showErrorLog(plug.getGenErrorList());
+        plug.clearGenErrorList();
+      }
     });
   }
   
+  private ArrayList<MontiCoreException> checkPortsCompatibility() {
+    ArrayList<MontiCoreException> errorList = new ArrayList();
+    for (Edge edge : graph.getAllEdges()) {
+      if (edge instanceof ConnectorEdge) {
+        System.out.println("type " + ((ConnectorEdge)edge).getStartPort().getPortType());
+        System.out.println("type " + ((ConnectorEdge)edge).getEndPort().getPortType());
+        System.out.println("Edge " + edge.toString());
+        if (!((ConnectorEdge)edge).getStartPort().getPortType().equals(((ConnectorEdge)edge).getEndPort().getPortType())) {
+          for (AbstractEdgeView view : allEdgeViews) {
+            if (view.getRefEdge() == edge) {
+              System.out.println("view " + view.toString());
+              if (view instanceof ConnectorEdgeView) {
+                errorList.add(new ConnectorNotCompatibleException(edge, view));
+              }
+            }
+          }
+          
+        }
+      }
+    }
+    return errorList;
+    // TODO Auto-generated method stub
+    
+  }
+
   public AbstractNodeView createNodeView(AbstractNode node, boolean remote) {
     AbstractNodeView newView = null;
     if (node instanceof ComponentNode) {
       newView = new ComponentNodeView((ComponentNode) node);
-      System.out.println("We are in MONTIARCCONTROLLER BY CREATING NODEVIEW");
     }
     else if (node instanceof PortNode) {
-//      ComponentNodeView compView = new ComponentNodeView();
-      System.out.println("NodeMap " + nodeMap.toString());
-      System.out.println("AllNodeViews "+ allNodeViews);
       for (AbstractNodeView view : allNodeViews) {
         if(nodeMap.get(view) ==  (ComponentNode)((PortNode) node).getComponentNode()) {
           newView = ((ComponentNodeView)view).getNodeToViewMap().get(node);
@@ -878,7 +805,6 @@ public class MontiArcController extends AbstractDiagramController {
       } 
     }
     if (!graph.getAllNodes().contains(node)) {
-      // test; maybe also without AbstractDiagramController-cast
       graph.addNode(node, remote);
       undoManager.add(new AddDeleteNodeCommand((AbstractDiagramController)MontiArcController.this, graph, newView, node, true));
     }
@@ -891,14 +817,10 @@ public class MontiArcController extends AbstractDiagramController {
     PortNodeView endNodeView = null;
     AbstractNode tempNode;
 
-//    System.out.println("We are in MONTIARCCONTROLLER BY ADDING EDGEVIEW");
     for (AbstractNodeView nodeView : allNodeViews) {
       tempNode = nodeMap.get(nodeView);
-//      System.out.println("TempNode " + tempNode);
       if (edge.getStartNode().getId().equals(tempNode.getId())) {
         edge.setStartNode(tempNode);
-        System.out.println("Is nodeView instance of ComponentNodeView : " + (nodeView instanceof ComponentNodeView));
-        System.out.println("Is nodeView instance of PortNodeView : " + (nodeView instanceof PortNodeView));
         startNodeView = (PortNodeView) nodeView;
       }
       else if (edge.getEndNode().getId().equals(tempNode.getId())) {
@@ -906,9 +828,6 @@ public class MontiArcController extends AbstractDiagramController {
         endNodeView = (PortNodeView) nodeView;
       }  
     }    
-//    System.out.println("We are in ConnectorEdge case");
-//    System.out.println("StartNodeView "+ startNodeView);
-//    System.out.println("EndNodeView "+ endNodeView);
     AbstractEdgeView edgeView;
     edgeView = new ConnectorEdgeView((ConnectorEdge)edge, startNodeView, endNodeView);
     
@@ -929,7 +848,6 @@ public class MontiArcController extends AbstractDiagramController {
     else {
       edgeView = null;
     }
-    System.out.println("Edge View get Ref Edge " + edgeView.getRefEdge());
     return addEdgeView(edgeView);
   }
 
@@ -947,11 +865,8 @@ public class MontiArcController extends AbstractDiagramController {
         nodeView.setSelected(false);
       }
     }
-    System.out.println("We are in drawSelected");
-    System.out.println("selectedEdges looks as " + selectedEdges.toString());
     for (AbstractEdgeView edgeView : allEdgeViews) {
       if (selectedEdges.contains(edgeView)) {
-        System.out.println("edgeView is selected ? " + selectedEdges.contains(edgeView) + edgeView.toString());
         ((ConnectorEdgeView)edgeView).setSelected(true);
       }
       else {
@@ -972,12 +887,8 @@ public class MontiArcController extends AbstractDiagramController {
   
   public void checkPortNames() {
     for (AbstractNode node: graph.getAllNodes()) {
-      if (node instanceof PortNode) {
-
-        System.out.println("node.getTitile() " + node.getTitle());
-      }
       if(node instanceof PortNode) {
-        if (node.getTitle() == ""|| node.getTitle() == null) {
+        if (node.getTitle() == ""|| node.getTitle() == null || node.getTitle().isEmpty()) {
           String name = ((PortNode)node).getPortType();
           name = name.replaceAll("([A-Z])", "$1").toLowerCase();
           node.setTitle(name);

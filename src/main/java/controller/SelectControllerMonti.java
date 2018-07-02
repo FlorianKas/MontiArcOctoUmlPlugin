@@ -44,9 +44,10 @@ public class SelectControllerMonti {
         if (!(edgeView instanceof MessageEdgeView) && (distanceToLine(edgeView.getStartLine(), event.getX(), event.getY()) < 15 || distanceToLine(edgeView.getMiddleLine(), event.getX(), event.getY()) < 15 || distanceToLine(edgeView.getStartLine(), event.getX(), event.getY()) < 15)) {
           diagramController.selectedEdges.add(edgeView);
           if (event.getClickCount() == 1) {
+            System.out.println("Event clicked once!!!!!!!!!!!!!!!!!!!!!");
             edgeView.setSelected(true);
-            diagramController.setTool(ToolEnum.SELECT);
-            diagramController.setButtonClicked(diagramController.selectBtn);
+//            diagramController.setTool(ToolEnum.SELECT);
+//            diagramController.setButtonClicked(diagramController.selectBtn);
           }
           else {
             ((MontiArcController)diagramController).edgeController.showEdgeEditDialog(edgeView.getRefEdge());
@@ -64,14 +65,16 @@ public class SelectControllerMonti {
         }
       }
     }
-    else if (diagramController.getTool() == ToolEnum.SELECT) {
+    else if (diagramController.getTool() == ToolEnum.SELECT ) {
       for (AbstractEdgeView edgeView : diagramController.allEdgeViews) {
         if (!(edgeView instanceof MessageEdgeView) && (distanceToLine(edgeView.getStartLine(), event.getX(), event.getY()) < 15 || distanceToLine(edgeView.getMiddleLine(), event.getX(), event.getY()) < 15 || distanceToLine(edgeView.getEndLine(), event.getX(), event.getY()) < 15)) {
           if (!diagramController.selectedEdges.contains(edgeView)) {
             diagramController.selectedEdges.add(edgeView);
           }
           if (event.getClickCount() == 1) {
-            diagramController.selectedEdges.add(edgeView);
+//            diagramController.selectedEdges.add(edgeView);
+            edgeView.setSelected(true);
+            System.out.println("Event clicked once with Select !!!!!!!!!!!!!!!!!!!!!");
             diagramController.setTool(ToolEnum.SELECT);
             diagramController.setButtonClicked(diagramController.selectBtn);
             // diagramController.edgeController.onMousePressDragEdge(event);

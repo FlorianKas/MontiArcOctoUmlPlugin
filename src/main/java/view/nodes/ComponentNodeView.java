@@ -294,10 +294,16 @@ public class ComponentNodeView extends AbstractNodeView {
     if (selected) {
       rectangle.setStrokeWidth(2);
       setStroke(ConstantsMonti.selected_color);
+      for (PortNodeView pView : portViews) {
+        pView.setSelected(selected);
+      }
     }
     else {
       rectangle.setStrokeWidth(1);
       setStroke(Color.BLACK);
+      for (PortNodeView pView : portViews) {
+        pView.setSelected(selected);
+      }
     }
   }
   

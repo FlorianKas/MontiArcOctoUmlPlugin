@@ -6,6 +6,7 @@ import edu.tamu.core.sketch.Shape;
 import edu.tamu.core.sketch.Stroke;
 import edu.tamu.recognition.paleo.PaleoConfig;
 import edu.tamu.recognition.paleo.PaleoSketchRecognizer;
+import exceptions.SketchNotRecError;
 import javafx.geometry.Point2D;
 import javafx.scene.layout.Pane;
 import model.*;
@@ -16,6 +17,7 @@ import model.nodes.AbstractNode;
 import model.nodes.ClassNode;
 import model.nodes.ComponentNode;
 import model.nodes.PortNode;
+import plugin.MontiCoreException;
 import model.nodes.Node;
 import util.commands.AddDeleteEdgeCommand;
 import util.commands.AddDeleteNodeCommand;
@@ -54,8 +56,9 @@ public class MontiRecognizeController{
     recognizer.recognize().getBestShape();
   }
 
-  public synchronized void recognize(List<Sketch> sketches) {  
-    boolean probs = false;
+  public synchronized ArrayList recognize(List<Sketch> sketches) {
+	ArrayList<MontiCoreException> errorList = new ArrayList();
+	boolean probs = false;
     ArrayList<AbstractNode> recognizedNodes = new ArrayList();
     ArrayList<Sketch> sketchesToBeRemoved = new ArrayList<>();
     ArrayList<AbstractEdge> recognizedEdges = new ArrayList<>();
@@ -75,6 +78,7 @@ public class MontiRecognizeController{
           }
         }
         else {
+          errorList.add(new SketchNotRecError());
           System.out.println("Sketch " + s + " could not be recogniezd as a box");
           probs = true;
         }
@@ -314,15 +318,16 @@ public class MontiRecognizeController{
       diagramController.deleteSketch(sketch, recognizeCompoundCommand, false);
     }
     
-    for (Sketch s : sketches) {
-      if(!(sketchesToBeRemoved.contains(s))) {
-        diagramController.deleteSketch(s, recognizeCompoundCommand, false);
-      }
-    }
+//    for (Sketch s : sketches) {
+//      if(!(sketchesToBeRemoved.contains(s))) {
+//        diagramController.deleteSketch(s, recognizeCompoundCommand, false);
+//      }
+//    }
     
     if(recognizeCompoundCommand.size() > 0){
       diagramController.getUndoManager().add(recognizeCompoundCommand);
-    }        
+    }
+	return errorList;        
   }
   
   public Node findNode(Graph g, Point2D point) {

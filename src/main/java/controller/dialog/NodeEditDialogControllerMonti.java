@@ -23,6 +23,8 @@ public class NodeEditDialogControllerMonti extends NodeEditDialogController{
   @FXML
   private TextField nameField;
   @FXML
+  private TextField subNameField;
+  @FXML
   private TextField genericsField;
   @FXML
   private TextField stereotypeField;
@@ -55,16 +57,10 @@ public class NodeEditDialogControllerMonti extends NodeEditDialogController{
    * @param node
    */
   public void setNode(AbstractNode node) {
-    if (node instanceof ClassNode) {
-      this.node = (ClassNode) node;
-    
-      titleField.setText(this.node.getTitle());
-      attributesArea.setText(((ClassNode)this.node).getAttributes());
-      operationsArea.setText(((ClassNode)this.node).getOperations());
-    }
-    else if (node instanceof ComponentNode) {
+    if (node instanceof ComponentNode) {
       this.node = (ComponentNode) node;
       nameField.setText(((ComponentNode)this.node).getTitle());
+      subNameField.setText(((ComponentNode)this.node).getSubName());
       typeField.setText(((ComponentNode)this.node).getComponentType());
       stereotypeField.setText(((ComponentNode)this.node).getStereotype());
       genericsField.setText(((ComponentNode) this.node).getGenerics());
@@ -97,6 +93,10 @@ public class NodeEditDialogControllerMonti extends NodeEditDialogController{
   
   public String getName() {
     return nameField.getText();
+  }
+  
+  public String getSubName() {
+    return subNameField.getText();
   }
   
   public String getStereotype() {
@@ -160,6 +160,14 @@ public class NodeEditDialogControllerMonti extends NodeEditDialogController{
     }
     else {
       return !((ComponentNode)this.node).getTitle().equals(nameField.getText());
+    }
+  }
+  public boolean hasSubNameChanged() {
+    if (((ComponentNode)this.node).getSubName() == null) {
+      return nameField.getText() != null;
+    }
+    else {
+      return !((ComponentNode)this.node).getSubName().equals(nameField.getText());
     }
   }
   

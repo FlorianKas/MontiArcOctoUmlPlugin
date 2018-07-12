@@ -1,3 +1,0 @@
-package tmp;
-component Modelle {
-}

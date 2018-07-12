@@ -17,6 +17,7 @@ public class ComponentNode extends AbstractNode implements Serializable {
   private String generics = "";
   private String aTitle = ""; 
   private ArrayList<PortNode> Ports = new ArrayList<>();
+  private String subName ="";
   
   
   public ComponentNode(double x, double y, double height, double width, ArrayList<PortNode> ports) {
@@ -164,6 +165,16 @@ public class ComponentNode extends AbstractNode implements Serializable {
   
   public String getComponentType() {
     return componentType;  
+  }
+
+  public String getSubName() {
+    return subName;
+  }
+
+  public void setSubName(String subName) {
+    this.subName = subName;
+    changes.firePropertyChange(ConstantsMonti.changeNodeSubName, null, subName);
+    remoteChanges.firePropertyChange(ConstantsMonti.changeNodeSubName, null, subName);
   }
   
   

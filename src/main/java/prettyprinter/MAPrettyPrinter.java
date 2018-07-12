@@ -1,4 +1,4 @@
-package controller;
+package prettyprinter;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -92,15 +92,17 @@ public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
   }
   
   public void printComponentOuter(ASTComponent astComp) {
-    if(astComp.getStereotype().isPresent()) {
-      if (!astComp.getStereotype().get().getValues().get(0).getName().isEmpty()) {
-        getPrinter().print(" " + astComp.getStereotype().get().getValues().get(0).getName() + " ");
-        stereo = false;
-      }
-    }
-    else {
-      stereo = true;
-    }
+//    if(astComp.getStereotype().isPresent()) {
+//      System.out.println("StereoType " + astComp.getStereotype());	
+//      if (!astComp.getStereotype().get().getValues().get(0).getName().equals("")) {
+//        getPrinter().print(" " + astComp.getStereotype().get().getValues().get(0).getName() + " ");
+//        stereo = false;
+//      }
+//    }
+//    else {
+//      stereo = true;
+//    }
+    stereo = true;
     getPrinter().print("component ");
     getPrinter().print(astComp.getName() + " ");
     printComponentHead(astComp.getHead());
@@ -299,9 +301,21 @@ public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
             }
           }
         }
-        String compName = ((ASTComponent)e).getName();
-        if(Character.isUpperCase(compName.charAt(0))) {
-          compName = compName.substring(0, 1).toLowerCase() + compName.substring(1);
+        String compName = "";
+        if ( ((ASTComponent)e).getInstanceName().isPresent() && !(((ASTComponent)e).getInstanceName().get().equals(""))) {
+          String tmpName = ((ASTComponent)e).getInstanceName().get();
+          if(Character.isUpperCase(tmpName.charAt(0))) {
+            compName = tmpName.substring(0, 1).toLowerCase() + tmpName.substring(1);
+          }
+          else {
+            compName = tmpName;
+          }
+        }
+        else {
+          compName = ((ASTComponent)e).getName();
+          if(Character.isUpperCase(compName.charAt(0))) {
+            compName = compName.substring(0, 1).toLowerCase() + compName.substring(1);
+          }
         }
         getPrinter().print(" " +compName);
         getPrinter().println(";");
@@ -391,7 +405,7 @@ public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
   public void printConnector(ASTConnector astConnector) {
     getPrinter().print("  ");
     if (astConnector.getStereotype().isPresent()) {
-      getPrinter().print(astConnector.getStereotype());
+      getPrinter().print(astConnector.getStereotype().get());
     }
 //    getPrinter().indent();
     getPrinter().print("connect ");

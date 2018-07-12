@@ -40,6 +40,7 @@ public class ConstantsMonti extends Constants{
   public static String changeClassNodeOperations = "ClassNodeOperations";
   public static String changeNodeIsChild = "ClassNodeIsChild";
   public static String changeLifelineLength = "LifelineLength";
+  public static String changeNodeSubName ="changeSubName";
   
   public static String changeEdgeStereoType = "StereoType";
   public static String changeEdgeDirection = "EdgeDirection";

@@ -7,8 +7,8 @@ import model.nodes.PortNode;
 import util.ConstantsMonti;
 
 public class ConnectorEdge extends AbstractEdge{
-  private String dataType;
-  private String stereoType;
+  private String dataType = "";
+  private String stereoType = "";
   
   public ConnectorEdge(PortNode startPort, PortNode endPort) {
     super(startPort, endPort);

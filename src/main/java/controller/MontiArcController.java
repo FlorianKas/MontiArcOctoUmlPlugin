@@ -3,6 +3,7 @@ package controller;
 import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.controlsfx.control.Notifications;
 
@@ -39,6 +40,9 @@ import model.nodes.PortNode;
 import plugin.MontiArcPlugin;
 import plugin.MontiCoreException;
 import exceptions.ConnectorNotCompatibleException;
+import exceptions.InnerNameLow;
+import exceptions.InnerNameMissingException;
+import exceptions.PortTypeException;
 import exceptions.allFine;
 
 import util.commands.AddDeleteNodeCommand;
@@ -606,6 +610,10 @@ public class MontiArcController extends AbstractDiagramController {
     errorList1 = errors;
   }
   
+  private void addErrors(ArrayList<MontiCoreException> errors) {
+	errorList1.addAll(errors);
+  }
+  
   public ArrayList<MontiCoreException> getErrors(){
     return errorList1;
   }
@@ -708,8 +716,18 @@ public class MontiArcController extends AbstractDiagramController {
     
     deleteBtn.setOnAction(event -> deleteSelected());
     
-    recognizeBtn.setOnAction(event -> recognizeController.recognize(selectedSketches));
-    
+    recognizeBtn.setOnAction(event -> {
+      ArrayList errors = recognizeController.recognize(selectedSketches);
+      if (!errors.isEmpty()) {
+      	setErrors(errors);
+      }
+      else {
+    	ArrayList<MontiCoreException> tmp = new ArrayList<MontiCoreException>();
+        tmp.add(new allFine());
+        setErrors(tmp);
+      }
+    	
+    });
     voiceBtn.setOnAction(event -> {
       if (voiceController.voiceEnabled) {
         Notifications.create().title("Voice disabled").text("Voice commands are now disabled.").showInformation();
@@ -723,19 +741,41 @@ public class MontiArcController extends AbstractDiagramController {
     
    
     checkValidityBtn.setOnAction(event -> {
-      checkPortNames();
-      ArrayList errors1 = checkPortsCompatibility();
-      System.out.println("Errors1 " + errors1.toString());
-      if (!errors1.isEmpty()) {
-        setErrors(errors1);
+      ArrayList<MontiCoreException> tmp1 = new ArrayList<MontiCoreException>();
+      tmp1.add(new allFine());
+      setErrors(tmp1);  	
+      ArrayList errors2 = checkPortTypes();
+      ArrayList errors3 = checkCompNames();
+      System.out.println("Errors2 " + errors2.toString());
+      if (!errors2.isEmpty()) {
+    	if(!errors3.isEmpty()) {
+    	  errors2.addAll(errors3);
+    	  setErrors(errors2);
+    	}
       }
       else {
-        ArrayList<String> arg = new ArrayList<String>();
-        arg.add(modelName);
-        MontiArcPlugin plug = plugin.getInstance();
-        ASTNode node = plug.shapeToAST(graph, arg);
-        ArrayList<MontiCoreException> errors = (ArrayList<MontiCoreException>) plug.check(node, getNodeMap());
-        setErrors(errors);
+	    checkPortNames();
+	    ArrayList errors1 = checkPortsCompatibility();
+	    System.out.println("Errors1 " + errors1.toString());
+	    if (!errors1.isEmpty()) {
+	      setErrors(errors1);
+	    }
+	    else {
+	      
+	      ArrayList<String> arg = new ArrayList<String>();
+	      arg.add(modelName);
+	      MontiArcPlugin plug = plugin.getInstance();
+	      ASTNode node = plug.shapeToAST(graph, arg);
+	      ArrayList<MontiCoreException> errors = (ArrayList<MontiCoreException>) plug.check(node, getNodeMap());
+	      if (errors.isEmpty()) {
+	    	ArrayList<MontiCoreException> tmp = new ArrayList<MontiCoreException>();
+	        tmp.add(new allFine());
+	        setErrors(tmp);
+          }
+	      else {
+	    	setErrors(errors);
+	  	  }
+	    }
       }
     });
     
@@ -757,7 +797,13 @@ public class MontiArcController extends AbstractDiagramController {
     topBox.setOnMouseClicked(event -> this.showSomething());
     
     generateBtn.setOnAction(event -> {
-      if (errorList1.isEmpty()) {
+      boolean good = true;	
+      for (MontiCoreException e: errorList1) {
+    	if (!(e instanceof allFine)) {
+    	  good = false;  	
+    	}
+      }
+      if (good == true) {
         MontiArcPlugin plug = plugin.getInstance();
         plug.generateCode(null, null, null);
         showErrorLog(plug.getGenErrorList());
@@ -766,7 +812,22 @@ public class MontiArcController extends AbstractDiagramController {
     });
   }
   
-  private ArrayList<MontiCoreException> checkPortsCompatibility() {
+  private ArrayList checkCompNames() {
+	ArrayList<MontiCoreException> errorList = new ArrayList();
+	for (AbstractNode node : graph.getAllNodes()) {
+	  if (node instanceof ComponentNode) {
+		if (((ComponentNode)node).getTitle() == null) {
+		  errorList.add(new InnerNameMissingException(node, getNodeView(node, getNodeMap())));	
+		}
+		else if(((ComponentNode)node).getTitle() != null && Character.isLowerCase(((ComponentNode)node).getTitle().charAt(0))) {
+	      errorList.add(new InnerNameLow(node,getNodeView(node, getNodeMap())));	
+		}
+	  }
+	}
+	return errorList;
+}
+
+private ArrayList<MontiCoreException> checkPortsCompatibility() {
     ArrayList<MontiCoreException> errorList = new ArrayList();
     for (Edge edge : graph.getAllEdges()) {
       if (edge instanceof ConnectorEdge) {
@@ -789,6 +850,27 @@ public class MontiArcController extends AbstractDiagramController {
     return errorList;
     // TODO Auto-generated method stub
     
+  }
+  
+  private ArrayList<MontiCoreException> checkPortTypes() {
+	ArrayList<MontiCoreException> errorList = new ArrayList();
+	for (AbstractNode node : graph.getAllNodes()) {
+	  if (node instanceof PortNode) {
+		if (((PortNode)node).getPortType().equals("")) {
+		  errorList.add(new PortTypeException(node, getNodeView(node, getNodeMap())));	
+		}
+	  }
+	}
+    return errorList;
+  }
+  
+  private AbstractNodeView getNodeView(AbstractNode node, HashMap<AbstractNodeView, AbstractNode> arg1) {
+	for (AbstractNodeView nodeView : arg1.keySet()) {
+	  if (arg1.get(nodeView) == node) {
+	    return nodeView;
+	  }
+	}
+	return null;
   }
 
   public AbstractNodeView createNodeView(AbstractNode node, boolean remote) {

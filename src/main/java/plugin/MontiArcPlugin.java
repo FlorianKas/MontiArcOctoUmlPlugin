@@ -1,21 +1,19 @@
 package plugin;
 
 import java.io.BufferedWriter;
-import de.monticore.java.symboltable.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
 import controller.AbstractDiagramController;
-import controller.MAPrettyPrinter;
 import controller.MontiArcController;
-
+import de.montiarcautomaton.generator.MontiArcGeneratorTool;
 import de.monticore.ast.ASTNode;
-import de.monticore.java.javadsl._ast.ASTImportDeclaration;
 import de.monticore.prettyprint.IndentPrinter;
 import de.monticore.types.prettyprint.TypesPrettyPrinterConcreteVisitor;
 import de.monticore.types.types._ast.ASTImportStatement;
@@ -24,10 +22,10 @@ import de.monticore.types.types._ast.ASTSimpleReferenceType;
 import de.monticore.types.types._ast.ASTType;
 import de.monticore.types.types._ast.ASTTypeArguments;
 import de.monticore.types.types._ast.ASTTypeParameters;
-import de.monticore.types.types._ast.ASTTypeVariableDeclaration;
 import de.monticore.types.types._ast.TypesNodeFactory;
 import de.monticore.types.types._parser.TypesParser;
-
+import de.se_rwth.commons.logging.Finding;
+import de.se_rwth.commons.logging.Log;
 import exceptions.ComponentGenericsException;
 import exceptions.ConnectorSourceException;
 import exceptions.ConnectorTargetsException;
@@ -41,7 +39,6 @@ import exceptions.PortDirectionException;
 import exceptions.PortTypeException;
 import exceptions.cocoError;
 import exceptions.genOuterExtendException;
-import exceptions.genOuterVarWrong;
 import exceptions.genSplitException;
 import exceptions.genTypeWrong;
 import exceptions.genTypeWrongOuter;
@@ -58,24 +55,24 @@ import model.edges.Edge;
 import model.nodes.AbstractNode;
 import model.nodes.ComponentNode;
 import model.nodes.PortNode;
-import montiarc.MontiArcTool;
-import montiarc._ast.*;
+import montiarc._ast.ASTComponent;
+import montiarc._ast.ASTComponentBody;
+import montiarc._ast.ASTComponentHead;
+import montiarc._ast.ASTConnector;
+import montiarc._ast.ASTElement;
+import montiarc._ast.ASTInterface;
+import montiarc._ast.ASTMACompilationUnit;
+import montiarc._ast.ASTParameter;
+import montiarc._ast.ASTPort;
+import montiarc._ast.ASTStereoValue;
+import montiarc._ast.ASTStereotype;
+import montiarc._ast.ASTValuation;
+import montiarc._ast.MontiArcNodeFactory;
 import montiarc._parser.MontiArcParserTOP;
 import montiarc._symboltable.MontiArcLanguage;
+import prettyprinter.MAPrettyPrinter;
 import view.edges.AbstractEdgeView;
 import view.nodes.AbstractNodeView;
-import de.montiarcautomaton.generator.MontiArcGeneratorTool;
-
-import de.monticore.templateclassgenerator.Modelfinder;
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-
-import de.se_rwth.commons.logging.Finding;
-import de.se_rwth.commons.logging.Log;
-
-import de.montiarcautomaton.generator.codegen.MAAGenerator;
 
 public class MontiArcPlugin implements MontiCorePlugIn {
 
@@ -558,6 +555,7 @@ public class MontiArcPlugin implements MontiCorePlugIn {
     ASTTypeParameters typeParams = parseGenerics(gens1, ex2, null);
     
     
+    
     // Now for ComponentNodes
     
     for (AbstractNode node : arg0.getAllNodes()) {
@@ -589,8 +587,9 @@ public class MontiArcPlugin implements MontiCorePlugIn {
       ASTComponent astComponent = null;
       
         // create outermost component head
+      ASTSimpleReferenceType superCompOut = MontiArcNodeFactory.createASTSimpleReferenceType();
       ASTComponentHead astHead = 
-          MontiArcNodeFactory.createASTComponentHead(typeParams, allParams, null);
+          MontiArcNodeFactory.createASTComponentHead(typeParams, allParams, superCompOut);
         
       // create params for outermost component body
       for (AbstractNode node : arg0.getAllNodes()) {
@@ -645,8 +644,9 @@ public class MontiArcPlugin implements MontiCorePlugIn {
           }
           
           ArrayList<String> names = new ArrayList<String>();
+          ASTSimpleReferenceType superComp = MontiArcNodeFactory.createASTSimpleReferenceType();
           ASTComponentHead head = 
-              MontiArcNodeFactory.createASTComponentHead(typeGenComp,typesComp, null);
+              MontiArcNodeFactory.createASTComponentHead(typeGenComp,typesComp, superComp);
           ArrayList<ASTElement> bodyElements = new ArrayList<ASTElement>();
           
        // create AstPorts
@@ -721,11 +721,17 @@ public class MontiArcPlugin implements MontiCorePlugIn {
                   }
                 }
                 else {
-                  String tit = ((PortNode)c.getStartNode()).getComponentNode().getTitle();
-                  if (!Character.isLowerCase(tit.charAt(0))) {
-                    tit = tit.substring(0, 1).toLowerCase() + tit.substring(1);
+                  if (((PortNode)c.getEndNode()).getComponentNode().getSubName().equals("")) {
+                    String tit = ((PortNode)c.getStartNode()).getComponentNode().getTitle();
+                    if (!Character.isLowerCase(tit.charAt(0))) {
+                      tit = tit.substring(0, 1).toLowerCase() + tit.substring(1);
+                    }
+                    title.add(tit);  
                   }
-                  title.add(tit);
+                  else {
+                    String subName1 = ((PortNode)c.getStartNode()).getComponentNode().getSubName();
+                    title.add(subName1);
+                  }
                   title.add(portName);
                 }
               }
@@ -761,19 +767,29 @@ public class MontiArcPlugin implements MontiCorePlugIn {
                     }
                   }
                   else {
-                    String tit = ((PortNode)e.getEndNode()).getComponentNode().getTitle();
-                    if (!Character.isLowerCase(tit.charAt(0))) {
-                      tit = tit.substring(0, 1).toLowerCase() + tit.substring(1);
+                    if (((PortNode)e.getEndNode()).getComponentNode().getSubName().equals("")) {
+                      String tit = ((PortNode)e.getEndNode()).getComponentNode().getTitle();
+                      if (!Character.isLowerCase(tit.charAt(0))) {
+                        tit = tit.substring(0, 1).toLowerCase() + tit.substring(1);
+                      }
+                      target.add(tit);  
                     }
-                    target.add(tit);
+                    else {
+                      String subName = ((PortNode)e.getEndNode()).getComponentNode().getSubName();
+                      target.add(subName);
+                    }
                     target.add(portNameTarget);
                   }
                   ASTQualifiedName astTarget = TypesNodeFactory.createASTQualifiedName(target);
                   targets.add(astTarget);
                 }  
               }
+              ASTStereoValue stereoConnectVal = MontiArcNodeFactory.createASTStereoValue(c.getStereoType(), "");
+              ArrayList<ASTStereoValue> stereoConnectVals = new ArrayList<ASTStereoValue>();
+              stereoConnectVals.add(stereoConnectVal);
+              ASTStereotype stereoConnect = MontiArcNodeFactory.createASTStereotype(stereoConnectVals);
               ASTConnector astConnector =
-                  MontiArcNodeFactory.createASTConnector(null, source, targets);
+                  MontiArcNodeFactory.createASTConnector(stereoConnect, source, targets);
               astConnect.put(astConnector, tEdges);
               bodyElements.add(astConnector);
             }
@@ -796,8 +812,12 @@ public class MontiArcPlugin implements MontiCorePlugIn {
             
           }
           
+          String compName = node.getTitle().split(" ")[0];
+          String instanceName = (((ComponentNode) node).getSubName());
+          System.out.println("instanceName " + instanceName);
           astComponent = 
-              MontiArcNodeFactory.createASTComponent(stereotype, node.getTitle(), head, "", typeArgs, astBody);
+              MontiArcNodeFactory.createASTComponent(stereotype, compName , 
+                  head, instanceName, typeArgs, astBody);
           astMap.put(astComponent, node);
          // add each astComponent to elementsList (the list for the body of the outermost component)
           elements.add(astComponent);
@@ -808,8 +828,10 @@ public class MontiArcPlugin implements MontiCorePlugIn {
      ASTComponentBody astBody = 
          MontiArcNodeFactory.createASTComponentBody(elements);
      // create outermost component
+     ASTStereotype stereoOutComp = MontiArcNodeFactory.createASTStereotype();
+     ASTTypeArguments typeArgsOut = TypesNodeFactory.createASTTypeArguments();
      ASTComponent astComp = 
-         MontiArcNodeFactory.createASTComponent(null, arg1.get(0), astHead, null, null, astBody);
+         MontiArcNodeFactory.createASTComponent(stereoOutComp, arg1.get(0), astHead, "", typeArgsOut, astBody);
      // create AST
      ASTMACompilationUnit ast = 
          MontiArcNodeFactory.createASTMACompilationUnit(packageParts, importDecls, astComp);

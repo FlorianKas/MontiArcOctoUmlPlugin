@@ -63,26 +63,7 @@
 		</extensions>
 
 		<plugins>
-			<!-- MontiCore Generation -->
-			<!-- <plugin> -->
-			<!-- <groupId>de.monticore.mojo</groupId> -->
-			<!-- <artifactId>monticore-maven-plugin</artifactId> -->
-			<!-- <version>${monticore.version}</version> -->
-			<!-- <executions> -->
-			<!-- <execution> -->
-			<!-- <configuration> -->
-			<!-- <script>de/monticore/monticore_noemf.groovy</script> -->
-			<!-- </configuration> -->
-			<!-- <goals> -->
-			<!-- <goal>generate</goal> -->
-			<!-- </goals> -->
-			<!-- </execution> -->
-			<!-- </executions> -->
-			<!-- </plugin> -->
-
-			<!-- Other Configuration -->
-			
-		<plugin>
+	    <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
         <version>2.10</version>
@@ -150,7 +131,7 @@
           </dependency>
         </dependencies>
       </plugin>
-    
+     
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -244,7 +225,7 @@
 <dependency>
   <groupId>montiarc.generators</groupId>
   <artifactId>maa2java</artifactId>
-  <version>4.3.4-SNAPSHOT</version>
+  <version>4.3.3</version>
 </dependency>
 <dependency>
   <groupId>octouml</groupId>
@@ -254,7 +235,7 @@
 	<dependency>
   <groupId>montiarc.languages</groupId>
   <artifactId>montiarc-fe</artifactId>
-  <version>4.3.4-SNAPSHOT</version>
+  <version>4.3.3</version>
 </dependency>
 	
 <!-- 

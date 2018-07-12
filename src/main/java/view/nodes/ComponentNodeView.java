@@ -268,7 +268,12 @@ public class ComponentNodeView extends AbstractNodeView {
       type.setText(node.getComponentType());
     }
     if(node.getTitle() != null) {
-      name.setText(node.getTitle());
+      if(node.getSubName() != null) {
+        name.setText(node.getTitle() + " " + node.getSubName());
+      }
+      else {
+        name.setText(node.getTitle());
+      }
     }
     if(node.getStereotype() != null) {
       stereotype.setText(node.getStereotype());
@@ -356,6 +361,12 @@ public class ComponentNodeView extends AbstractNodeView {
     super.propertyChange(evt);
     if (evt.getPropertyName().equals(Constants.changeNodeX)) {
       setX((double) evt.getNewValue());
+    }
+    else if (evt.getPropertyName().equals(Constants.changeNodeTitle)) {
+      name.setText((String) evt.getNewValue() + " " + ((ComponentNode)this.getRefNode()).getSubName());
+    }
+    else if (evt.getPropertyName().equals(ConstantsMonti.changeNodeSubName) ) {
+      name.setText(this.getRefNode().getTitle() + " " + (String) evt.getNewValue());
     }
     else if (evt.getPropertyName().equals(Constants.changeNodeY)) {
       setY((double) evt.getNewValue());

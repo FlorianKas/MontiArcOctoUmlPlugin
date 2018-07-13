@@ -22,6 +22,7 @@ import de.monticore.types.types._ast.ASTSimpleReferenceType;
 import de.monticore.types.types._ast.ASTType;
 import de.monticore.types.types._ast.ASTTypeArguments;
 import de.monticore.types.types._ast.ASTTypeParameters;
+import de.monticore.types.types._ast.ASTTypeVariableDeclaration;
 import de.monticore.types.types._ast.TypesNodeFactory;
 import de.monticore.types.types._parser.TypesParser;
 import de.se_rwth.commons.logging.Finding;
@@ -29,6 +30,7 @@ import de.se_rwth.commons.logging.Log;
 import exceptions.ComponentGenericsException;
 import exceptions.ConnectorSourceException;
 import exceptions.ConnectorTargetsException;
+import exceptions.DuplicateParam;
 import exceptions.ImportException;
 import exceptions.InnerNameLow;
 import exceptions.InnerNameMissingException;
@@ -83,9 +85,9 @@ public class MontiArcPlugin implements MontiCorePlugIn {
   private List<AbstractNode> nameErrors = new ArrayList<AbstractNode>();
   private boolean outerName = true;
   private List<String> astPack = new ArrayList<String>();
-  private List errorList = new ArrayList();
+  private ArrayList<MontiCoreException> errorList = new ArrayList<MontiCoreException>();
   private List<Finding> oldFindings = new ArrayList<Finding>();
-  private List genErrorList = new ArrayList();
+  private List<MontiCoreException> genErrorList = new ArrayList<MontiCoreException>();
   
   public static MontiArcPlugin getInstance() {
     return plugIn;
@@ -362,8 +364,9 @@ public class MontiArcPlugin implements MontiCorePlugIn {
             
             if (par.isPresent()) {
               allParams.add(par.get());
+              
             }
-            String test4 ="(([a-zA-z])+([a-zA-z0-9])*)\\s(([a-zA-z])+([a-zA-z0-9])*)(\\s)*(=(\\s)*([a-zA-z0-9]|')*)"; 
+            String test4 ="(([a-zA-z])+([a-zA-z0-9])*)\\s(([a-zA-z])+([a-zA-z0-9])*)(\\s)*(=(\\s)*([a-zA-z0-9]|'))*"; 
             System.out.println(s.matches(test4));
             if (!s.matches(test4)) {
               if (ex instanceof genTypeWrongParam) {
@@ -373,6 +376,7 @@ public class MontiArcPlugin implements MontiCorePlugIn {
                 errorList.add(new genTypeWrongParamOuter("Configs should have the form int i = 5 and are separated with ','", node, null));
               }
             }
+
             List<Finding> findings = Log.getFindings();
             findings = findings.subList(oldFindings.size(), findings.size());
             System.out.println("Findings " + findings);
@@ -534,25 +538,27 @@ public class MontiArcPlugin implements MontiCorePlugIn {
     
     //checking for Generics (also checked for all Components)
     
-    ArrayList<String> generics = MontiArcController.genericsArray;
-    String gens1 = "<";
-    for (String g : generics) {
-      System.out.println("g " +g);
-      if(!g.isEmpty()) {
-        if (!g.contains("extends")) {
-          errorList.add(new genOuterExtendException());
-        }
-        else if(g.split("extends").length > 2) {
-          errorList.add(new genSplitException());
-        }
-        else {
-          gens1 = gens1 + g;
-        }
-      }
-    }
-    gens1 = gens1 + ">";
+//    ArrayList<String> generics = MontiArcController.genericsArray;
+    String gens = "<" + arg1.get(1) + ">";
+    System.out.println("GEEEENS " + gens);
+//    String gens1 = "<";
+//    for (String g : generics) {
+//      System.out.println("g " +g);
+//      if(!g.isEmpty()) {
+//        if (!g.contains("extends")) {
+//          errorList.add(new genOuterExtendException());
+//        }
+//        else if(g.split("extends").length > 2) {
+//          errorList.add(new genSplitException());
+//        }
+//        else {
+//          gens1 = gens1 + g;
+//        }
+//      }
+//    }
+//    gens1 = gens1 + ">";
     genTypeWrong ex2 = new genTypeWrong(null);
-    ASTTypeParameters typeParams = parseGenerics(gens1, ex2, null);
+    ASTTypeParameters typeParams = parseGenerics(gens, ex2, null);
     
     
     
@@ -573,11 +579,42 @@ public class MontiArcPlugin implements MontiCorePlugIn {
     genTypeWrongParam ex3 = new genTypeWrongParam(null);
     ArrayList<ASTParameter> allParams = parseTypes(astTypes, ex3, null);
     
+    for (ASTParameter p : allParams) {
+      for (ASTParameter pam : allParams) {
+      	if (p != pam) {
+      	  if (p.getName().equals(pam.getName())){
+      	    errorList.add(new DuplicateParam());	  
+      	  }
+        }
+      }
+    }
     for (AbstractNode node : arg0.getAllNodes()) {
       if (node instanceof ComponentNode) {
         String genComp = ((ComponentNode)node).getComponentType();
+        ArrayList<String> compTypes = new ArrayList<String>();
+        for (String s : genComp.split("\\,")) {
+          compTypes.add(s);  	
+        }
         genTypeWrongParamOuter ex4 = new genTypeWrongParamOuter(null,null,null);
-        ASTTypeParameters bin = parseGenerics(genComp, ex4, node);
+        ArrayList<ASTParameter> bin = parseTypes(compTypes, ex4, node);
+        ArrayList<String> names = new ArrayList<String>();
+        for (ASTParameter b : bin) {
+          names.add(b.getName());	
+        }
+        for (ASTParameter p : allParams) {
+          if (bin.contains(p)) {
+        	errorList.add(new DuplicateParam());		  
+          }
+          else if (names.contains(p.getName())) {
+        	errorList.add(new DuplicateParam());  
+          }
+          else {
+        	bin.add(p);  
+          }
+        }
+        
+        
+        
       }
     }
     
@@ -585,15 +622,58 @@ public class MontiArcPlugin implements MontiCorePlugIn {
     if (errorList.isEmpty()) {
       ArrayList<ASTElement> elements = new ArrayList<ASTElement>();
       ASTComponent astComponent = null;
+      List<ASTTypeVariableDeclaration> gensOuter = typeParams.getTypeVariableDeclarations();
+      ArrayList<ASTTypeVariableDeclaration> gensToAdd = new ArrayList<ASTTypeVariableDeclaration>();
+      for (AbstractNode node:arg0.getAllNodes()) {
+    	if (node instanceof ComponentNode) {
+    	  String gen = ((ComponentNode) node).getGenerics();
+          gen = "<" + gen +">";
+            
+          Optional<ASTTypeParameters> arguments1 = Optional.of(TypesNodeFactory.createASTTypeParameters());
+          if (!gen.equals("<>")) {
+            try {
+              arguments1 = parser.parseString_TypeParameters(gen);
+            }
+            catch (IOException e2) {
+              // TODO Auto-generated catch block
+              e2.printStackTrace();
+            }
+          }
+          ASTTypeParameters typeGenComp = null;
+          if (arguments1.isPresent()) {
+            typeGenComp = arguments1.get();
+          }
+          // add all Generics from Modell
+          // remove duplicates
+          // check for errors like T extends String and T extends int
+//          List<ASTTypeVariableDeclaration> gensComp = typeGenComp.getTypeVariableDeclarations();
+          System.out.println("gensOuter " + gensOuter.toString());
+          for (ASTTypeVariableDeclaration g : typeGenComp.getTypeVariableDeclarations()) {
+            if (!typeParams.getTypeVariableDeclarations().contains(g)) {
+              for (ASTTypeVariableDeclaration gOut : typeParams.getTypeVariableDeclarations()) {
+            	System.out.println("gOut " + gOut + " its name " + gOut.getName());
+            	System.out.println("g " + g + " its name " + g.getName());
+            	if (!gOut.getName().equals(g.getName())) {
+            	  gensToAdd.add(g);	
+//            	  typeParams.getTypeVariableDeclarations().add(g);	
+              	}
+              }
+            }
+          }
+        }
+      }
+      for (ASTTypeVariableDeclaration g : gensOuter) {
+    	gensToAdd.add(g);  
+      }
+      ASTTypeParameters genCompAllOuter = TypesNodeFactory.createASTTypeParameters(gensToAdd);
+   // create outermost component head
       
-        // create outermost component head
-      ASTSimpleReferenceType superCompOut = MontiArcNodeFactory.createASTSimpleReferenceType();
-      ASTComponentHead astHead = 
-          MontiArcNodeFactory.createASTComponentHead(typeParams, allParams, superCompOut);
-        
       // create params for outermost component body
       for (AbstractNode node : arg0.getAllNodes()) {
         if (node instanceof ComponentNode) {
+          ArrayList<ASTTypeVariableDeclaration> gensToAddPro = new ArrayList<ASTTypeVariableDeclaration>();
+          List<ASTTypeVariableDeclaration> gensCompW = typeParams.getTypeVariableDeclarations();
+          gensToAddPro.addAll(gensCompW);  	
           ASTStereoValue value = MontiArcNodeFactory.createASTStereoValue(((ComponentNode)node).getStereotype(), "");
           List<ASTStereoValue> valueList = new ArrayList<ASTStereoValue>();
           valueList.add(value);
@@ -615,7 +695,20 @@ public class MontiArcPlugin implements MontiCorePlugIn {
           if (arguments1.isPresent()) {
             typeGenComp = arguments1.get();
           }
-          
+          System.out.println("Component has gens " + typeGenComp);
+          // add all Generics from Modell
+          // remove duplicates
+          // check for errors like T extends String and T extends int
+          for (ASTTypeVariableDeclaration g : typeGenComp.getTypeVariableDeclarations()) {
+            if (!gensToAddPro.contains(g)) {
+              for (ASTTypeVariableDeclaration gOut : typeParams.getTypeVariableDeclarations()) {
+            	if (!gOut.getName().equals(g.getName())) {
+            	  gensToAddPro.add(g);	
+            	}
+              }
+            }
+          }
+          ASTTypeParameters genCompAll = TypesNodeFactory.createASTTypeParameters(gensToAddPro);
           String tyComp = ((ComponentNode) node).getComponentType();
           String[] tyComp1 = tyComp.split("\\,");
           ArrayList<String> tyComp2 = new ArrayList<String>();
@@ -628,13 +721,21 @@ public class MontiArcPlugin implements MontiCorePlugIn {
             for (String s : tyComp2) {
               try {
                 Optional<ASTParameter> par = parser.parseString_Parameter(s);
-                Optional<ASTValuation> val1 = parser.parseString_Valuation(s.split("\\=")[1]);
-                if (par.isPresent()) {
-                  if (val1.isPresent()) {
-                    par.get().setDefaultValue(val1.get());
+                if (s.contains("\\=")) {
+                  Optional<ASTValuation> val1 = parser.parseString_Valuation(s.split("\\=")[1]);
+                  if (par.isPresent()) {
+                    if (val1.isPresent()) {
+                      par.get().setDefaultValue(val1.get());
+                    }
+                    typesComp.add(par.get());
                   }
-                  typesComp.add(par.get());
                 }
+                else {
+                  if (par.isPresent()) {
+                    typesComp.add(par.get());
+                  }	
+                }
+                
               }
               catch (IOException e1) {
                 // TODO Auto-generated catch block
@@ -646,7 +747,7 @@ public class MontiArcPlugin implements MontiCorePlugIn {
           ArrayList<String> names = new ArrayList<String>();
           ASTSimpleReferenceType superComp = MontiArcNodeFactory.createASTSimpleReferenceType();
           ASTComponentHead head = 
-              MontiArcNodeFactory.createASTComponentHead(typeGenComp,typesComp, superComp);
+              MontiArcNodeFactory.createASTComponentHead(genCompAll,typesComp, superComp);
           ArrayList<ASTElement> bodyElements = new ArrayList<ASTElement>();
           
        // create AstPorts
@@ -830,6 +931,10 @@ public class MontiArcPlugin implements MontiCorePlugIn {
      // create outermost component
      ASTStereotype stereoOutComp = MontiArcNodeFactory.createASTStereotype();
      ASTTypeArguments typeArgsOut = TypesNodeFactory.createASTTypeArguments();
+     ASTSimpleReferenceType superCompOut = MontiArcNodeFactory.createASTSimpleReferenceType();
+     ASTComponentHead astHead = 
+       MontiArcNodeFactory.createASTComponentHead(genCompAllOuter, allParams, superCompOut);
+     
      ASTComponent astComp = 
          MontiArcNodeFactory.createASTComponent(stereoOutComp, arg1.get(0), astHead, "", typeArgsOut, astBody);
      // create AST
@@ -890,8 +995,7 @@ public class MontiArcPlugin implements MontiCorePlugIn {
        }
      }
 
-       
-       // pretty Printing of inner components
+     // pretty Printing of inner components
      for (ASTElement e : ast.getComponent().getBody().getElements()) {
        if (e instanceof ASTComponent) {
          MAPrettyPrinter CompPrinter = new MAPrettyPrinter(indentPrinter);
@@ -902,7 +1006,7 @@ public class MontiArcPlugin implements MontiCorePlugIn {
            }
          }
         
-         CompPrinter.printComponentInner((ASTComponent) e,  ast.getComponent().getHead().getGenericTypeParameters());
+         CompPrinter.printComponentInner((ASTComponent) e,  ast.getComponent().getHead().getGenericTypeParameters(), ast);
          CompPrinter.getPrinter().flushBuffer();
          String nameComp = ((ASTComponent)e).getName();
          String first = "";

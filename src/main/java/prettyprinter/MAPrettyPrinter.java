@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,14 +20,12 @@ import de.monticore.types.prettyprint.TypesPrettyPrinterConcreteVisitor;
 import de.monticore.types.types._ast.ASTComplexReferenceType;
 import de.monticore.types.types._ast.ASTPrimitiveType;
 import de.monticore.types.types._ast.ASTSimpleReferenceType;
+import de.monticore.types.types._ast.ASTTypeArgument;
+import de.monticore.types.types._ast.ASTTypeArguments;
 import de.monticore.types.types._ast.ASTTypeParameters;
 import de.monticore.types.types._ast.ASTTypeVariableDeclaration;
 import de.monticore.types.types._ast.TypesNodeFactory;
 import montiarc._ast.*;
-import montiarc._ast.ASTComponentBody;
-import montiarc._ast.ASTComponentHead;
-import montiarc._ast.ASTParameter;
-import montiarc._ast.ASTPort;
 import montiarc._parser.MontiArcParserTOP;
 import plugin.MontiArcPlugin;
 
@@ -71,11 +70,11 @@ public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
     }
     getPrinter().print("component ");
     getPrinter().print(astComp.getName() + " ");
-    printComponentHead(astComp.getHead());
+    printComponentHead(astComp);
     printComponentBody(astComp.getBody());
   }
   
-  public void printComponentInner(ASTComponent astComp, Optional<ASTTypeParameters> optional) {
+  public void printComponentInner(ASTComponent astComp, Optional<ASTTypeParameters> optional, ASTMACompilationUnit ast) {
     if (astComp.getStereotype().isPresent()) {
       if (!astComp.getStereotype().get().getValues().get(0).getName().isEmpty()) {
         getPrinter().print(" " + astComp.getStereotype().get().getValues().get(0).getName() + " ");
@@ -87,7 +86,7 @@ public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
     }
     getPrinter().print("component ");
     getPrinter().print(astComp.getName() + " ");
-    printComponentHeadInner(astComp.getHead(), optional);
+    printComponentHeadInner(astComp.getHead(), optional, ast);
     printComponentBody(astComp.getBody());
   }
   
@@ -104,23 +103,63 @@ public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
 //    }
     stereo = true;
     getPrinter().print("component ");
+    ArrayList<ASTTypeVariableDeclaration> allGens = new ArrayList<ASTTypeVariableDeclaration>(); 
+//    for ( ASTElement e : astComp.getBody().getElements()) {
+//      if (e instanceof ASTComponent) {
+//    	if (((ASTComponent) e).getHead().getGenericTypeParameters().isPresent() 
+//    	  && ((ASTComponent) e).getHead().getGenericTypeParameters().get().getTypeVariableDeclarations() != null
+//    	  && !((ASTComponent) e).getHead().getGenericTypeParameters().get().getTypeVariableDeclarations().isEmpty()
+//        ){
+//    	  for (ASTTypeVariableDeclaration typeVar : ((ASTComponent) e).getHead().getGenericTypeParameters().get().getTypeVariableDeclarations()) {
+//    	    if (!allGens.contains(typeVar)) {
+//    	      allGens.add( typeVar);	
+//    	    }
+//    	  }
+//        }
+//      }
+//    }
+//    ASTTypeParameters allGensTo = TypesNodeFactory.createASTTypeParameters(allGens);
+//    handle(allGensTo);
     getPrinter().print(astComp.getName() + " ");
-    printComponentHead(astComp.getHead());
+    printComponentHead(astComp);
     List<ASTParameter> params = astComp.getHead().getParameters();
     printComponentBodyOuter(astComp.getBody(),params);
 //    printConnector(astComp.getBody());
   }
   
-  public void printComponentHead(ASTComponentHead astHead) {
-    System.out.println("generics empty? " + astHead.getGenericTypeParameters().isPresent());
-    if (astHead.getGenericTypeParameters().isPresent() && astHead.getGenericTypeParameters().get().getTypeVariableDeclarations() != null
-        && !astHead.getGenericTypeParameters().get().getTypeVariableDeclarations().isEmpty()
-        ) {
-      System.out.println("Generics are Present " + astHead.getGenericTypeParameters().get().getTypeVariableDeclarations() + 
-          astHead.getGenericTypeParameters().get().getTypeVariableDeclarations().isEmpty());
-      handle(astHead.getGenericTypeParameters().get());
-    }
-    int paramSize = astHead.getParameters().size();
+  public void printComponentHead(ASTComponent astComp) {
+	ASTComponentHead astHead = astComp.getHead();
+	ASTComponentBody astBody = astComp.getBody();
+	List<ASTElement> astElements = astBody.getElements();
+	ArrayList<ASTTypeVariableDeclaration> typeDecs = new ArrayList<ASTTypeVariableDeclaration>();
+	if (astHead.getGenericTypeParameters().isPresent() 
+	  && astHead.getGenericTypeParameters().get().getTypeVariableDeclarations() != null
+	  && !astHead.getGenericTypeParameters().get().getTypeVariableDeclarations().isEmpty()
+	) {
+	  System.out.println("Generics are Present " + astHead.getGenericTypeParameters().get().getTypeVariableDeclarations() + 
+	    astHead.getGenericTypeParameters().get().getTypeVariableDeclarations().isEmpty());
+	  for (ASTTypeVariableDeclaration typeDec: astHead.getGenericTypeParameters().get().getTypeVariableDeclarations()) {
+	  	typeDecs.add(typeDec);  
+	  }
+	}
+	    
+//	for (ASTElement e : astElements) {
+//	  if (e instanceof ASTComponent) {
+//	    if(((ASTComponent)e).getHead().getGenericTypeParameters().isPresent() 
+//	      && ((ASTComponent)e).getHead().getGenericTypeParameters().get().getTypeVariableDeclarations() != null
+//	      && !((ASTComponent)e).getHead().getGenericTypeParameters().get().getTypeVariableDeclarations().isEmpty()
+//	    ) {
+//		  for(ASTTypeVariableDeclaration typeDec: ((ASTComponent)e).getHead().getGenericTypeParameters().get().getTypeVariableDeclarations()) {
+//		    typeDecs.add(typeDec);  	 
+//		  }
+//	    }
+//	  }
+//	}
+	if (typeDecs.size()>0) {
+	  ASTTypeParameters typeParams = TypesNodeFactory.createASTTypeParameters(typeDecs);
+	  handle(typeParams);
+	}
+	int paramSize = astHead.getParameters().size();
     int k = 1;
     if(!astHead.getParameters().isEmpty() && astHead.getParameters() != null) {
       System.out.println("params " + astHead.getParameters().toString());
@@ -151,23 +190,23 @@ public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
       getPrinter().print(") ");
     }
     if (astHead.getSuperComponent().isPresent()) {
-      getPrinter().print("extends");
-      handle(astHead.getSuperComponent().get());
+      if (!((ASTSimpleReferenceType)astHead.getSuperComponent().get()).getNames().isEmpty()) {
+    	getPrinter().print("extends");
+        handle(astHead.getSuperComponent().get());
+      }
+      
     } 
 //    getPrinter().flushBuffer();
 //    System.out.println("Test "+ getPrinter().getContent());
   }
   
   
-  public void printComponentHeadInner(ASTComponentHead astHead, Optional<ASTTypeParameters> optional) {
+  public void printComponentHeadInner(ASTComponentHead astHead, Optional<ASTTypeParameters> optional, ASTMACompilationUnit ast) {
     List<ASTTypeVariableDeclaration> compGen = new ArrayList<ASTTypeVariableDeclaration>();
     if (astHead.getGenericTypeParameters().isPresent() && astHead.getGenericTypeParameters().get().getTypeVariableDeclarations() != null
         && !astHead.getGenericTypeParameters().get().getTypeVariableDeclarations().isEmpty()
         ) {
       compGen.addAll(astHead.getGenericTypeParameters().get().getTypeVariableDeclarations());
-    }
-    if (optional.isPresent()) {
-      compGen.addAll(optional.get().getTypeVariableDeclarations());
     }
     ASTTypeParameters tmp = TypesNodeFactory.createASTTypeParameters(compGen);
     System.out.println("tmp " + tmp.toString());
@@ -203,8 +242,10 @@ public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
       getPrinter().print(") ");
     }
     if (astHead.getSuperComponent().isPresent()) {
-      getPrinter().print("extends");
-      handle(astHead.getSuperComponent().get());
+      if (!((ASTSimpleReferenceType)astHead.getSuperComponent().get()).getNames().isEmpty()) {
+        getPrinter().print("extends");
+        handle(astHead.getSuperComponent().get());
+      }
     } 
 //    getPrinter().flushBuffer();
 //    System.out.println("Test "+ getPrinter().getContent());
@@ -246,6 +287,33 @@ public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
         getPrinter().print("");
         getPrinter().print("  component " + ((ASTComponent)e).getName());
         int i = 0;
+        
+        // print Generics here
+        if (((ASTComponent) e).getHead().getGenericTypeParameters().isPresent() && 
+          ((ASTComponent) e).getHead().getGenericTypeParameters().get().getTypeVariableDeclarations() != null
+          && !((ASTComponent) e).getHead().getGenericTypeParameters().get().getTypeVariableDeclarations().isEmpty()
+        ) {
+//              System.out.println("Generics are Present " + astHead.getGenericTypeParameters().get().getTypeVariableDeclarations() + 
+//                  astHead.getGenericTypeParameters().get().getTypeVariableDeclarations().isEmpty());
+          ArrayList<String> extendNames = new ArrayList<String>();
+          for (ASTTypeVariableDeclaration typeDec : ((ASTComponent) e).getHead().getGenericTypeParameters().get().getTypeVariableDeclarations()) {
+        	extendNames.add(typeDec.getName());  
+          }
+          
+          String first = extendNames.remove(0);
+          if (extendNames.size()>0) {
+            String last = extendNames.remove(extendNames.size()-1);
+            getPrinter().print("<"+first+",");
+            for (String t : extendNames) {
+              getPrinter().print(t+",");	
+            }
+            getPrinter().print(last+">");
+          }
+          else {
+        	getPrinter().print("<"+first+">");  
+          }
+          
+        }
         ArrayList<ASTParameter> allParams = new ArrayList<ASTParameter>();
         allParams.addAll(params);
         allParams.addAll(((ASTComponent)e).getHead().getParameters());
@@ -405,7 +473,13 @@ public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
   public void printConnector(ASTConnector astConnector) {
     getPrinter().print("  ");
     if (astConnector.getStereotype().isPresent()) {
-      getPrinter().print(astConnector.getStereotype().get());
+      if(!astConnector.getStereotype().get().getValues().isEmpty()) {
+    	for (ASTStereoValue val: astConnector.getStereotype().get().getValues()) {
+    	  if (!val.getName().equals("")) {
+    		getPrinter().print(val.getName());  
+    	  }
+    	}
+      }
     }
 //    getPrinter().indent();
     getPrinter().print("connect ");

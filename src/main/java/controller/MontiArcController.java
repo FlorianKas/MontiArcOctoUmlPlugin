@@ -42,6 +42,9 @@ import plugin.MontiCoreException;
 import exceptions.ConnectorNotCompatibleException;
 import exceptions.InnerNameLow;
 import exceptions.InnerNameMissingException;
+import exceptions.InstanceDuplicateError;
+import exceptions.ModelNameError;
+import exceptions.PackageNameMissing;
 import exceptions.PortTypeException;
 import exceptions.allFine;
 
@@ -67,7 +70,7 @@ public class MontiArcController extends AbstractDiagramController {
   Infos in;
   MontiInitDialogController controller; 
   SelectControllerMonti selectController;
-  
+  String genericsString;
   private AnchorPane dialog; 
   private ArrayList<MontiCoreException> errorList1 = new ArrayList<MontiCoreException>();
   public static ArrayList<String> genericsArray = new ArrayList<String>();
@@ -133,8 +136,8 @@ public class MontiArcController extends AbstractDiagramController {
   }
   
   
-  public ArrayList<String> getGenerics() {
-    return genericsArray;  
+  public String getGenerics() {
+    return genericsString;  
   }
   
   public ArrayList<String> getTypes() {
@@ -157,13 +160,14 @@ public class MontiArcController extends AbstractDiagramController {
       for (String i: importTmp) {
         importStatements.add(i.trim());
       }
-      String genericsString = controller.genericsTextField.getText();
-      in.setGenerics(controller.genericsTextField.getText());
-      String[] genericsTmp = genericsString.split("\\;");
-      genericsArray.clear();
-      for (String g: genericsTmp) {
-        genericsArray.add(g.trim());
-      }
+      genericsString = controller.genericsTextField.getText();
+//      in.setGenerics(controller.genericsTextField.getText());
+//      String[] genericsTmp = genericsString.split("\\;");
+//      genericsArray.clear();
+//      for (String g: genericsTmp) {
+//        genericsArray.add(g.trim());
+//      }
+      in.setGenerics(genericsString);
       String typeParam = controller.arcParameterTextField.getText();
       in.setArcParam(controller.arcParameterTextField.getText());
       types.clear();
@@ -223,19 +227,44 @@ public class MontiArcController extends AbstractDiagramController {
 //    topBox.getChildren().add(name);
     
     
-    if (!genericsArray.isEmpty()) {
-      int k = 0;
-      if (!genericsArray.get(0).isEmpty()) {
-        name.setText(name.getText() + " <"); 
+//    if (!genericsArray.isEmpty()) {
+//      int k = 0;
+//      if (!genericsArray.get(0).isEmpty()) {
+//        name.setText(name.getText() + " <"); 
+//      }
+//      for( String g : genericsArray) {
+//        if(!g.isEmpty()) {
+//          k++;
+//          name.setText(name.getText() + g + "; ");
+//        }
+//      }
+//      if (k>0) {
+//        name.setText(name.getText().substring(0,name.getText().length()-2) + ">");
+//      }
+//    }
+    boolean front = false;
+    boolean tail = false;
+    if (!genericsString.equals("")) {
+      if (genericsString.substring(0, 1).equals("<")) {
+        front = true;	  
       }
-      for( String g : genericsArray) {
-        if(!g.isEmpty()) {
-          k++;
-          name.setText(name.getText() + g + "; ");
-        }
+      if (genericsString.substring(genericsString.length()-1).equals(">") 
+    	&& genericsString.split("<").length == genericsString.split(">").length
+    	&& genericsString.contains("<")
+      ){
+    	tail = true;  
       }
-      if (k>0) {
-        name.setText(name.getText().substring(0,name.getText().length()-2) + ">");
+      if (front == true && tail == true) {
+    	name.setText(name.getText() + genericsString);  
+      }
+      else if (front == true && tail == false) {
+    	name.setText(name.getText() + genericsString + ">");  
+      }
+      else if (front == false && tail == true) {
+    	name.setText(name.getText() + "<" +genericsString);
+      }
+      else {
+    	name.setText(name.getText() + "<" + genericsString + ">");  
       }
     }
     if (types.size() > 0) {
@@ -747,12 +776,16 @@ public class MontiArcController extends AbstractDiagramController {
       ArrayList errors2 = checkPortTypes();
       ArrayList errors3 = checkCompNames();
       System.out.println("Errors2 " + errors2.toString());
+      ArrayList<MontiCoreException> overallErrors = new ArrayList<MontiCoreException>();
       if (!errors2.isEmpty()) {
-    	if(!errors3.isEmpty()) {
-    	  errors2.addAll(errors3);
-    	  setErrors(errors2);
-    	}
+    	overallErrors.addAll(errors2);
       }
+      if(!errors3.isEmpty()) {
+    	overallErrors.addAll(errors3);
+      }
+      if (!overallErrors.isEmpty()) {
+        setErrors(overallErrors);
+	  }
       else {
 	    checkPortNames();
 	    ArrayList errors1 = checkPortsCompatibility();
@@ -764,6 +797,7 @@ public class MontiArcController extends AbstractDiagramController {
 	      
 	      ArrayList<String> arg = new ArrayList<String>();
 	      arg.add(modelName);
+	      arg.add(genericsString);
 	      MontiArcPlugin plug = plugin.getInstance();
 	      ASTNode node = plug.shapeToAST(graph, arg);
 	      ArrayList<MontiCoreException> errors = (ArrayList<MontiCoreException>) plug.check(node, getNodeMap());
@@ -814,6 +848,9 @@ public class MontiArcController extends AbstractDiagramController {
   
   private ArrayList checkCompNames() {
 	ArrayList<MontiCoreException> errorList = new ArrayList();
+	if (packageName.equals("")) {
+	  errorList.add(new PackageNameMissing());	
+	}
 	for (AbstractNode node : graph.getAllNodes()) {
 	  if (node instanceof ComponentNode) {
 		if (((ComponentNode)node).getTitle() == null) {
@@ -821,6 +858,20 @@ public class MontiArcController extends AbstractDiagramController {
 		}
 		else if(((ComponentNode)node).getTitle() != null && Character.isLowerCase(((ComponentNode)node).getTitle().charAt(0))) {
 	      errorList.add(new InnerNameLow(node,getNodeView(node, getNodeMap())));	
+		}
+		if(node.getTitle().equals(modelName)) {
+		  errorList.add(new ModelNameError(node,getNodeView(node, getNodeMap())));	
+		}
+		for (AbstractNode n1 : graph.getAllNodes()) {
+		  if (n1 instanceof ComponentNode) {
+			if (n1 != node) {
+			  if (((ComponentNode)n1).getTitle() == ((ComponentNode)node).getTitle() 
+				&& ((ComponentNode)n1).getSubName().equals(((ComponentNode)node).getSubName())
+				&& !((ComponentNode)n1).getSubName().equals("")) {
+			    errorList.add(new InstanceDuplicateError(node,getNodeView(node, getNodeMap()), n1,getNodeView(n1, getNodeMap())));	  
+			  }
+			}
+		  }
 		}
 	  }
 	}

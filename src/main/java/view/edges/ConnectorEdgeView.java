@@ -30,6 +30,10 @@ public class ConnectorEdgeView extends AbstractEdgeView{
   private Text dataType = new Text();
   private Label StereoType = new Label();
   
+  protected Line middleline1 = new Line();
+  protected Line middleline2 = new Line();
+  
+  
   
   public ConnectorEdgeView(ConnectorEdge edge, PortNodeView startNode, PortNodeView endNode) {
     super(edge, startNode, endNode);
@@ -42,25 +46,80 @@ public class ConnectorEdgeView extends AbstractEdgeView{
     draw();
   }
   
+  public Line getMiddleLine1() {
+      return middleline1;
+  }
+  
+  public Line getMiddleLine2() {
+      return middleline2;
+  }
+
+
+  
   protected void draw() {
-    getChildren().clear();
-    getStartLine().setStartX(getStartLine().getStartX()+20);
-    getEndLine().setEndX(getEndLine().getEndX()+20);
-    getChildren().add(getStartLine());
-    getChildren().add(getMiddleLine());
-    getChildren().add(getEndLine());
-    //Draw arrows.
-    this.getChildren().add(drawArrowHead(getEndLine().getEndX(), getEndLine().getEndY(), getEndLine().getStartX(), getEndLine().getStartY()));
+	if (startNode.getX() > endNode.getX()) {
+	  System.out.println("Recognized");	
+	  getChildren().clear();
+//	  getStartLine().setStartX(getStartLine().getStartX()+20);
+	  getStartLine().setStartX(startNode.getX()+ 40 + 20);
+	  getStartLine().setEndX(startNode.getX() + 40 + 40);
+	  getMiddleLine1().setStartX(getStartLine().getEndX());
+	  getMiddleLine1().setStartY(getStartLine().getEndY());
+	  getMiddleLine1().setEndX(getStartLine().getEndX());
+	  getMiddleLine1().setEndY(getStartLine().getEndY() + 
+		(((PortNode)refEdge.getStartNode()).getComponentNode().getHeight()-(getStartLine().getEndY()-((PortNode)refEdge.getStartNode()).getComponentNode().getY()))+20);
+	  
+	  getMiddleLine().setStartX(getMiddleLine1().getEndX());
+	  getMiddleLine().setStartY(getMiddleLine1().getEndY());
+	  getMiddleLine().setEndX(endNode.getX() - 20);
+	  getMiddleLine().setEndY(getMiddleLine1().getEndY());
+	  
+	  getMiddleLine2().setStartX(getMiddleLine().getEndX());
+	  getMiddleLine2().setStartY(getMiddleLine().getEndY());
+	  getMiddleLine2().setEndX(getMiddleLine().getEndX());
+	  getMiddleLine2().setEndY(endNode.getY()+20);
+	  
+	  getEndLine().setStartX(getMiddleLine2().getEndX());
+	  getEndLine().setStartY(getMiddleLine2().getEndY());
+	  getEndLine().setEndX(endNode.getX()+20);
+	  getEndLine().setEndY(getMiddleLine2().getEndY());
+	  
+	  getChildren().add(getStartLine());
+	  getChildren().add(getMiddleLine1());
+	  getChildren().add(getMiddleLine());
+	  getChildren().add(getMiddleLine2());
+	  getChildren().add(getEndLine());
+	  
+	  this.getChildren().add(drawArrowHead(getEndLine().getEndX(), getEndLine().getEndY(), getEndLine().getStartX(), getEndLine().getStartY()));
+	  
+	}
+	else {
+	  System.out.println("Not recoginized");	
+	  getChildren().clear();
+	  getStartLine().setStartX(getStartLine().getStartX()+20);
+	  getEndLine().setEndX(getEndLine().getEndX()+20);
+	  getChildren().add(getStartLine());
+	  getChildren().add(getMiddleLine());
+	  getChildren().add(getEndLine());
+	  //Draw arrows.
+	  this.getChildren().add(drawArrowHead(getEndLine().getEndX(), getEndLine().getEndY(), getEndLine().getStartX(), getEndLine().getStartY()));
+	    	
+	}
     
   }
   
   public void setSelected(boolean selected) {
     super.setSelected(selected);
     if(selected){
+      middleline1.setStroke(Constants.selected_color);
+      middleline2.setStroke(Constants.selected_color);
+        	
       for(Line l : arrowHeadLines){
         l.setStroke(Constants.selected_color);
       }
     } else {
+      middleline1.setStroke(Color.BLACK);
+      middleline2.setStroke(Color.BLACK);
       for (Line l : arrowHeadLines) {
         l.setStroke(Color.BLACK);
       }

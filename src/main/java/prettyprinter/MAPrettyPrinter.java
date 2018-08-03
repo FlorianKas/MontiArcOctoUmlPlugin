@@ -397,7 +397,7 @@ public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
       System.out.println("Connectors " + connectors);
     
       for (ASTConnector connector : connectors) {
-        printConnector(connector);
+        printConnector(connector, astBody);
       }
     }
     getPrinter().println("}");
@@ -470,7 +470,7 @@ public class MAPrettyPrinter extends TypesPrettyPrinterConcreteVisitor{
 //    System.out.println("Test "+ getPrinter().getContent());
   }
   
-  public void printConnector(ASTConnector astConnector) {
+  public void printConnector(ASTConnector astConnector, ASTComponentBody astBody) {
     getPrinter().print("  ");
     if (astConnector.getStereotype().isPresent()) {
       if(!astConnector.getStereotype().get().getValues().isEmpty()) {

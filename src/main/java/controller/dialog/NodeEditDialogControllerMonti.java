@@ -68,9 +68,6 @@ public class NodeEditDialogControllerMonti extends NodeEditDialogController{
     else if (node instanceof PortNode) {
       this.node = (PortNode) node;
       titleField.setText(this.node.getTitle());
-      System.out.println("Typ of PortNode "+ ((PortNode)this.node).getPortType());
-      System.out.println("dataTypeField " + dataTypeField.getText());
-      
       dataTypeField.setText(((PortNode)this.node).getPortType());
       }
   }

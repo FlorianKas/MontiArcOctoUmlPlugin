@@ -853,7 +853,8 @@ public class MontiArcController extends AbstractDiagramController {
 	}
 	for (AbstractNode node : graph.getAllNodes()) {
 	  if (node instanceof ComponentNode) {
-		if (((ComponentNode)node).getTitle() == null) {
+		System.out.println("NODETITLE IS " + node.getTitle());
+		if (((ComponentNode)node).getTitle() == null ||((ComponentNode)node).getTitle().equals("")) {
 		  errorList.add(new InnerNameMissingException(node, getNodeView(node, getNodeMap())));	
 		}
 		else if(((ComponentNode)node).getTitle() != null && Character.isLowerCase(((ComponentNode)node).getTitle().charAt(0))) {

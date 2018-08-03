@@ -39,6 +39,7 @@ import exceptions.OuterComponentGenericsException;
 import exceptions.OuterNameMissingException;
 import exceptions.PortDirectionException;
 import exceptions.PortTypeException;
+import exceptions.PortTypeWrongException;
 import exceptions.cocoError;
 import exceptions.genOuterExtendException;
 import exceptions.genSplitException;
@@ -116,6 +117,9 @@ public class MontiArcPlugin implements MontiCorePlugIn {
       for (Object e:errorList) {
         if(e instanceof InnerNameLow) {
           ((InnerNameLow) e).setNodeView(getNodeView(((InnerNameLow) e).getNode(),arg1));
+        }
+        if (e instanceof PortTypeWrongException) {
+          ((PortTypeWrongException)e).setNodeView(getNodeView(((PortTypeWrongException) e).getNode(),arg1));	
         }
         if (e instanceof genTypeWrongOuter) {
           ((genTypeWrongOuter)e).setNodeView(getNodeView(((genTypeWrongOuter) e).getNode(),arg1));
@@ -263,18 +267,22 @@ public class MontiArcPlugin implements MontiCorePlugIn {
   public boolean generateCode(ASTNode arg0, String arg1, String arg2) {
     // TODO Auto-generated method stub
     MontiArcGeneratorTool gen = new MontiArcGeneratorTool();
-    String targetFolderPath = "C:\\\\Users\\\\Flo\\\\Desktop\\result\\";
-    String hwcFolderPath = "C:\\\\Users\\\\Flo\\\\Desktop\\hwc\\";
+    String targetFolderPath = "target/generated-test-sources/";
+    String usageFolderPathTmp = "src/test/resources/";
+//    String hwcFolderPath = "C:\\\\Users\\\\Flo\\\\Desktop\\hwc\\";
 //    String targetFolderPath = usageFolderPath;
 //    String hwcFolderPath = usageFolderPath;
     Log.enableFailQuick(false);
-    gen.generate(Paths.get(usageFolderPath).toFile(), Paths.get(targetFolderPath).toFile(), Paths.get(hwcFolderPath).toFile());
+    gen.generate(Paths.get(usageFolderPathTmp).toFile(), Paths.get(targetFolderPath).toFile(), Paths.get(usageFolderPathTmp).toFile());
     List<Finding> findings = Log.getFindings();
     findings = findings.subList(oldFindings.size(), findings.size());
     System.out.println("Findings " + findings);
     for (Finding f: findings) {
       if (f.isError()) {
-        genErrorList.add(new cocoError(f.getMsg()));
+    	System.out.println("Error msg " + f.getMsg() + "errorType " + f.getType());  
+    	if(!f.getMsg().contains("0xMA060")) {  
+    	  genErrorList.add(new cocoError(f.getMsg()));
+    	}
       }
     }
     oldFindings.addAll(findings);
@@ -619,6 +627,71 @@ public class MontiArcPlugin implements MontiCorePlugIn {
     }
     
     
+    
+      
+    boolean typeGood = false;  
+    for (AbstractNode n : arg0.getAllNodes()) {
+      if (n instanceof ComponentNode) {
+    	String gen1 = ((ComponentNode) n).getGenerics();
+        gen1 = "<" + gen1 +">";
+    	ArrayList<ASTTypeVariableDeclaration> gensToAddPro1 = new ArrayList<ASTTypeVariableDeclaration>();
+    	Optional<ASTTypeParameters> arguments2 = Optional.of(TypesNodeFactory.createASTTypeParameters());
+        if (!gen1.equals("<>")) {
+          try {
+            arguments2 = parser.parseString_TypeParameters(gen1);
+          }
+          catch (IOException e2) {
+            // TODO Auto-generated catch block
+            e2.printStackTrace();
+          }
+        }
+        ASTTypeParameters typeGenComp2 = null;
+        if (arguments2.isPresent()) {
+          typeGenComp2 = arguments2.get();
+        }
+    	for (ASTTypeVariableDeclaration g : typeGenComp2.getTypeVariableDeclarations()) {
+          if (!gensToAddPro1.contains(g)) {
+            for (ASTTypeVariableDeclaration gOut : typeParams.getTypeVariableDeclarations()) {
+              if (!gOut.getName().equals(g.getName())) {
+            	gensToAddPro1.add(g);	
+              }
+            }
+          }
+        }
+    	ASTTypeParameters genCompAll1 = TypesNodeFactory.createASTTypeParameters(gensToAddPro1);
+        
+		for (PortNode p : ((ComponentNode)n).getPorts()) {
+    	  if (!(p.getPortType().equals("int") ||
+	        p.getPortType().equals("String") ||
+	        p.getPortType().equals("float") ||
+	        p.getPortType().equals("double") ||
+	        p.getPortType().equals("boolean") ||
+	        p.getPortType().equals("char") ||
+	        p.getPortType().equals("byte") ||
+	        p.getPortType().equals("short") ||
+	        p.getPortType().equals("long") ||
+	        p.getPortType().equals("Integer")
+	      )) {
+	        for (ASTTypeVariableDeclaration varDec : genCompAll1.getTypeVariableDeclarations()) {
+	          System.out.println("varDEC NAME " + varDec.getName());
+	          System.out.println("Port NAME " + p.getPortType());
+	          if(p.getPortType().equals(varDec.getName()))	{
+	            typeGood = true;  	
+	          }  	  
+	        }
+	      }
+	      else {
+	        typeGood = true;	
+	      }
+	      if (typeGood == false) {
+	        errorList.add(new PortTypeWrongException(p,null));
+	      }
+		}
+      }
+    }
+	          
+    
+    
     if (errorList.isEmpty()) {
       ArrayList<ASTElement> elements = new ArrayList<ASTElement>();
       ASTComponent astComponent = null;
@@ -753,7 +826,7 @@ public class MontiArcPlugin implements MontiCorePlugIn {
        // create AstPorts
           ArrayList<ASTPort> astPorts = new ArrayList<ASTPort>();
           for (PortNode p : ((ComponentNode) node).getPorts()) {
-            boolean incoming = false;
+        	boolean incoming = false;
             boolean outgoing = true;
             if (p.getPortDirection() == "in") {
               incoming = true;
@@ -822,8 +895,8 @@ public class MontiArcPlugin implements MontiCorePlugIn {
                   }
                 }
                 else {
-                  if (((PortNode)c.getEndNode()).getComponentNode().getSubName().equals("")) {
-                    String tit = ((PortNode)c.getStartNode()).getComponentNode().getTitle();
+                  if (((PortNode)c.getStartNode()).getComponentNode().getSubName().equals("")) {
+                	String tit = ((PortNode)c.getStartNode()).getComponentNode().getTitle();
                     if (!Character.isLowerCase(tit.charAt(0))) {
                       tit = tit.substring(0, 1).toLowerCase() + tit.substring(1);
                     }
@@ -839,16 +912,30 @@ public class MontiArcPlugin implements MontiCorePlugIn {
               ASTQualifiedName source = TypesNodeFactory.createASTQualifiedName(title);
               ArrayList<ASTQualifiedName> targets = new ArrayList<ASTQualifiedName>();
               ArrayList<String> firstTarget = new ArrayList<String>();
-              String firstTit = ((PortNode)c.getEndNode()).getComponentNode().getTitle();
-              if (!Character.isLowerCase(firstTit.charAt(0))) {
-                firstTit = firstTit.substring(0, 1).toLowerCase() + firstTit.substring(1);
+              
+              if (((PortNode)c.getEndNode()).getComponentNode().getSubName().equals("")) {
+                String tit = ((PortNode)c.getEndNode()).getComponentNode().getTitle();
+                if (!Character.isLowerCase(tit.charAt(0))) {
+                  tit = tit.substring(0, 1).toLowerCase() + tit.substring(1);
+                }
+                firstTarget.add(tit);  
               }
-              firstTarget.add(firstTit);
-              firstTit = c.getEndNode().getTitle();
-              if (!Character.isLowerCase(firstTit.charAt(0))) {
-                firstTit = firstTit.substring(0, 1).toLowerCase() + firstTit.substring(1);
+              else {
+                String subName = ((PortNode)c.getEndNode()).getComponentNode().getSubName();
+                firstTarget.add(subName);
               }
-              firstTarget.add(firstTit);
+              firstTarget.add(c.getEndNode().getTitle());
+              
+//              String firstTit = ((PortNode)c.getEndNode()).getComponentNode().getTitle();
+//              if (!Character.isLowerCase(firstTit.charAt(0))) {
+//                firstTit = firstTit.substring(0, 1).toLowerCase() + firstTit.substring(1);
+//              }
+//              firstTarget.add(firstTit);
+//              firstTit = c.getEndNode().getTitle();
+//              if (!Character.isLowerCase(firstTit.charAt(0))) {
+//                firstTit = firstTit.substring(0, 1).toLowerCase() + firstTit.substring(1);
+//              }
+//              firstTarget.add(firstTit);
               ASTQualifiedName astTargetFirst = TypesNodeFactory.createASTQualifiedName(firstTarget);
               targets.add(astTargetFirst);
               for (ConnectorEdge e: edges) {
@@ -932,8 +1019,15 @@ public class MontiArcPlugin implements MontiCorePlugIn {
      ASTStereotype stereoOutComp = MontiArcNodeFactory.createASTStereotype();
      ASTTypeArguments typeArgsOut = TypesNodeFactory.createASTTypeArguments();
      ASTSimpleReferenceType superCompOut = MontiArcNodeFactory.createASTSimpleReferenceType();
+     ArrayList<ASTTypeVariableDeclaration> genCompAllOuterNew = new ArrayList<ASTTypeVariableDeclaration>();
+     for (ASTTypeVariableDeclaration g : genCompAllOuter.getTypeVariableDeclarations()) {
+       if (!genCompAllOuterNew.contains(g)) {
+    	 genCompAllOuterNew.add(g);  
+       }
+     }
+     ASTTypeParameters genAllWow = TypesNodeFactory.createASTTypeParameters(genCompAllOuterNew);
      ASTComponentHead astHead = 
-       MontiArcNodeFactory.createASTComponentHead(genCompAllOuter, allParams, superCompOut);
+       MontiArcNodeFactory.createASTComponentHead(genAllWow, allParams, superCompOut);
      
      ASTComponent astComp = 
          MontiArcNodeFactory.createASTComponent(stereoOutComp, arg1.get(0), astHead, "", typeArgsOut, astBody);
@@ -973,7 +1067,8 @@ public class MontiArcPlugin implements MontiCorePlugIn {
          }
        }
      }
-     String tmp = usageFolderPath+ folder+ "\\" +arg1.get(0)+"."+MontiArcLanguage.FILE_ENDING;
+     String usageFolderPathTmp = "src/test/resources/";
+     String tmp = usageFolderPathTmp+ folder+ "\\" +arg1.get(0)+"."+MontiArcLanguage.FILE_ENDING;
      File f = new File(tmp);
      BufferedWriter bw = null;
      FileWriter fw = null;
@@ -1013,7 +1108,7 @@ public class MontiArcPlugin implements MontiCorePlugIn {
          if (!Character.isUpperCase(astComp.getName().charAt(0))) {
            nameComp = nameComp.substring(0, 1).toUpperCase() + nameComp.substring(1);
          }
-         String tmp1 = usageFolderPath+ folder + "\\"+nameComp+"."+MontiArcLanguage.FILE_ENDING;
+         String tmp1 = usageFolderPathTmp+ folder + "\\"+nameComp+"."+MontiArcLanguage.FILE_ENDING;
          File f1 = new File(tmp1);
          
          BufferedWriter bw1 = null;

@@ -121,6 +121,8 @@ public class MontiRecognizeController{
 //                break;
 //              }
               PortNode port = new PortNode(xDraw,yDraw,bb.getHeight(), bb.getWidth());
+              port.setTitle("");
+              port.setPortDirection(direction);
               // contains the sketch values
               port.createPortNodeSketch(x, y, bb.getHeight(), bb.getHeight());
 //              port.setXDraw(xDraw);
@@ -133,6 +135,8 @@ public class MontiRecognizeController{
                 ArrayList<PortNode> ports = new ArrayList<>();
                 ports.add(port);
                 ComponentNode node = new ComponentNode(b.getX(), b.getY(), b.getHeight(), b.getWidth(), ports);
+                node.setTitle("");
+                node.setSubName("");
                 for (PortNode p : ports) {
                   p.setComponentNode(node);
                   p.setPortDirection(direction);

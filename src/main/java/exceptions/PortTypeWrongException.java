@@ -14,13 +14,13 @@ import view.nodes.AbstractNodeView;
 import view.nodes.ComponentNodeView;
 
 
-public class PortTypeException implements MontiCoreException {
+public class PortTypeWrongException implements MontiCoreException {
   private Pane tmpPane; 
-  private MontiArcPlugInErrors.ExceptionType type = MontiArcPlugInErrors.ExceptionType.PORT_TYPE_WRONG;
+  private MontiArcPlugInErrors.ExceptionType type = MontiArcPlugInErrors.ExceptionType.PORT_TYPE_MISSING;
   private AbstractNode tmpNode;
   private AbstractNodeView tmpNodeView;
   
-  public PortTypeException(AbstractNode node, AbstractNodeView nodeView)
+  public PortTypeWrongException(AbstractNode node, AbstractNodeView nodeView)
   {
     this.tmpNode = node;
     this.tmpNodeView = nodeView;
@@ -28,7 +28,7 @@ public class PortTypeException implements MontiCoreException {
   }
   @Override
   public String getContentMessage() {
-    return "Type of port is missing";
+    return "Type of port is not existing";
   }
 
   @Override
@@ -44,7 +44,9 @@ public class PortTypeException implements MontiCoreException {
   public void setNode(AbstractNode pTmpNode) {
     this.tmpNode = pTmpNode;
   }
-  
+  public void setNodeView(AbstractNodeView nodeView) {
+	tmpNodeView = nodeView;
+  }
 
   @Override
   public void handleActionClickOnPane() {
@@ -64,7 +66,7 @@ public class PortTypeException implements MontiCoreException {
     this.tmpPane.setOnMouseClicked(new EventHandler() {
       @Override
       public void handle(Event arg0) {
-        PortTypeException.this.handleActionClickOnPane();
+        PortTypeWrongException.this.handleActionClickOnPane();
       }
     });
   }

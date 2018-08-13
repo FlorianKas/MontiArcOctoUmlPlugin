@@ -507,7 +507,9 @@ public class MontiArcController extends AbstractDiagramController {
       }
       else if (tool == ToolEnum.EDGE) { // Start edge creation.
         mode = Mode.CREATING;
+        System.out.println("Event " + event.toString());
         edgeController.onMousePressedOnNode(event);
+        
       }
       event.consume();
     });
@@ -873,9 +875,9 @@ public class MontiArcController extends AbstractDiagramController {
 		for (AbstractNode n1 : graph.getAllNodes()) {
 		  if (n1 instanceof ComponentNode) {
 			if (n1 != node) {
-			  if (((ComponentNode)n1).getTitle() == ((ComponentNode)node).getTitle() 
+			  if (((ComponentNode)n1).getTitle().equals(((ComponentNode)node).getTitle() )
 				&& ((ComponentNode)n1).getSubName().equals(((ComponentNode)node).getSubName())
-				&& !((ComponentNode)n1).getSubName().equals("")) {
+				) {
 			    errorList.add(new InstanceDuplicateError(node,getNodeView(node, getNodeMap()), n1,getNodeView(n1, getNodeMap())));	  
 			  }
 			}

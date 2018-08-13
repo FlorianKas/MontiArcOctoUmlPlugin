@@ -31,7 +31,7 @@ import model.GraphElement;
  */
 public class MoveCompViewCommand implements Command
 {
-  private ComponentNode aGraphElement;
+  private AbstractNode aGraphElement;
   private double aDX;
   private double aDY;
   
@@ -43,7 +43,8 @@ public class MoveCompViewCommand implements Command
    */
   public MoveCompViewCommand(GraphElement pNode, double pDX, double pDY)
   {
-    aGraphElement = (ComponentNode) pNode;
+//    aGraphElement = (ComponentNode) pNode;
+    aGraphElement = (AbstractNode) pNode;
     aDX = pDX;
     aDY = pDY;
   }
@@ -55,7 +56,7 @@ public class MoveCompViewCommand implements Command
   {
     aGraphElement.setTranslateX(aGraphElement.getTranslateX()-aDX);
     aGraphElement.setTranslateY(aGraphElement.getTranslateY()-aDY);
-    for (PortNode p: aGraphElement.getPorts()) {
+    for (PortNode p: ((ComponentNode)aGraphElement).getPorts()) {
       p.setTranslateX(p.getTranslateX()-aDX);
       p.setTranslateY(p.getTranslateY()-aDY);
     }
@@ -68,7 +69,7 @@ public class MoveCompViewCommand implements Command
   {
     aGraphElement.setTranslateX(aGraphElement.getTranslateX()+aDX);
     aGraphElement.setTranslateY(aGraphElement.getTranslateY()+aDY);
-    for (PortNode p: aGraphElement.getPorts()) {
+    for (PortNode p: ((ComponentNode)aGraphElement).getPorts()) {
       System.out.println("p TranslateX" + p.getTranslateX());
       p.setTranslateX(p.getTranslateX()+aDX);
       System.out.println("p TranslateX after" + p.getTranslateX());

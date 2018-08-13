@@ -1075,13 +1075,14 @@ public class MontiArcPlugin implements MontiCorePlugIn {
      if (genCompAllOuter.getTypeVariableDeclarations().size()>0) {
        genCompAllOuterNew.add(genCompAllOuter.getTypeVariableDeclarations().get(0));	 
      }
+     // To check once again
      for (ASTTypeVariableDeclaration g : genCompAllOuter.getTypeVariableDeclarations()) {
        if (!genCompAllOuterNew.contains(g)) {
-    	 for (ASTTypeVariableDeclaration g1 : genCompAllOuterNew) {
-    	   if (!g1.getName().equals(g.getName())) {
-    	     genCompAllOuterNew.add(g);   
-    	   }
-    	 }
+//    	 for (ASTTypeVariableDeclaration g1 : genCompAllOuterNew) {
+//    	   if (!g1.getName().equals(g.getName())) {
+         genCompAllOuterNew.add(g);   
+//    	   }
+//    	 }
        }
      }
      System.out.println("NEWONE " + genCompAllOuterNew);

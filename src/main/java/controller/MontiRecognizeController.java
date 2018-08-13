@@ -26,6 +26,7 @@ import view.edges.AbstractEdgeView;
 import view.edges.ConnectorEdgeView;
 import view.nodes.AbstractNodeView;
 
+import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -91,26 +92,41 @@ public class MontiRecognizeController{
         for (BoundingBox bb: boxes) {
           if (!b.equals(bb) && b.intersects(bb)) {
             if(b.getWidth()*b.getHeight() > 2*bb.getWidth()*bb.getHeight()) {
-                  
               // bb ist Port von b
               String direction = "";
               PortNode tmpPort = new PortNode();
               double x = 0,y = 0,xDraw = 0,yDraw = 0;
-              System.out.println("Bounding Box of Node has position x " + bb.getX() + " " + bb.getY() + " " + bb.getHeight() + " " + bb.getWidth());
-              System.out.println("Bounding Box of Port has position x " + b.getX() + " " + b.getY() + " " + b.getHeight() + " " + b.getWidth());
-              if(Math.abs(b.getX() - bb.getX()) < Math.abs(b.getX() + b.getWidth() - bb.getX()) && (bb.getY() + bb.getHeight() < b.getY() + b.getHeight())) {
+              System.out.println("Bounding Box of Port has position x " + bb.getX() + " " + bb.getY() + " " + bb.getHeight() + " " + bb.getWidth());
+              System.out.println("Bounding Box of Node has position x " + b.getX() + " " + b.getY() + " " + b.getHeight() + " " + b.getWidth());
+//              Stroke right = new Stroke(b.getTopRightPoint(),b.getBottomRightPoint());
+              Line2D.Double right = new Line2D.Double(b.getTopRightPoint().getX(),
+            		  b.getTopRightPoint().getY(), b.getBottomRightPoint().getX(),
+            		  b.getBottomRightPoint().getY());
+              Line2D.Double left = new Line2D.Double(b.getTopLeftPoint().getX(),
+            		  b.getTopLeftPoint().getY(), b.getBottomLeftPoint().getX(),
+            		  b.getBottomLeftPoint().getY());
+              
+              Point p1 = new Point(bb.getX(),bb.getY());
+              Point pp = new Point(bb.getX()+bb.getWidth()-20,bb.getY());
+              if (left.intersects(bb)) {
+//              if(Math.abs(b.getX() - bb.getX()) < Math.abs(b.getX() + b.getWidth() - bb.getX()) && (bb.getY() + bb.getHeight() < b.getY() + b.getHeight())) {
+//              if(Math.abs(b.getX()) < Math.abs(bb.getX() + bb.getWidth()) && (bb.getY() + bb.getHeight() < b.getY() + b.getHeight())) {
+                  
               // left Port
                 System.out.println("LEFTTTTTTT");
                 xDraw = b.getX() - 0.5*tmpPort.getPortWidth();
+                System.out.println("xDraw " + xDraw);
                 x = bb.getX();
                 yDraw = bb.getY();
                 y = bb.getY();
                 direction = "in";
               }
-              else if (Math.abs(b.getX() - bb.getX()) > Math.abs(b.getX() + b.getWidth() - bb.getX()) && (bb.getY() + bb.getHeight() < b.getY() + b.getHeight()) ) {
+              else if (right.intersects(bb)) {
+//              else if (Math.abs(b.getX() - bb.getX()) > Math.abs(b.getX() + b.getWidth() - bb.getX()) && (bb.getY() + bb.getHeight() < b.getY() + b.getHeight()) ) {
 //              right
                 System.out.println("righttttttttt");
                 xDraw = (b.getX() + b.getWidth() - 0.5*tmpPort.getPortWidth());
+                System.out.println("xDraw " + xDraw);
                 x = (bb.getX());
                 yDraw = (bb.getY());
                 y = (bb.getY());

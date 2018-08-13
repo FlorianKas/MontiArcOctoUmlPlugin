@@ -154,7 +154,7 @@ public class ComponentNodeView extends AbstractNodeView {
         System.out.println(node.getY());
         
 //        if (p.getX() + p.getWidth() < node.getX() + node.getWidth() && p.getX() < node.getX()) {
-        if (Math.abs(node.getX() - p.getX()) < Math.abs(node.getX() + node.getWidth() - p.getX())) {
+        if (p.getPortDirection().equals("in")) {
 //          PortNodeView portView = new PortNodeView(p);
           System.out.println("LeftPane");
           System.out.println("yDraw" + p.getY());

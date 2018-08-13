@@ -3,6 +3,9 @@ package controller;
 import controller.dialog.EdgeEditDialogController;
 import controller.dialog.EdgeEditDialogControllerMonti;
 import controller.dialog.MessageEditDialogController;
+import edu.tamu.core.sketch.BoundingBox;
+//import edu.tamu.core.sketch.BoundingBox;
+import edu.tamu.core.sketch.Point;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -31,6 +34,7 @@ import view.nodes.ComponentNodeView;
 import view.nodes.PortNodeView;
 import view.nodes.SequenceObjectView;
 
+import java.awt.Rectangle;
 import java.io.IOException;
 
 /**
@@ -54,27 +58,57 @@ public class EdgeControllerMonti extends EdgeController {
   }
   
   public void onMousePressedOnNode(MouseEvent event) {
-    double tmp = event.getX() + ((AbstractNodeView) event.getSource()).getTranslateX() + 1.5*((ComponentNodeView) event.getSource()).getPortNodeViews().get(0).getPortWidth();
-    
-    ComponentNodeView tmpView = (ComponentNodeView) event.getSource();
-    
-    for (PortNodeView pView : tmpView.getPortNodeViews()) {
-//      System.out.println("port getX " + pView.getPortX());
-//      System.out.println("port getY " + pView.getPortY());
-      System.out.println(" port height " + pView.getPortHeight());
-      System.out.println(" componentNodeView translate Y " + tmpView.getTranslateY());
-      System.out.println(" event get Y " + event.getY());
-      
-      if (event.getX() + tmpView.getTranslateX() > pView.getX() + 0.5*pView.getPortWidth() 
-          && event.getX() + tmpView.getTranslateX()  < pView.getX() + 1.5*pView.getPortWidth() &&
-          event.getY() + tmpView.getTranslateY() > pView.getY() &&
-          event.getY() + tmpView.getTranslateY() < pView.getY() + pView.getHeight()) {
-        System.out.println("Test");
-        dragStartX = pView.getX() + 1.5*pView.getPortWidth();
-        dragStartY = pView.getY() + 0.5*pView.getPortHeight(); 
-        startNodeView = pView;
+//    double tmp = event.getX() + ((AbstractNodeView) event.getSource()).getTranslateX() + 1.5*((ComponentNodeView) event.getSource()).getPortNodeViews().get(0).getPortWidth();
+    startNodeView = null;
+	ComponentNodeView tmpView = (ComponentNodeView) event.getSource();
+    for (AbstractNodeView n : diagramController.getAllNodeViews()) {
+      if (n instanceof PortNodeView) {
+    	BoundingBox portBox = new BoundingBox(n.getX()+20,n.getY() - ((PortNodeView)n).getPortHeight()+40,n.getX() + ((PortNodeView)n).getPortWidth()+20,n.getY()+40);
+    	Point mousePoint = new Point(tmpView.getX()+event.getX(), tmpView.getY()+event.getY());
+    	System.out.println("PortBox " + portBox.getX() + " "+ portBox.getY()+" "+ portBox.getHeight()+ " "+portBox.getWidth());
+    	System.out.println("MousePoint " + mousePoint.getX() +" "+ mousePoint.getY());
+    	
+    	if (portBox.contains(mousePoint)) {
+    		
+//    	if (n.getX() > tmpView.getX() + tmpView.getWidth())
+    	  //    	if (event.getX() + tmpView.getTranslateX() > n.getX() + 0.5*((PortNodeView) n).getPortWidth() 
+//        && event.getX() + tmpView.getTranslateX()  < n.getX() + 1.5*((PortNodeView) n).getPortWidth() &&
+//        event.getY() + tmpView.getTranslateY() > n.getY() &&
+//        event.getY() + tmpView.getTranslateY() < n.getY() + ((PortNodeView) n).getPortHeight()) {
+          System.out.println("STARTNODEVIEW FOUND");
+          dragStartX = n.getX() + 1.5*((PortNodeView) n).getPortWidth();
+          dragStartY = n.getY() + 0.5*((PortNodeView) n).getPortHeight(); 
+          startNodeView = n;
+          System.out.println("StartNodeView is " + startNodeView);
+        }  
       }
     }
+//    for (PortNodeView pView : tmpView.getPortNodeViews()) {
+////      System.out.println("port getX " + pView.getPortX());
+////      System.out.println("port getY " + pView.getPortY());
+//      System.out.println(" componentNodeView translate Y " + tmpView.getTranslateY());
+//      System.out.println(" componentNodeView translate X " + tmpView.getTranslateX());
+//      System.out.println(" event get Y " + event.getY());
+//      System.out.println("Evenet get X " + event.getX());
+//      System.out.println("Scene " + event.getSceneX());
+//      System.out.println("Screne" + event.getScreenX());
+//      System.out.println("pView X" + pView.getX());
+//      System.out.println("pView Y" + pView.getY());
+//      System.out.println("pView Height" + pView.getPortHeight());
+//      System.out.println("pView Width" + pView.getPortWidth());
+//      
+//      
+//      if (event.getX() + tmpView.getTranslateX() > pView.getX() + 0.5*pView.getPortWidth() 
+//          && event.getX() + tmpView.getTranslateX()  < pView.getX() + 1.5*pView.getPortWidth() &&
+//          event.getY() + tmpView.getTranslateY() > pView.getY() &&
+//          event.getY() + tmpView.getTranslateY() < pView.getY() + pView.getHeight()) {
+//        System.out.println("STARTNODEVIEW FOUND");
+//        dragStartX = pView.getX() + 1.5*pView.getPortWidth();
+//        dragStartY = pView.getY() + 0.5*pView.getPortHeight(); 
+//        startNodeView = pView;
+//        System.out.println("StartNodeView is " + startNodeView);
+//      }
+//    }
     aDrawPane.getChildren().add(dragLine);
   }
   
@@ -101,8 +135,13 @@ public class EdgeControllerMonti extends EdgeController {
     for (AbstractNodeView nodeView : diagramController.getAllNodeViews()) {
       System.out.println("Endpoint " + getEndPoint());
       System.out.println("nodeView " + nodeView.getTranslateX() + nodeView.getTranslateY());
-      if(nodeView.contains(getEndPoint())){
+      Point2D endPoint = getEndPoint();
+      Point2D endPointBetter = new Point2D(endPoint.getX()-20,endPoint.getY());
+      if(nodeView.contains(endPointBetter) && nodeView instanceof PortNodeView){
+    	System.out.println("Here we found an Endpoint");  
         endNodeView = nodeView;
+        System.out.println("Endpoint is " + endNodeView.toString());
+        System.out.println("And StartNodeView is " + startNodeView);
       }
     }
     PortNode endNode = new PortNode();
@@ -118,6 +157,9 @@ public class EdgeControllerMonti extends EdgeController {
       ((MontiArcController)diagramController).createEdgeView(edge, (PortNodeView)startNodeView, (PortNodeView)endNodeView);
     } 
     else if (endNodeView != null && startNodeView != null) {
+      System.out.println("Nothing found");	
+      System.out.println("StartNodeView " + startNodeView.toString());
+      System.out.println("EndNodeView " + endNodeView.toString());
       for (PortNodeView pView: ((ComponentNodeView) endNodeView).getPortNodeViews()) {
         if(pView.getX() <= getEndPoint().getX() && pView.getX() + pView.getPortWidth() >= getEndPoint().getX()
             && pView.getY() <= getEndPoint().getY() && pView.getY() + pView.getPortHeight() >= getEndPoint().getY()) {

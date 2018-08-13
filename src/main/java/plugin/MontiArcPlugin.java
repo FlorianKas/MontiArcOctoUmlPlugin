@@ -649,16 +649,33 @@ public class MontiArcPlugin implements MontiCorePlugIn {
         if (arguments2.isPresent()) {
           typeGenComp2 = arguments2.get();
         }
-    	for (ASTTypeVariableDeclaration g : typeGenComp2.getTypeVariableDeclarations()) {
-          if (!gensToAddPro1.contains(g)) {
-            for (ASTTypeVariableDeclaration gOut : typeParams.getTypeVariableDeclarations()) {
-              if (!gOut.getName().equals(g.getName())) {
-            	gensToAddPro1.add(g);	
+        System.out.println("typeParams " + typeParams.getTypeVariableDeclarations());
+        System.out.println("typeParams " + typeGenComp2.getTypeVariableDeclarations().isEmpty());
+        System.out.println("typeParams " + (typeGenComp2.getTypeVariableDeclarations().size()>0));
+        if (typeGenComp2 == null || typeGenComp2.getTypeVariableDeclarations().isEmpty()) {
+          for (ASTTypeVariableDeclaration gOut : typeParams.getTypeVariableDeclarations()) {
+            gensToAddPro1.add(gOut);	
+          } 	
+        }
+        else if (typeParams.getTypeVariableDeclarations().isEmpty()) {
+          for (ASTTypeVariableDeclaration gOut : typeGenComp2.getTypeVariableDeclarations()) {
+            gensToAddPro1.add(gOut);	
+          } 	
+        }
+        else {
+          for (ASTTypeVariableDeclaration g : typeGenComp2.getTypeVariableDeclarations()) {
+            if (!gensToAddPro1.contains(g)) {
+              for (ASTTypeVariableDeclaration gOut : typeParams.getTypeVariableDeclarations()) {
+                if (!gOut.getName().equals(g.getName())) {
+            	  gensToAddPro1.add(g);	
+                }
               }
             }
           }
         }
+        System.out.println("gensToAddPro1 " + gensToAddPro1.toString());
     	ASTTypeParameters genCompAll1 = TypesNodeFactory.createASTTypeParameters(gensToAddPro1);
+    	System.out.println("GEENERRRIIICCS lookks as follows " + genCompAll1.toString());
         
 		for (PortNode p : ((ComponentNode)n).getPorts()) {
     	  if (!(p.getPortType().equals("int") ||
@@ -672,6 +689,9 @@ public class MontiArcPlugin implements MontiCorePlugIn {
 	        p.getPortType().equals("long") ||
 	        p.getPortType().equals("Integer")
 	      )) {
+    		System.out.println("Port p has title " + p.getTitle() + " and type " + p.getPortType());  
+    		System.out.println("GENERICS " + genCompAll1.getTypeVariableDeclarations().toString());  
+    		
 	        for (ASTTypeVariableDeclaration varDec : genCompAll1.getTypeVariableDeclarations()) {
 	          System.out.println("varDEC NAME " + varDec.getName());
 	          System.out.println("Port NAME " + p.getPortType());
@@ -681,6 +701,7 @@ public class MontiArcPlugin implements MontiCorePlugIn {
 	        }
 	      }
 	      else {
+	    	System.out.println("YEAAAAAAH");  
 	        typeGood = true;	
 	      }
 	      if (typeGood == false) {
@@ -721,23 +742,45 @@ public class MontiArcPlugin implements MontiCorePlugIn {
           // check for errors like T extends String and T extends int
 //          List<ASTTypeVariableDeclaration> gensComp = typeGenComp.getTypeVariableDeclarations();
           System.out.println("gensOuter " + gensOuter.toString());
-          for (ASTTypeVariableDeclaration g : typeGenComp.getTypeVariableDeclarations()) {
-            if (!typeParams.getTypeVariableDeclarations().contains(g)) {
-              for (ASTTypeVariableDeclaration gOut : typeParams.getTypeVariableDeclarations()) {
-            	System.out.println("gOut " + gOut + " its name " + gOut.getName());
-            	System.out.println("g " + g + " its name " + g.getName());
-            	if (!gOut.getName().equals(g.getName())) {
-            	  gensToAdd.add(g);	
-//            	  typeParams.getTypeVariableDeclarations().add(g);	
-              	}
+          if (typeGenComp == null || typeGenComp.getTypeVariableDeclarations().isEmpty()) {
+            for (ASTTypeVariableDeclaration gOut : typeParams.getTypeVariableDeclarations()) {
+              gensToAdd.add(gOut);	
+            } 	
+          }
+          else if (typeParams.getTypeVariableDeclarations().isEmpty()) {
+            for (ASTTypeVariableDeclaration gOut : typeGenComp.getTypeVariableDeclarations()) {
+              gensToAdd.add(gOut);	
+            } 	
+          }
+          else {
+            for (ASTTypeVariableDeclaration g : typeGenComp.getTypeVariableDeclarations()) {
+              if (!gensToAdd.contains(g)) {
+                for (ASTTypeVariableDeclaration gOut : typeParams.getTypeVariableDeclarations()) {
+                  if (!gOut.getName().equals(g.getName())) {
+                	gensToAdd.add(g);	
+                  }
+                }
               }
             }
           }
+            
+//          for (ASTTypeVariableDeclaration g : typeGenComp.getTypeVariableDeclarations()) {
+//            if (!typeParams.getTypeVariableDeclarations().contains(g)) {
+//              for (ASTTypeVariableDeclaration gOut : typeParams.getTypeVariableDeclarations()) {
+//            	System.out.println("gOut " + gOut + " its name " + gOut.getName());
+//            	System.out.println("g " + g + " its name " + g.getName());
+//            	if (!gOut.getName().equals(g.getName())) {
+//            	  gensToAdd.add(g);	
+////            	  typeParams.getTypeVariableDeclarations().add(g);	
+//              	}
+//              }
+//            }
+//          }
         }
       }
-      for (ASTTypeVariableDeclaration g : gensOuter) {
-    	gensToAdd.add(g);  
-      }
+//      for (ASTTypeVariableDeclaration g : gensOuter) {
+//    	gensToAdd.add(g);  
+//      }
       ASTTypeParameters genCompAllOuter = TypesNodeFactory.createASTTypeParameters(gensToAdd);
    // create outermost component head
       
@@ -772,15 +815,23 @@ public class MontiArcPlugin implements MontiCorePlugIn {
           // add all Generics from Modell
           // remove duplicates
           // check for errors like T extends String and T extends int
-          for (ASTTypeVariableDeclaration g : typeGenComp.getTypeVariableDeclarations()) {
-            if (!gensToAddPro.contains(g)) {
-              for (ASTTypeVariableDeclaration gOut : typeParams.getTypeVariableDeclarations()) {
-            	if (!gOut.getName().equals(g.getName())) {
-            	  gensToAddPro.add(g);	
-            	}
+          if (typeParams == null || typeParams.getTypeVariableDeclarations().isEmpty()) {
+        	for (ASTTypeVariableDeclaration g : typeGenComp.getTypeVariableDeclarations()) {
+        	  gensToAddPro.add(g);	
+        	}
+          }
+          else {
+            for (ASTTypeVariableDeclaration g : typeGenComp.getTypeVariableDeclarations()) {
+              if (!gensToAddPro.contains(g)) {
+                for (ASTTypeVariableDeclaration gOut : typeParams.getTypeVariableDeclarations()) {
+            	  if (!gOut.getName().equals(g.getName())) {
+            	    gensToAddPro.add(g);	
+            	  }
+                }
               }
             }
           }
+          
           ASTTypeParameters genCompAll = TypesNodeFactory.createASTTypeParameters(gensToAddPro);
           String tyComp = ((ComponentNode) node).getComponentType();
           String[] tyComp1 = tyComp.split("\\,");
@@ -1020,11 +1071,20 @@ public class MontiArcPlugin implements MontiCorePlugIn {
      ASTTypeArguments typeArgsOut = TypesNodeFactory.createASTTypeArguments();
      ASTSimpleReferenceType superCompOut = MontiArcNodeFactory.createASTSimpleReferenceType();
      ArrayList<ASTTypeVariableDeclaration> genCompAllOuterNew = new ArrayList<ASTTypeVariableDeclaration>();
+     System.out.println("GENCOMPALLOUTER " + genCompAllOuter.getTypeVariableDeclarations());
+     if (genCompAllOuter.getTypeVariableDeclarations().size()>0) {
+       genCompAllOuterNew.add(genCompAllOuter.getTypeVariableDeclarations().get(0));	 
+     }
      for (ASTTypeVariableDeclaration g : genCompAllOuter.getTypeVariableDeclarations()) {
        if (!genCompAllOuterNew.contains(g)) {
-    	 genCompAllOuterNew.add(g);  
+    	 for (ASTTypeVariableDeclaration g1 : genCompAllOuterNew) {
+    	   if (!g1.getName().equals(g.getName())) {
+    	     genCompAllOuterNew.add(g);   
+    	   }
+    	 }
        }
      }
+     System.out.println("NEWONE " + genCompAllOuterNew);
      ASTTypeParameters genAllWow = TypesNodeFactory.createASTTypeParameters(genCompAllOuterNew);
      ASTComponentHead astHead = 
        MontiArcNodeFactory.createASTComponentHead(genAllWow, allParams, superCompOut);

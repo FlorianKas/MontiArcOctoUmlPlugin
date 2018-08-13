@@ -699,6 +699,7 @@ public class MontiArcController extends AbstractDiagramController {
     image = new Image("/icons/generatew.png");
     generateBtn.setGraphic(new ImageView(image));
     generateBtn.setText("Generate");
+    generateBtn.setDisable(true);
     
     image = new Image("/icons/editinfow.png");
     editInfoBtn.setGraphic(new ImageView(image));
@@ -811,6 +812,12 @@ public class MontiArcController extends AbstractDiagramController {
 	  	  }
 	    }
       }
+      for (MontiCoreException el : errorList1) {
+    	if (el instanceof allFine) {
+    	  generateBtn.setDisable(false);	
+    	}
+      }
+      
     });
     
     editInfoBtn.setOnAction(event -> {

@@ -929,9 +929,6 @@ private ArrayList<MontiCoreException> checkPortsCompatibility() {
     ArrayList<MontiCoreException> errorList = new ArrayList();
     for (Edge edge : graph.getAllEdges()) {
       if (edge instanceof ConnectorEdge) {
-        System.out.println("type " + ((ConnectorEdge)edge).getStartPort().getPortType());
-        System.out.println("type " + ((ConnectorEdge)edge).getEndPort().getPortType());
-        System.out.println("Edge " + edge.toString());
         if (!((ConnectorEdge)edge).getStartPort().getPortType().equals(((ConnectorEdge)edge).getEndPort().getPortType())) {
           for (AbstractEdgeView view : allEdgeViews) {
             if (view.getRefEdge() == edge) {

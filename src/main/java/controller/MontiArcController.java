@@ -4,6 +4,7 @@ import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import org.controlsfx.control.Notifications;
 
@@ -772,13 +773,17 @@ public class MontiArcController extends AbstractDiagramController {
     });
     
    
-    checkValidityBtn.setOnAction(event -> {
+        checkValidityBtn.setOnAction(event -> {
       ArrayList<MontiCoreException> tmp1 = new ArrayList<MontiCoreException>();
       tmp1.add(new allFine());
       setErrors(tmp1);  	
       ArrayList errors2 = checkPortTypes();
       ArrayList errors3 = checkCompNames();
       System.out.println("Errors2 " + errors2.toString());
+      for (Object e : errors2) {
+    	System.out.println("PortNodeException " + ((PortNode)((PortTypeException)e).getNode()).getId());
+    	System.out.println("PortNodeException " + ((PortNode)((PortTypeException)e).getNode()).getTitle());  
+      }
       ArrayList<MontiCoreException> overallErrors = new ArrayList<MontiCoreException>();
       if (!errors2.isEmpty()) {
     	overallErrors.addAll(errors2);
@@ -855,6 +860,38 @@ public class MontiArcController extends AbstractDiagramController {
     });
   }
   
+  void deleteSelected() {
+    CompoundCommand command = new CompoundCommand();
+    for (AbstractNodeView nodeView : selectedNodes) {
+      if (nodeView instanceof ComponentNodeView) {
+    	for (PortNodeView pView: ((ComponentNodeView)nodeView).getPortNodeViews()) {
+    	  deleteNode(pView, command, false, false);	
+    	}
+        deleteNode(nodeView, command, false, false);
+      }
+      else {
+        deleteNode(nodeView, command, false, false);
+      }
+    }
+    for (AbstractEdgeView edgeView : selectedEdges) {
+      deleteEdgeView(edgeView, command, false, false);
+    }
+    ArrayList<Sketch> deletedSketches = new ArrayList<Sketch>();
+    for (Sketch sketch : selectedSketches) {
+      deletedSketches.add(sketch);
+    }
+    Iterator<Sketch> itr = deletedSketches.iterator();
+    while (itr.hasNext()) {
+      Sketch element = (Sketch) itr.next();
+      deleteSketch(element, command, false);
+    }
+    selectedNodes.clear();
+    selectedEdges.clear();
+    selectedSketches.clear();
+    undoManager.add(command);
+    }
+    
+
   private ArrayList checkCompNames() {
 	ArrayList<MontiCoreException> errorList = new ArrayList();
 	if (packageName.equals("")) {
@@ -951,6 +988,8 @@ private ArrayList<MontiCoreException> checkPortsCompatibility() {
       graph.addNode(node, remote);
       undoManager.add(new AddDeleteNodeCommand((AbstractDiagramController)MontiArcController.this, graph, newView, node, true));
     }
+    System.out.println("newView " + newView);
+    System.out.println("node " + node);
     return addNodeView(newView, node);
   }
   

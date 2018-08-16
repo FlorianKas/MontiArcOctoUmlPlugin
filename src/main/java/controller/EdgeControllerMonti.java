@@ -146,7 +146,7 @@ public class EdgeControllerMonti extends EdgeController {
     }
     PortNode endNode = new PortNode();
     PortNode startNode = new PortNode();
-    if (endNodeView != null && startNodeView != null && endNodeView instanceof PortNodeView) {
+    if (endNodeView != null && startNodeView != null && endNodeView instanceof PortNodeView && startNodeView instanceof PortNodeView) {
       endNode = (PortNode) diagramController.getNodeMap().get(endNodeView);
       startNode = (PortNode) diagramController.getNodeMap().get(startNodeView);
       System.out.println("EndNode " + endNode.toString());
@@ -156,7 +156,7 @@ public class EdgeControllerMonti extends EdgeController {
       ConnectorEdge edge = new ConnectorEdge(startNode, endNode);
       ((MontiArcController)diagramController).createEdgeView(edge, (PortNodeView)startNodeView, (PortNodeView)endNodeView);
     } 
-    else if (endNodeView != null && startNodeView != null) {
+    else if (endNodeView != null && startNodeView != null && startNodeView instanceof PortNodeView && endNodeView instanceof PortNodeView) {
       System.out.println("Nothing found");	
       System.out.println("StartNodeView " + startNodeView.toString());
       System.out.println("EndNodeView " + endNodeView.toString());

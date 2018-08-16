@@ -174,15 +174,17 @@ public class MontiRecognizeController{
                 
               }
               else {
-                ((ComponentNode)findNode(graph, tmpPoint)).addPort(port);
-                port.setComponentNode((ComponentNode)findNode(graph,tmpPoint));
-                if(!recognizedNodes.contains(port)) {
-                  recognizedNodes.add(port);
-                }
+            	if (findNode(graph, tmpPoint) instanceof ComponentNode) {  
+                  ((ComponentNode)findNode(graph, tmpPoint)).addPort(port);
+                  port.setComponentNode((ComponentNode)findNode(graph,tmpPoint));
+                  if(!recognizedNodes.contains(port)) {
+                    recognizedNodes.add(port);
+                  }
 
-                Sketch s2 = sketchMap.get(bb);
-                s2.setRecognizedElement(port);
-                sketchesToBeRemoved.add(s2);
+                  Sketch s2 = sketchMap.get(bb);
+                  s2.setRecognizedElement(port);
+                  sketchesToBeRemoved.add(s2);
+            	}
               }
               
             }
@@ -290,7 +292,7 @@ public class MontiRecognizeController{
                   Node secTmpOutNode = findNode(tmp,endPoint);
                   endNode = (PortNode) secTmpOutNode;
                 }
-                else {
+                else if (tmpOutNode instanceof PortNode){
                   endNode = (PortNode) tmpOutNode; 
                 }
                 
@@ -298,7 +300,7 @@ public class MontiRecognizeController{
                 List<Point> points = s.getStroke().getPoints();
                 for (int i = points.size()-1; i > points.size()/2; i--) {
                   Point2D point = new Point2D(points.get(i).getX(), points.get(i).getY());
-                  if (findNode(graph, point) != null) {
+                  if (findNode(graph, point) != null && findNode(graph, point) instanceof PortNode) {  
                     endNode = (PortNode)findNode(graph, point);
                     break;
                   }

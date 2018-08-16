@@ -374,7 +374,7 @@ public class MontiArcPlugin implements MontiCorePlugIn {
               allParams.add(par.get());
               
             }
-            String test4 ="(([a-zA-z])+([a-zA-z0-9])*)\\s(([a-zA-z])+([a-zA-z0-9])*)(\\s)*(=(\\s)*([a-zA-z0-9]|'))*"; 
+            String test4 ="(([a-zA-z])+([a-zA-z0-9])*)\\s(([a-zA-z])+([a-zA-z0-9])*)(\\s)*(=(\\s)*([a-zA-z0-9]|')*)*"; 
             System.out.println(s.matches(test4));
             if (!s.matches(test4)) {
               if (ex instanceof genTypeWrongParam) {

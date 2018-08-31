@@ -38,6 +38,7 @@
                <HBox fx:id="infoBox" spacing="5">
 					<Button fx:id="editInfoBtn" text="MontiArc model - configuration" />
 					<Button fx:id="showErrorLogBtn" text="Errors" />
+					<Button fx:id="showCodeBtn" text="show Code" />
 				</HBox>
             </ToolBar>   
     	</VBox>

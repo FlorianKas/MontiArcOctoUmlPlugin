@@ -259,9 +259,9 @@ public class ComponentNodeView extends AbstractNodeView {
     vbox.setPadding(new Insets(0, 20, 0, 0));
     vbox.setSpacing(5);
     
-    type.setFont(Font.font("Verdana", FontWeight.LIGHT, 10));
-    name.setFont(Font.font("Verdana", FontWeight.LIGHT, 10));
-    stereotype.setFont(Font.font("Verdana", FontWeight.LIGHT, 10));
+    type.setFont(Font.font("Verdana", FontWeight.LIGHT, 20));
+    name.setFont(Font.font("Verdana", FontWeight.LIGHT, 20));
+    stereotype.setFont(Font.font("Verdana", FontWeight.LIGHT, 20));
 //    generics.setFont(Font.font("Verdana", FontWeight.LIGHT, 10));
     System.out.println("We are going to set a title" + node.getComponentType());
     if(node.getComponentType() != null) {
@@ -281,12 +281,12 @@ public class ComponentNodeView extends AbstractNodeView {
 //    if(node.getGenerics() != null) {
 //      generics.setText(node.getGenerics().split("extends")[0] + "...");
 //    }
-    type.setAlignment(Pos.TOP_CENTER);
-    name.setAlignment(Pos.TOP_CENTER);
-    stereotype.setAlignment(Pos.TOP_CENTER);
+    type.setAlignment(Pos.TOP_LEFT);
+    name.setAlignment(Pos.TOP_LEFT);
+    stereotype.setAlignment(Pos.TOP_LEFT);
 //    generics.setAlignment(Pos.TOP_LEFT);
-    vbox.setAlignment(Pos.TOP_CENTER);
-    vbox.getChildren().addAll(stereotype, type, name);
+    vbox.setAlignment(Pos.TOP_LEFT);
+    vbox.getChildren().addAll(stereotype, name, type);
   }
   
   private void initLooks() {

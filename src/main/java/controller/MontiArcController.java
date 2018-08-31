@@ -2,17 +2,25 @@ package controller;
 
 import java.awt.geom.Point2D;
 import java.io.IOException;
+import java.io.File;
+
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
 import org.controlsfx.control.Notifications;
+import org.controlsfx.control.PopOver;
+import org.apache.commons.io.FileUtils;
 
 import controller.dialog.MontiInitDialogController;
 import de.monticore.ast.ASTNode;
 import groovyjarjarantlr.collections.List;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -28,6 +36,8 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+
+import javafx.scene.control.*;
 
 import model.Sketch;
 import model.edges.AbstractEdge;
@@ -62,7 +72,7 @@ import view.nodes.PortNodeView;
 
 public class MontiArcController extends AbstractDiagramController { 
   
-  
+  // defined vars
 
   NodeControllerMonti nodeController;
   MontiRecognizeController recognizeController; 
@@ -83,7 +93,7 @@ public class MontiArcController extends AbstractDiagramController {
   VBox config,topBox;
   
   @FXML
-  protected Button edgeBtn, selectBtn, drawBtn, undoBtn, redoBtn, moveBtn, deleteBtn, voiceBtn, recognizeBtn, checkValidityBtn, generateBtn;
+  protected Button edgeBtn, selectBtn, drawBtn, undoBtn, redoBtn, moveBtn, deleteBtn, voiceBtn, recognizeBtn, checkValidityBtn, generateBtn, showCodeBtn;
   
   @FXML
   public void initialize() {
@@ -712,6 +722,11 @@ public class MontiArcController extends AbstractDiagramController {
     showErrorLogBtn.setGraphic(new ImageView(image));
     showErrorLogBtn.setText("Show errors");
     
+
+    image = new Image("/icons/showcodew.png");
+    showCodeBtn.setGraphic(new ImageView(image));
+    showCodeBtn.setText("Show Code");
+    
     buttonInUse = selectBtn;
     buttonInUse.getStyleClass().add("button-in-use");
     
@@ -854,9 +869,20 @@ public class MontiArcController extends AbstractDiagramController {
       if (good == true) {
         MontiArcPlugin plug = plugin.getInstance();
         plug.generateCode(null, null, null);
-        showErrorLog(plug.getGenErrorList());
-        plug.clearGenErrorList();
+        if (plug.getGenErrorList().isEmpty()) {
+          ArrayList<MontiCoreException> exs = new ArrayList<MontiCoreException>();
+          exs.add(new allFine());
+          showErrorLog(exs);
+        }
+        else {
+          showErrorLog(plug.getGenErrorList());
+          plug.clearGenErrorList();    
+        }
       }
+    });
+    
+    showCodeBtn.setOnAction(event -> {
+      showCode("C:\\Users\\Flo\\Desktop\\octouml1");
     });
   }
   
@@ -1076,6 +1102,56 @@ private ArrayList<MontiCoreException> checkPortsCompatibility() {
     }
   }
   
-  
+public void showCode(String path) {
+  if(selectedNodes.size() > 0) {
+    for(AbstractNodeView view : selectedNodes) {
+      PopOver pop = new PopOver();
+      String fileTitle = view.getRefNode().getTitle();
+      String folder = path;
+    
+      String filename = folder + "/target/generated-test-sources/"+ packageName + "/" + fileTitle + ".java";
+      File file = new File(filename);
+      if(file.exists()) {
+        VBox box = new VBox();
+        try {
+          java.util.List<String> allLines = Files.readAllLines(Paths.get(filename));
+          String code = "";
+          for(String line : allLines) {
+            code += line + "\n";
+          }
+          TextArea textField = new TextArea(code);
+          Button saveBtn = new Button("Save");
+          saveBtn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override 
+            public void handle(ActionEvent e) {
+              try {
+                FileUtils.writeStringToFile(new File(filename), textField.getText());
+                Notifications.create().title("Code Display").text("Code file was saved.").showInformation();
+              }
+              catch (IOException e1) {
+                e1.printStackTrace();
+              }
+            }
+          });
+          box.getChildren().add(textField);
+          box.getChildren().add(saveBtn);
+        }
+        catch (IOException e) {
+          e.printStackTrace();
+        }
+        pop.setContentNode(box);
+      } else {
+        Label label = new Label("No generated code available.");
+        pop.setContentNode(label);
+      }
+    
+      //pop.setContentNode();
+    
+      pop.show(view);
+    }
+  } else {
+    Notifications.create().title("Code Display").text("No Node was selected.").showInformation();
+  }
+}
   
 }

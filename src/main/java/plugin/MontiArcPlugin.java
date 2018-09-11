@@ -4,11 +4,16 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+
+import org.apache.commons.io.FileUtils;
 
 import controller.AbstractDiagramController;
 import controller.MontiArcController;
@@ -89,6 +94,7 @@ public class MontiArcPlugin implements MontiCorePlugIn {
   private ArrayList<MontiCoreException> errorList = new ArrayList<MontiCoreException>();
   private List<Finding> oldFindings = new ArrayList<Finding>();
   private List<MontiCoreException> genErrorList = new ArrayList<MontiCoreException>();
+  private String pFolder = "";
   
   public static MontiArcPlugin getInstance() {
     return plugIn;
@@ -288,7 +294,36 @@ public class MontiArcPlugin implements MontiCorePlugIn {
     oldFindings.addAll(findings);
  
     System.out.println("After generation");
+    String tmp3 = usageFolderPath + getFolder();
+    
+    File srcDir = new File(targetFolderPath + getFolder());
+    System.out.println("UsageFolderPath " + tmp3);
+    File tarDir = new File(tmp3);
+    
+    for( File f1 : srcDir.listFiles()) {
+	   try {
+		 FileUtils.copyFileToDirectory(f1, tarDir);
+	   } catch (IOException e1) {
+		// TODO Auto-generated catch block
+		e1.printStackTrace();
+      }   
+    }
+    File directory = new File("target/generated-test-sources/");
+    try {
+		FileUtils.cleanDirectory(directory);
+	} catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	} 
+    File directory1 = new File("src/test/resources/");
+    try {
+		FileUtils.cleanDirectory(directory1);
+	} catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
     return false;
+    
   }
 
   @Override
@@ -1128,8 +1163,8 @@ public class MontiArcPlugin implements MontiCorePlugIn {
          }
        }
      }
-     String usageFolderPathTmp = "src/test/resources/";
-     String tmp = usageFolderPathTmp+ folder+ "\\" +arg1.get(0)+"."+MontiArcLanguage.FILE_ENDING;
+//     String usageFolderPathTmp = "src/test/resources/";
+     String tmp = usageFolderPath+ folder+ "\\" +arg1.get(0)+"."+MontiArcLanguage.FILE_ENDING;
      File f = new File(tmp);
      BufferedWriter bw = null;
      FileWriter fw = null;
@@ -1169,8 +1204,12 @@ public class MontiArcPlugin implements MontiCorePlugIn {
          if (!Character.isUpperCase(astComp.getName().charAt(0))) {
            nameComp = nameComp.substring(0, 1).toUpperCase() + nameComp.substring(1);
          }
-         String tmp1 = usageFolderPathTmp+ folder + "\\"+nameComp+"."+MontiArcLanguage.FILE_ENDING;
-         File f1 = new File(tmp1);
+         String tmp1 = usageFolderPath+ folder + "\\"+nameComp+"."+MontiArcLanguage.FILE_ENDING;
+         String tmp3 = usageFolderPath + folder;
+         String tmp2 = "src/test/resources/" +nameComp+"."+MontiArcLanguage.FILE_ENDING;
+         String tmp4 = "src/test/resources/" + folder;
+         setFolder(folder);
+//         File f1 = new File(tmp1);
          
          BufferedWriter bw1 = null;
          FileWriter fw1 = null;
@@ -1200,8 +1239,20 @@ public class MontiArcPlugin implements MontiCorePlugIn {
     
            }
          }
+//		Files.copy(tmp1, tmp2, options);
+         File srcDir = new File(tmp3);
+         System.out.println("UsageFolderPath " + tmp3);
+         File tarDir = new File(tmp4);
+         
+         for( File f1 : srcDir.listFiles()) {
+    	   try {
+			 FileUtils.copyFileToDirectory(f1, tarDir);
+		   } catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+	       }   
+         }
        } 
-
      }
      if (error == true) {
        return null;
@@ -1229,6 +1280,13 @@ public class MontiArcPlugin implements MontiCorePlugIn {
     return null;
   }
   
+  private void setFolder(String f) {
+	pFolder = f;  
+  }
+  
+  private String getFolder() {
+	return pFolder;  
+  }
 
   
 }

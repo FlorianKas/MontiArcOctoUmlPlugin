@@ -109,9 +109,6 @@ public class MontiRecognizeController{
               Point p1 = new Point(bb.getX(),bb.getY());
               Point pp = new Point(bb.getX()+bb.getWidth()-20,bb.getY());
               if (left.intersects(bb)) {
-//              if(Math.abs(b.getX() - bb.getX()) < Math.abs(b.getX() + b.getWidth() - bb.getX()) && (bb.getY() + bb.getHeight() < b.getY() + b.getHeight())) {
-//              if(Math.abs(b.getX()) < Math.abs(bb.getX() + bb.getWidth()) && (bb.getY() + bb.getHeight() < b.getY() + b.getHeight())) {
-                  
               // left Port
                 System.out.println("LEFTTTTTTT");
                 xDraw = b.getX() - 0.5*tmpPort.getPortWidth();
@@ -122,7 +119,6 @@ public class MontiRecognizeController{
                 direction = "in";
               }
               else if (right.intersects(bb)) {
-//              else if (Math.abs(b.getX() - bb.getX()) > Math.abs(b.getX() + b.getWidth() - bb.getX()) && (bb.getY() + bb.getHeight() < b.getY() + b.getHeight()) ) {
 //              right
                 System.out.println("righttttttttt");
                 xDraw = (b.getX() + b.getWidth() - 0.5*tmpPort.getPortWidth());
@@ -132,17 +128,11 @@ public class MontiRecognizeController{
                 y = (bb.getY());
                 direction = "out";
               }
-//              else {
-//                System.out.println("Some Ports are not at the right or left");
-//                break;
-//              }
               PortNode port = new PortNode(xDraw,yDraw,bb.getHeight(), bb.getWidth());
               port.setTitle("");
               port.setPortDirection(direction);
               // contains the sketch values
               port.createPortNodeSketch(x, y, bb.getHeight(), bb.getHeight());
-//              port.setXDraw(xDraw);
-//              port.setYDraw(yDraw);
               if (!graph.getAllNodes().contains(port)) {
                 graph.addNode(port, false);
               }  
@@ -219,6 +209,7 @@ public class MontiRecognizeController{
             System.out.println("endpoint " + endPoint);
             System.out.println("Graph looks as follows " + graph.getAllGraphElements().toString());
             PortNode endNode = new PortNode();
+            sketchesToBeRemoved.add(s);
             for (AbstractNode n : graph.getAllNodes()) {
               if (n instanceof PortNode) {
                 System.out.println("PortNodeSketch Pos " + ((PortNode)n).getPortNodeSketch().getX()

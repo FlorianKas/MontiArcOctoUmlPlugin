@@ -109,7 +109,7 @@ public class MontiArcController extends AbstractDiagramController {
     in = new Infos();
   }
   
-  public void showSomething() {
+  public void showModellConfig() {
     String name = "";
     boolean bla = showMontiInitDialog();
     showConfiguration();
@@ -843,7 +843,7 @@ public class MontiArcController extends AbstractDiagramController {
     });
     
     editInfoBtn.setOnAction(event -> {
-      showSomething();
+      showModellConfig();
     });
     
     showErrorLogBtn.setOnAction(event -> {
@@ -857,7 +857,7 @@ public class MontiArcController extends AbstractDiagramController {
       }
     });
     
-    topBox.setOnMouseClicked(event -> this.showSomething());
+    topBox.setOnMouseClicked(event -> this.showModellConfig());
     
     generateBtn.setOnAction(event -> {
       boolean good = true;	
@@ -1093,23 +1093,47 @@ private ArrayList<MontiCoreException> checkPortsCompatibility() {
   public void checkPortNames() {
     for (AbstractNode node: graph.getAllNodes()) {
       if(node instanceof PortNode) {
-        if (node.getTitle() == ""|| node.getTitle() == null || node.getTitle().isEmpty()) {
-          String name = ((PortNode)node).getPortType();
-          name = name.replaceAll("([A-Z])", "$1").toLowerCase();
-          node.setTitle(name);
+        if (node.getTitle().equals("")|| node.getTitle() == null || node.getTitle().isEmpty()) {
+          if (Character.isLowerCase(((PortNode) node).getPortType().charAt(0))) {
+        	node.setTitle(((PortNode) node).getPortType() + "D");  
+          } 
+          else {
+        	String name = ((PortNode)node).getPortType();
+            name = name.replaceAll("([A-Z])", "$1").toLowerCase();
+            node.setTitle(name); 
+          }
         }
+      }
+    }
+    for (AbstractNode node: graph.getAllNodes()) {
+      if (node instanceof PortNode) {
+    	int i = 0;  
+    	for (AbstractNode node1 : graph.getAllNodes()) {
+    	  if (node1 instanceof PortNode) {
+    		if (node != node1 && node.getTitle().equals(node1.getTitle())) {
+    		  node1.setTitle(node1.getTitle() + i);
+    		  i++;
+    		}
+    	  }
+    	}
       }
     }
   }
   
-public void showCode(String path) {
+public void showCode(String path) {	
   if(selectedNodes.size() > 0) {
     for(AbstractNodeView view : selectedNodes) {
       PopOver pop = new PopOver();
       String fileTitle = view.getRefNode().getTitle();
       String folder = path;
-    
-      String filename = folder + "/target/generated-test-sources/"+ packageName + "/" + fileTitle + ".java";
+      String pack = "";
+      System.out.println("packageName " + packageName);
+      for (String s : packageName.split("\\.")) {
+    	System.out.println("s " + s);  
+    	pack = pack + s + "/";  
+      }
+      System.out.println("pack " + pack);
+      String filename = folder + "/target/generated-test-sources/"+ pack + fileTitle + ".java";
       File file = new File(filename);
       if(file.exists()) {
         VBox box = new VBox();

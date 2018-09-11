@@ -68,7 +68,7 @@ public class EdgeControllerMonti extends EdgeController {
     	System.out.println("PortBox " + portBox.getX() + " "+ portBox.getY()+" "+ portBox.getHeight()+ " "+portBox.getWidth());
     	System.out.println("MousePoint " + mousePoint.getX() +" "+ mousePoint.getY());
     	
-    	if (portBox.contains(mousePoint)) {
+    	if (portBox.contains(mousePoint) && ((PortNode)((PortNodeView)n).getRefNode()).getPortDirection().equals("out")) {
     		
 //    	if (n.getX() > tmpView.getX() + tmpView.getWidth())
     	  //    	if (event.getX() + tmpView.getTranslateX() > n.getX() + 0.5*((PortNodeView) n).getPortWidth() 
@@ -83,32 +83,6 @@ public class EdgeControllerMonti extends EdgeController {
         }  
       }
     }
-//    for (PortNodeView pView : tmpView.getPortNodeViews()) {
-////      System.out.println("port getX " + pView.getPortX());
-////      System.out.println("port getY " + pView.getPortY());
-//      System.out.println(" componentNodeView translate Y " + tmpView.getTranslateY());
-//      System.out.println(" componentNodeView translate X " + tmpView.getTranslateX());
-//      System.out.println(" event get Y " + event.getY());
-//      System.out.println("Evenet get X " + event.getX());
-//      System.out.println("Scene " + event.getSceneX());
-//      System.out.println("Screne" + event.getScreenX());
-//      System.out.println("pView X" + pView.getX());
-//      System.out.println("pView Y" + pView.getY());
-//      System.out.println("pView Height" + pView.getPortHeight());
-//      System.out.println("pView Width" + pView.getPortWidth());
-//      
-//      
-//      if (event.getX() + tmpView.getTranslateX() > pView.getX() + 0.5*pView.getPortWidth() 
-//          && event.getX() + tmpView.getTranslateX()  < pView.getX() + 1.5*pView.getPortWidth() &&
-//          event.getY() + tmpView.getTranslateY() > pView.getY() &&
-//          event.getY() + tmpView.getTranslateY() < pView.getY() + pView.getHeight()) {
-//        System.out.println("STARTNODEVIEW FOUND");
-//        dragStartX = pView.getX() + 1.5*pView.getPortWidth();
-//        dragStartY = pView.getY() + 0.5*pView.getPortHeight(); 
-//        startNodeView = pView;
-//        System.out.println("StartNodeView is " + startNodeView);
-//      }
-//    }
     aDrawPane.getChildren().add(dragLine);
   }
   

@@ -821,7 +821,7 @@ public class MontiArcController extends AbstractDiagramController {
 	      ArrayList<String> arg = new ArrayList<String>();
 	      arg.add(modelName);
 	      arg.add(genericsString);
-	      MontiArcPlugin plug = plugin.getInstance();
+	      MontiArcPlugin plug = MontiArcPlugin.getInstance();
 	      ASTNode node = plug.shapeToAST(graph, arg);
 	      ArrayList<MontiCoreException> errors = (ArrayList<MontiCoreException>) plug.check(node, getNodeMap());
 	      if (errors.isEmpty()) {
@@ -867,7 +867,7 @@ public class MontiArcController extends AbstractDiagramController {
     	}
       }
       if (good == true) {
-        MontiArcPlugin plug = plugin.getInstance();
+        MontiArcPlugin plug = MontiArcPlugin.getInstance();
         plug.generateCode(null, null, null);
         if (plug.getGenErrorList().isEmpty()) {
           ArrayList<MontiCoreException> exs = new ArrayList<MontiCoreException>();
@@ -882,7 +882,7 @@ public class MontiArcController extends AbstractDiagramController {
     });
     
     showCodeBtn.setOnAction(event -> {
-      showCode("C:\\Users\\Flo\\Desktop\\octouml1");
+      showCode(MontiArcPlugin.getInstance().getUsageFolderPath());
     });
   }
   
@@ -1104,6 +1104,12 @@ private ArrayList<MontiCoreException> checkPortsCompatibility() {
           }
         }
       }
+      else if (node instanceof ComponentNode && !((ComponentNode) node).getSubName().equals("")) {
+    	if (Character.isUpperCase(((ComponentNode)node).getSubName().charAt(0))) {
+    	  String inName = ((ComponentNode)node).getSubName().toLowerCase();
+    	  ((ComponentNode) node).setSubName(inName);
+    	}
+      }
     }
     for (AbstractNode node: graph.getAllNodes()) {
       if (node instanceof PortNode) {
@@ -1130,10 +1136,12 @@ public void showCode(String path) {
       System.out.println("packageName " + packageName);
       for (String s : packageName.split("\\.")) {
     	System.out.println("s " + s);  
-    	pack = pack + s + "/";  
+    	pack = pack + "/" + s;  
       }
+      pack = pack + "/";
       System.out.println("pack " + pack);
-      String filename = folder + "/target/generated-test-sources/"+ pack + fileTitle + ".java";
+      String filename = folder + pack + fileTitle + ".java";
+      System.out.println("Filename is " + filename);
       File file = new File(filename);
       if(file.exists()) {
         VBox box = new VBox();

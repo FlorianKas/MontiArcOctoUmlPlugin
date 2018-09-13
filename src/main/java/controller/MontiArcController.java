@@ -788,7 +788,7 @@ public class MontiArcController extends AbstractDiagramController {
     });
     
    
-        checkValidityBtn.setOnAction(event -> {
+    checkValidityBtn.setOnAction(event -> {
       ArrayList<MontiCoreException> tmp1 = new ArrayList<MontiCoreException>();
       tmp1.add(new allFine());
       setErrors(tmp1);  	
@@ -837,6 +837,9 @@ public class MontiArcController extends AbstractDiagramController {
       for (MontiCoreException el : errorList1) {
     	if (el instanceof allFine) {
     	  generateBtn.setDisable(false);	
+    	}
+    	else {
+    	  generateBtn.setDisable(true);	
     	}
       }
       
@@ -938,10 +941,35 @@ public class MontiArcController extends AbstractDiagramController {
 		for (AbstractNode n1 : graph.getAllNodes()) {
 		  if (n1 instanceof ComponentNode) {
 			if (n1 != node) {
-			  if (((ComponentNode)n1).getTitle().equals(((ComponentNode)node).getTitle() )
-				&& ((ComponentNode)n1).getSubName().equals(((ComponentNode)node).getSubName())
-				) {
-			    errorList.add(new InstanceDuplicateError(node,getNodeView(node, getNodeMap()), n1,getNodeView(n1, getNodeMap())));	  
+			  if (((ComponentNode)n1).getTitle().equals(((ComponentNode)node).getTitle())) {
+				if(((ComponentNode)n1).getSubName().equals(((ComponentNode)node).getSubName()) || ((ComponentNode)n1).getSubName().equals("") || ((ComponentNode)node).getSubName().equals("")) {
+				  errorList.add(new InstanceDuplicateError(node,getNodeView(node, getNodeMap()), n1,getNodeView(n1, getNodeMap())));	  		  	
+				}
+				else {
+				  if (!((ComponentNode)n1).getStereotype().equals(((ComponentNode)node).getStereotype()) && !((ComponentNode)node).getStereotype().equals("")) {
+					errorList.add(new InstanceDuplicateError(node,getNodeView(node, getNodeMap()), n1,getNodeView(n1, getNodeMap())));	  		  	
+				  }
+				  else if (!((ComponentNode)n1).getGenerics().equals(((ComponentNode)node).getGenerics()) && !((ComponentNode)node).getGenerics().equals("")){
+				    errorList.add(new InstanceDuplicateError(node,getNodeView(node, getNodeMap()), n1,getNodeView(n1, getNodeMap())));  
+				  }
+				  else {
+					for (PortNode p :((ComponentNode)n1).getPorts()){
+					  for (PortNode p1: ((ComponentNode)node).getPorts()) {
+						if (p1 != p) {
+						  if (!p.getPortType().equals(p1.getPortType())) {
+						    errorList.add(new InstanceDuplicateError(node,getNodeView(node, getNodeMap()), n1,getNodeView(n1, getNodeMap())));	
+						  } 
+						  else if (!p.getTitle().equals(p1.getTitle()) && !p.getTitle().equals("")) {
+						    errorList.add(new InstanceDuplicateError(node,getNodeView(node, getNodeMap()), n1,getNodeView(n1, getNodeMap())));
+						  }
+						  else if (!p.getPortDirection().equals(p1.getPortDirection())){
+						    errorList.add(new InstanceDuplicateError(node,getNodeView(node, getNodeMap()), n1,getNodeView(n1, getNodeMap())));		
+						  }
+					  }
+					  }
+					}
+				  }
+				}
 			  }
 			}
 		  }
@@ -1116,7 +1144,7 @@ private ArrayList<MontiCoreException> checkPortsCompatibility() {
     	int i = 0;  
     	for (AbstractNode node1 : graph.getAllNodes()) {
     	  if (node1 instanceof PortNode) {
-    		if (node != node1 && node.getTitle().equals(node1.getTitle())) {
+    		if (node != node1 && node.getTitle().equals(node1.getTitle()) && ((PortNode)node).getComponentNode() == ((PortNode)node1).getComponentNode()) {
     		  node1.setTitle(node1.getTitle() + i);
     		  i++;
     		}

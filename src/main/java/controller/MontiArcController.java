@@ -109,6 +109,8 @@ public class MontiArcController extends AbstractDiagramController {
     in = new Infos();
   }
   
+
+  // Pops up the window for configuration of the model
   public void showModellConfig() {
     String name = "";
     boolean bla = showMontiInitDialog();
@@ -172,12 +174,6 @@ public class MontiArcController extends AbstractDiagramController {
         importStatements.add(i.trim());
       }
       genericsString = controller.genericsTextField.getText();
-//      in.setGenerics(controller.genericsTextField.getText());
-//      String[] genericsTmp = genericsString.split("\\;");
-//      genericsArray.clear();
-//      for (String g: genericsTmp) {
-//        genericsArray.add(g.trim());
-//      }
       in.setGenerics(genericsString);
       String typeParam = controller.arcParameterTextField.getText();
       in.setArcParam(controller.arcParameterTextField.getText());
@@ -191,13 +187,13 @@ public class MontiArcController extends AbstractDiagramController {
       }
       
       System.out.println("modelName "+ modelName );
-      
-      
       showOutputTopBox();
       
     }
   }
   
+
+  // shows the output configuration on top of the screen
   void showOutputTopBox(){
     VBox tmp  = new VBox();
     tmp.getChildren().add(topBox.getChildren().get(0));
@@ -214,9 +210,6 @@ public class MontiArcController extends AbstractDiagramController {
       topBox.getChildren().add(packetName);
     }
     if (!(null == importStatements) && !(importStatements.isEmpty())) {
-//      if (topBox.getChildren().contains(imports)) {
-//        topBox.getChildren().remove(imports);
-//      }
       for (Node n : topBox.getChildren()) {
         if (n instanceof Label) {
           if (((Label) n).getText().contains("import")) {
@@ -235,24 +228,6 @@ public class MontiArcController extends AbstractDiagramController {
     
     Label name = new Label();
     name.setText("  component " + modelName);
-//    topBox.getChildren().add(name);
-    
-    
-//    if (!genericsArray.isEmpty()) {
-//      int k = 0;
-//      if (!genericsArray.get(0).isEmpty()) {
-//        name.setText(name.getText() + " <"); 
-//      }
-//      for( String g : genericsArray) {
-//        if(!g.isEmpty()) {
-//          k++;
-//          name.setText(name.getText() + g + "; ");
-//        }
-//      }
-//      if (k>0) {
-//        name.setText(name.getText().substring(0,name.getText().length()-2) + ">");
-//      }
-//    }
     boolean front = false;
     boolean tail = false;
     if (!genericsString.equals("")) {
